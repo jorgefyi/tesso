@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/tesso-ui)](https://www.npmjs.com/package/tesso-ui)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-Tesso is a small CLI that turns [DTCG](https://www.designtokens.org/) design tokens into `public/tokens.css` and copies accessible, token-based components into a [Fusor](https://github.com/fusor-rs/fusor) app. You own the files it writes. The npm package is `tesso-ui`. The binary is `tesso`.
+Tesso is a CLI that copies accessible components and plain CSS design tokens into your [Fusor](https://github.com/fusor-rs/fusor) project, so you own and edit the code. Those tokens are [DTCG](https://www.designtokens.org/) files written to `public/tokens.css`. The npm package is `tesso-ui`. The binary is `tesso`.
 
 The token file uses 19 plain CSS variables, with no `--tesso-` prefix, including `--background`, `--foreground`, `--primary`, and `--radius`. Values are raw `oklch()` on `:root` and `.dark`. The same file works with or without Tailwind. When the Fusor app sets `tailwind`, `tesso init` writes an `@theme inline` bridge so utilities such as `bg-primary` follow `.dark`.
 
