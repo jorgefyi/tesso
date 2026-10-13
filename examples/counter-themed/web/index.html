@@ -6,10 +6,12 @@
     <script>
       (function () {
         try {
-          var t = localStorage.getItem("theme");
-          if (t === "dark" || t === "light")
-            document.documentElement.setAttribute("data-theme", t);
-          if (t === "dark") document.documentElement.classList.add("dark");
+          var stored = localStorage.getItem("theme");
+          var dark =
+            stored === "dark" ||
+            (stored !== "light" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
         } catch (e) {}
       })();
     </script>
@@ -33,27 +35,36 @@
             <Button variant="secondary" size="sm" on_press="{{ state.ask_reset.clone() }}">Reset</Button>
           </div>
           <div class="swatches" aria-hidden="true">
-            <div class="swatch danger">Danger <span>color.danger</span></div>
-            <div class="swatch success">Success <span>color.success</span></div>
-            <div class="swatch warning">Warning <span>color.warning</span></div>
+            <div class="swatch primary">Primary <span>primary</span></div>
+            <div class="swatch accent">Accent <span>accent</span></div>
+            <div class="swatch danger">Danger <span>destructive</span></div>
           </div>
-          <p class="warn-copy">Cutoff in 2 hours. This line uses color.warning.fg.</p>
+          <p class="caption">This line uses muted-foreground.</p>
+          <span class="utility-sample bg-primary text-primary-foreground rounded-md px-2 py-1">bg-primary</span>
+          <template slot="footer">
+            <p class="meta">Stored in this tab.</p>
+          </template>
         </Card>
         <Dialog
           open="{{ state.reset_open.clone() }}"
           title="Reset the counter?"
           description="This sets the count back to zero. You can keep counting after."
         >
-          <Button variant="quiet" size="md" on_press="{{ state.cancel_reset.clone() }}">Cancel</Button>
-          <Button variant="danger" size="md" on_press="{{ state.confirm_reset.clone() }}">Reset count</Button>
-          <Button variant="secondary" size="md" on_press="{{ state.ask_details.clone() }}">Why?</Button>
+          <p class="meta">The buttons below are the footer slot.</p>
+          <template slot="footer">
+            <Button variant="quiet" size="md" on_press="{{ state.cancel_reset.clone() }}">Cancel</Button>
+            <Button variant="danger" size="md" on_press="{{ state.confirm_reset.clone() }}">Reset count</Button>
+            <Button variant="secondary" size="md" on_press="{{ state.ask_details.clone() }}">Why?</Button>
+          </template>
         </Dialog>
         <Dialog
           open="{{ state.details_open.clone() }}"
           title="Reset is local"
           description="This only clears the count in this tab. The rest of the page stays as it is."
         >
-          <Button variant="primary" size="md" on_press="{{ state.close_details.clone() }}">OK</Button>
+          <template slot="footer">
+            <Button variant="primary" size="md" on_press="{{ state.close_details.clone() }}">OK</Button>
+          </template>
         </Dialog>
       </section>
     </App>

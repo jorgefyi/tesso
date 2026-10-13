@@ -14,19 +14,7 @@
     "foundation": {
       "sources": [
         {
-          "$ref": "../tokens/color.tokens.json"
-        },
-        {
           "$ref": "../tokens/radius.tokens.json"
-        },
-        {
-          "$ref": "../tokens/shadow.tokens.json"
-        },
-        {
-          "$ref": "../tokens/space.tokens.json"
-        },
-        {
-          "$ref": "../tokens/typography.tokens.json"
         },
         {
           "$ref": "../tokens/semantic.tokens.json"

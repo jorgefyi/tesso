@@ -3,7 +3,7 @@ import path from "node:path";
 import { CONFIG_FILENAME } from "./constants.js";
 
 const THEME_NAME = /^[A-Za-z][A-Za-z0-9_-]*$/;
-const PREFIX_NAME = /^[A-Za-z][A-Za-z0-9-]*$/;
+const PREFIX_NAME = /^$|^[A-Za-z][A-Za-z0-9-]*$/;
 
 export { CONFIG_FILENAME };
 
@@ -84,7 +84,7 @@ export function validateConfig(json) {
   }
   if (typeof json.prefix !== "string" || !PREFIX_NAME.test(json.prefix)) {
     throw new Error(
-      'Config "prefix" must start with a letter and contain only letters, numbers, or "-".',
+      'Config "prefix" must be empty, or start with a letter and contain only letters, numbers, or "-". An empty prefix emits plain names such as --background.',
     );
   }
   if (json.registry != null) {

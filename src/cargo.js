@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { ASSETS_BUILD_COMMAND, ASSETS_BUILD_TOML } from "./constants.js";
+import { ASSETS_BUILD_COMMAND, ASSETS_BUILD_TOML, ASSETS_TOML } from "./constants.js";
 
 const SECTION = "[package.metadata.fusor]";
 
@@ -14,7 +14,7 @@ export function patchCargoToml(source) {
     const block = [
       "",
       SECTION,
-      'assets = "public"',
+      ASSETS_TOML,
       ASSETS_BUILD_TOML,
       "",
     ].join("\n");
@@ -40,9 +40,14 @@ export function patchCargoToml(source) {
   while (insertAt > 0 && section[insertAt - 1].trim() === "") insertAt--;
   const add = (line) => section.splice(insertAt++, 0, line);
 
-  if (!section.some((line) => /^\s*assets\s*=/.test(line))) {
-    add('assets = "public"');
-    notes.push('set assets = "public"');
+  const assetsIndex = section.findIndex((line) => /^\s*assets\s*=/.test(line));
+  if (assetsIndex === -1) {
+    add(ASSETS_TOML);
+    notes.push(`set ${ASSETS_TOML}`);
+  } else if (/^\s*assets\s*=\s*"/.test(section[assetsIndex])) {
+    notes.push(
+      'kept assets as a directory string — Fusor 0.1.6 wants assets = { "/" = "public" }',
+    );
   }
 
   const buildIndex = section.findIndex((line) => /^\s*assets-build\s*=/.test(line));
@@ -58,6 +63,19 @@ export function patchCargoToml(source) {
 
   const next = [...lines.slice(0, header + 1), ...section, ...lines.slice(end)];
   return { text: next.join("\n").replace(/\n/g, newline), notes };
+}
+
+/** The `tailwind` path in `[package.metadata.fusor]`, or null when unset. */
+export function readFusorTailwind(source) {
+  const lines = source.replace(/\r\n/g, "\n").split("\n");
+  const header = lines.findIndex((line) => line.trim() === SECTION);
+  if (header === -1) return null;
+  for (let i = header + 1; i < lines.length; i++) {
+    if (/^\s*\[/.test(lines[i])) break;
+    const match = /^\s*tailwind\s*=\s*["']([^"']+)["']/.exec(lines[i]);
+    if (match) return match[1];
+  }
+  return null;
 }
 
 export function patchCargoFile(cwd) {

@@ -115,22 +115,28 @@ function fusorFontFamily(value) {
     .join(", ");
 }
 
+const tessoLegacyNames = {"color.bg":"background","color.bg.subtle":"card","color.bg.muted":"muted","color.fg":"foreground","color.fg.muted":"muted-foreground","color.border":"border","color.accent":"primary","color.accent.fg":"primary-foreground","color.danger":"destructive","color.focus.ring":"ring"};
+function tessoPlainName(id) {
+  if (Object.prototype.hasOwnProperty.call(tessoLegacyNames, id)) return tessoLegacyNames[id];
+  return String(id).replace(/\./g, "-");
+}
+
 export default defineConfig({
   tokens: [".tesso/resolver.json"],
   outDir: "public",
   plugins: [
     css({
       filename: "tokens.css",
-      variableName: (token) => "tesso-" + token.id.replace(/\./g, "-"),
+      variableName: (token) => "" + tessoPlainName(token.id),
       transform: fusorCssValue,
       permutations: [
         {
           input: { theme: "light" },
-          prepare: (contents) => `:root, [data-theme="light"] {\n${contents}\n}`,
+          prepare: (contents) => `:root {\n${contents}\n}`,
         },
         {
           input: { theme: "dark" },
-          prepare: (contents) => `[data-theme="dark"], .dark {\n${contents}\n}`,
+          prepare: (contents) => `.dark {\n${contents}\n}`,
         }
       ],
     }),

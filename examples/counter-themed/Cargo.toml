@@ -12,18 +12,19 @@ description = "Fusor app that consumes Tesso tokens and components."
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-fusor-core = { version = "=0.1.5", features = ["dom"] }
-fusor-components = { version = "=0.1.5", features = ["browser"] }
+fusor-core = { version = "0.1.6", features = ["dom"] }
+fusor-components = { version = "0.1.6", features = ["browser"] }
 wasm-bindgen = "=0.2.117"
-web-sys = { version = "0.3", features = ["Window", "Document", "Element", "HtmlElement", "Node", "Event", "EventTarget", "HtmlDialogElement", "DomTokenList", "Storage", "MediaQueryList"] }
+web-sys = { version = "0.3", features = ["Window", "Document", "Element", "HtmlElement", "Node", "Event", "EventTarget", "HtmlDialogElement", "DomTokenList", "Storage"] }
 
 [build-dependencies]
-fusor-build = "=0.1.5"
+fusor-build = { version = "0.1.6" }
 
 [package.metadata.fusor]
 entry = "web/index.html"
-assets = "public"
+assets = { "/" = "public" }
 assets-build = ["npx", "tesso-ui", "build"]
+tailwind = "web/app.css"
 output = "dist"
 base-path = "/"
 

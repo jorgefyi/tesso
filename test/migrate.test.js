@@ -35,7 +35,10 @@ function legacyApp() {
     }),
   );
   fs.mkdirSync(path.join(cwd, "public"), { recursive: true });
-  fs.writeFileSync(path.join(cwd, "public/app.css"), "body { color: var(--ft-color-fg); }\n");
+  fs.writeFileSync(
+    path.join(cwd, "public/app.css"),
+    "body { color: var(--ft-color-fg); background: var(--ft-color-success); font: var(--ft-font-size-2); }\n",
+  );
   fs.writeFileSync(
     path.join(cwd, "package.json"),
     JSON.stringify({ private: true, devDependencies: { "fusor-tokens": "^0.1.1" } }),
@@ -66,11 +69,15 @@ test("init --migrate moves the folder, prefix, and --ft- references", async () =
   assert.equal(fs.existsSync(path.join(cwd, ".tesso/terrazzo.config.ts")), true);
   assert.equal(fs.existsSync(path.join(cwd, "fusor-tokens.config.json")), false);
   const config = JSON.parse(fs.readFileSync(path.join(cwd, "tesso.config.json"), "utf8"));
-  assert.equal(config.prefix, "tesso");
-  assert.match(fs.readFileSync(path.join(cwd, "public/app.css"), "utf8"), /var\(--tesso-color-fg\)/);
-  assert.doesNotMatch(fs.readFileSync(path.join(cwd, "public/app.css"), "utf8"), /--ft-/);
+  assert.equal(config.prefix, "");
+  const appCss = fs.readFileSync(path.join(cwd, "public/app.css"), "utf8");
+  assert.match(appCss, /var\(--foreground\)/);
+  assert.match(appCss, /var\(--ft-color-success\)/);
+  assert.match(appCss, /var\(--ft-font-size-2\)/);
+  assert.match(io.text(), /left these --ft- names unchanged \(no kept token\): --ft-color-success, --ft-font-size-2/);
+  assert.doesNotMatch(appCss, /--tesso-/);
   const pkg = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
-  assert.equal(pkg.devDependencies["tesso-ui"], "^0.2.0");
+  assert.equal(pkg.devDependencies["tesso-ui"], "^0.3.0");
   assert.equal(pkg.devDependencies["fusor-tokens"], undefined);
   const cargo = fs.readFileSync(path.join(cwd, "Cargo.toml"), "utf8");
   assert.match(cargo, /assets-build = \["npx", "tesso-ui", "build"\]/);
@@ -79,8 +86,11 @@ test("init --migrate moves the folder, prefix, and --ft- references", async () =
   const build = capture();
   assert.equal(await run(["build", "--cwd", cwd], build), 0, build.error());
   const css = fs.readFileSync(path.join(cwd, "public/tokens.css"), "utf8");
-  assert.match(css, /--tesso-color-bg:/);
+  assert.match(css, /--background:/);
+  assert.match(css, /--foreground:/);
   assert.doesNotMatch(css, /--ft-/);
+  assert.doesNotMatch(css, /--tesso-/);
+  assert.doesNotMatch(css, /prefers-color-scheme/);
 });
 
 test("a custom prefix is kept and --ft- is not rewritten", async () => {

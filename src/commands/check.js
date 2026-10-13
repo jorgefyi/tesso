@@ -3,6 +3,7 @@ import { readConfig } from "../config.js";
 import { selectorFor } from "../css.js";
 import { validateTokenSet } from "../dtcg.js";
 import { assertNoLegacy } from "../migrate.js";
+import { cssVariable } from "../names.js";
 import { compileCssToTemp } from "../pipeline.js";
 
 export async function checkCommand(cwd, { stdout }) {
@@ -19,24 +20,16 @@ export async function checkCommand(cwd, { stdout }) {
 export function assertCss(css, config) {
   if (!css || !css.trim()) throw new Error("CSS output would be empty.");
   const light = selectorFor(config.themes[0], 0, config.themeAttribute);
-  if (!css.includes(light)) throw new Error(`CSS is missing selector ${light}.`);
+  if (!css.includes(`${light} {`)) throw new Error(`CSS is missing selector ${light}.`);
+  if (css.includes("prefers-color-scheme")) {
+    throw new Error("CSS must not include prefers-color-scheme. Put .dark on <html> in the app.");
+  }
   if (config.themes.includes("dark")) {
     const dark = selectorFor("dark", config.themes.indexOf("dark"), config.themeAttribute);
-    if (!css.includes(dark)) throw new Error(`CSS is missing selector ${dark}.`);
-    const explicit = config.themes[0];
-    if (!css.includes("@media (prefers-color-scheme: dark)")) {
-      throw new Error("CSS is missing the prefers-color-scheme: dark fallback.");
-    }
-    const system = `:root:not([${config.themeAttribute}="${explicit}"])`;
-    if (!css.includes(system)) {
-      throw new Error(`CSS is missing ${system}, so an explicit light theme cannot opt out of the system scheme.`);
-    }
+    if (!css.includes(`${dark} {`)) throw new Error(`CSS is missing selector ${dark}.`);
   }
-  if (!css.includes(`--${config.prefix}-`)) {
-    throw new Error(`CSS is missing --${config.prefix}- variables.`);
-  }
-  for (const id of ["color.bg", "color.fg", "color.accent"]) {
-    const name = `--${config.prefix}-${id.replaceAll(".", "-")}`;
-    if (!css.includes(name)) throw new Error(`CSS is missing ${name}.`);
+  for (const id of ["background", "foreground", "primary"]) {
+    const name = cssVariable(id, config.prefix);
+    if (!css.includes(`${name}:`)) throw new Error(`CSS is missing ${name}.`);
   }
 }

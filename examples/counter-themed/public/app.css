@@ -2,13 +2,6 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-  }
-}
-
-[data-theme="dark"],
 .dark {
   color-scheme: dark;
 }
@@ -21,11 +14,10 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(1200px 500px at 10% -10%, var(--tesso-color-bg-muted), transparent 60%),
-    var(--tesso-color-bg);
-  color: var(--tesso-color-fg);
-  font: var(--tesso-font-weight-regular) var(--tesso-font-size-2) / var(--tesso-line-height-normal)
-    var(--tesso-font-family-sans);
+    radial-gradient(1200px 500px at 10% -10%, var(--muted), transparent 60%),
+    var(--background);
+  color: var(--foreground);
+  font: 400 0.875rem/1.5 system-ui, sans-serif;
 }
 
 button,
@@ -37,7 +29,7 @@ input {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: var(--tesso-space-4);
+  padding: 1rem;
 }
 
 .shell .tesso-card {
@@ -47,7 +39,7 @@ input {
 .count {
   margin: 0;
   font-size: 4.5rem;
-  font-weight: var(--tesso-font-weight-semibold);
+  font-weight: 600;
   letter-spacing: -0.04em;
   line-height: 0.95;
   font-variant-numeric: tabular-nums;
@@ -56,61 +48,65 @@ input {
 .row,
 .theme {
   display: flex;
-  gap: var(--tesso-space-2);
+  gap: 0.5rem;
 }
 
 .swatches {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--tesso-space-2);
+  gap: 0.5rem;
 }
 
 .swatch {
-  border-radius: var(--tesso-radius-sm);
-  padding: var(--tesso-space-2) var(--tesso-space-3);
-  font-size: var(--tesso-font-size-1);
-  font-weight: var(--tesso-font-weight-medium);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .swatch span {
   display: block;
-  font-family: var(--tesso-font-family-mono);
-  font-weight: var(--tesso-font-weight-regular);
+  font-family: ui-monospace, monospace;
+  font-weight: 400;
   opacity: 0.8;
 }
 
+.swatch.primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.swatch.accent {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
 .swatch.danger {
-  background: var(--tesso-color-danger);
-  color: var(--tesso-color-gray-0);
+  background: var(--destructive);
+  color: var(--primary-foreground);
 }
 
-.swatch.success {
-  background: var(--tesso-color-success);
-  color: var(--tesso-color-gray-0);
-}
-
-.swatch.warning {
-  background: var(--tesso-color-warning);
-  color: var(--tesso-color-gray-12);
-}
-
-.warn-copy {
+.caption {
   margin: 0;
-  color: var(--tesso-color-warning-fg);
-  font-size: var(--tesso-font-size-2);
-  line-height: var(--tesso-line-height-normal);
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .meta {
   margin: 0;
-  color: var(--tesso-color-fg-subtle);
-  font-family: var(--tesso-font-family-mono);
-  font-size: var(--tesso-font-size-1);
+  color: var(--muted-foreground);
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+}
+
+.utility-sample {
+  align-self: start;
 }
 
 @media (max-width: 480px) {
   .shell .tesso-card {
-    padding: var(--tesso-space-4);
+    padding: 1rem;
   }
 
   .count {

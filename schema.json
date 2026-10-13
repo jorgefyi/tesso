@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/jorgefyi/tesso/raw/main/schema.json",
   "title": "tesso config",
-  "description": "Configuration for the tesso CLI. CSS variables for light and dark themes, plus an optional component registry URL.",
+  "description": "Configuration for the tesso CLI. The starter token set is the shadcn names (--background, --foreground, --card, --card-foreground, --popover, --popover-foreground, --primary, --primary-foreground, --secondary, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --destructive, --border, --input, --ring, --radius) as raw oklch on :root and .dark. Requires Fusor 0.1.6 or newer.",
   "type": "object",
   "additionalProperties": false,
   "required": ["tokens", "outFile", "engine", "themeAttribute", "themes", "prefix"],
@@ -29,13 +29,13 @@
     },
     "themeAttribute": {
       "type": "string",
-      "description": "HTML attribute that selects a theme. Default data-theme.",
+      "description": "Kept so existing configs load. Light and dark CSS use :root and .dark. This attribute is only used for themes other than the first and dark.",
       "minLength": 1,
       "examples": ["data-theme"]
     },
     "themes": {
       "type": "array",
-      "description": "Theme names. The first is the :root default. A theme named dark also emits the .dark class.",
+      "description": "Theme names. The first is :root. A theme named dark is emitted under .dark. There is no prefers-color-scheme block.",
       "minItems": 1,
       "uniqueItems": true,
       "items": {
@@ -46,8 +46,8 @@
     },
     "prefix": {
       "type": "string",
-      "description": "CSS variable prefix without leading dashes. tesso becomes --tesso-.",
-      "pattern": "^[A-Za-z][A-Za-z0-9-]*$"
+      "description": "Optional CSS variable prefix without leading dashes. Empty emits plain names such as --background. A custom prefix emits --brand-background.",
+      "pattern": "^$|^[A-Za-z][A-Za-z0-9-]*$"
     },
     "registry": {
       "type": "string",

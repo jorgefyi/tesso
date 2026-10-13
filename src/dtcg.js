@@ -1,6 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
-import { SEMANTIC_COLOR_IDS, SHADOW_COLOR_IDS, TOKEN_TYPES } from "./constants.js";
+import {
+  ELEVATION_COLOR_IDS,
+  LEGACY_SEMANTIC_COLOR_IDS,
+  LEGACY_SHADOW_COLOR_IDS,
+  SEMANTIC_COLOR_IDS,
+  TOKEN_TYPES,
+} from "./constants.js";
+import { plainName } from "./names.js";
 
 const ALIAS = /^\{([A-Za-z0-9_.-]+)\}$/;
 
@@ -206,7 +213,7 @@ export function validateTokenSet(cwd, config) {
       for (const token of loaded.get(file)) overlay.set(token.id, token);
     }
     assertAliasesResolve([...overlay.values()], `theme ${theme}`);
-    for (const id of SEMANTIC_COLOR_IDS) {
+    for (const id of requiredSemanticIds(overlay)) {
       const token = overlay.get(id);
       if (!token) {
         throw new Error(`Theme "${theme}" does not define semantic token ${id}.`);
@@ -219,14 +226,29 @@ export function validateTokenSet(cwd, config) {
         throw new Error(`Theme "${theme}" token ${id} does not resolve {${target}}.`);
       }
     }
+    if (overlay.has("background")) {
+      const radius = overlay.get("radius");
+      if (!radius || radius.$type !== "dimension") {
+        throw new Error(`Theme "${theme}" does not define a dimension token radius.`);
+      }
+    }
     assertDistinctRoles(overlay, theme);
-    for (const id of overlay.keys()) ids.add(id);
+    for (const id of overlay.keys()) {
+      plainName(id);
+      ids.add(id);
+    }
     overlays.set(theme, overlay);
   }
 
   const baseTheme = config.themes[0];
   if (overlays.has("dark") && overlays.has(baseTheme)) {
-    for (const id of SHADOW_COLOR_IDS) {
+    const base = overlays.get(baseTheme);
+    const shadowIds = base.has("elevation-color.sm")
+      ? ELEVATION_COLOR_IDS
+      : base.has("color.shadow.sm")
+        ? LEGACY_SHADOW_COLOR_IDS
+        : [];
+    for (const id of shadowIds) {
       const light = leafValue(overlays.get(baseTheme).get(id), overlays.get(baseTheme));
       const dark = leafValue(overlays.get("dark").get(id), overlays.get("dark"));
       if (light == null || dark == null) {
@@ -254,19 +276,33 @@ function leafValue(token, map) {
   return undefined;
 }
 
+function requiredSemanticIds(overlay) {
+  if (overlay.has("background")) return SEMANTIC_COLOR_IDS;
+  if (overlay.has("color.bg")) return LEGACY_SEMANTIC_COLOR_IDS;
+  return SEMANTIC_COLOR_IDS;
+}
+
 function assertDistinctRoles(overlay, theme) {
-  const ring = leafValue(overlay.get("color.focus.ring"), overlay);
-  const accent = leafValue(overlay.get("color.accent"), overlay);
-  if (ring != null && accent != null && JSON.stringify(ring) === JSON.stringify(accent)) {
+  const ring = firstLeaf(overlay, ["ring", "color.focus.ring"]);
+  const primary = firstLeaf(overlay, ["primary", "color.accent"]);
+  if (ring != null && primary != null && JSON.stringify(ring) === JSON.stringify(primary)) {
     throw new Error(
-      `Theme "${theme}" focus ring resolves to the same color as accent.`,
+      `Theme "${theme}" focus ring resolves to the same color as primary.`,
     );
   }
-  const warningFg = leafValue(overlay.get("color.warning.fg"), overlay);
-  const warning = leafValue(overlay.get("color.warning"), overlay);
+  const warningFg = firstLeaf(overlay, ["warning-foreground", "color.warning.fg"]);
+  const warning = firstLeaf(overlay, ["warning", "color.warning"]);
   if (warningFg != null && warning != null && JSON.stringify(warningFg) === JSON.stringify(warning)) {
     throw new Error(
-      `Theme "${theme}" warning.fg resolves to the same color as warning.`,
+      `Theme "${theme}" warning-foreground resolves to the same color as warning.`,
     );
   }
+}
+
+function firstLeaf(overlay, ids) {
+  for (const id of ids) {
+    if (!overlay.has(id)) continue;
+    return leafValue(overlay.get(id), overlay);
+  }
+  return undefined;
 }

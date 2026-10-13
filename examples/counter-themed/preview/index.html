@@ -6,10 +6,12 @@
     <script>
       (function () {
         try {
-          var t = localStorage.getItem("theme");
-          if (t === "dark" || t === "light")
-            document.documentElement.setAttribute("data-theme", t);
-          if (t === "dark") document.documentElement.classList.add("dark");
+          var stored = localStorage.getItem("theme");
+          var dark =
+            stored === "dark" ||
+            (stored !== "light" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
         } catch (e) {}
       })();
     </script>
@@ -40,13 +42,16 @@
             <button type="button" class="tesso-button tesso-button-secondary tesso-button-sm" id="reset">Reset</button>
           </div>
           <div class="swatches" aria-hidden="true">
-            <div class="swatch danger">Danger <span>color.danger</span></div>
-            <div class="swatch success">Success <span>color.success</span></div>
-            <div class="swatch warning">Warning <span>color.warning</span></div>
+            <div class="swatch primary">Primary <span>primary</span></div>
+            <div class="swatch accent">Accent <span>accent</span></div>
+            <div class="swatch danger">Danger <span>destructive</span></div>
           </div>
-          <p class="warn-copy">Cutoff in 2 hours. This line uses color.warning.fg.</p>
-          <p class="meta" id="meta"></p>
+          <p class="caption">This line uses muted-foreground.</p>
+          <span class="utility-sample">bg-primary</span>
         </div>
+        <footer class="tesso-card-footer">
+          <p class="meta" id="meta"></p>
+        </footer>
       </article>
     </section>
     <dialog class="tesso-dialog" id="dialog" data-tesso-dialog="preview" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description">
@@ -54,10 +59,13 @@
         <h2 id="dialog-title" class="tesso-dialog-title">Reset the counter?</h2>
         <p id="dialog-description" class="tesso-dialog-description">This sets the count back to zero. You can keep counting after.</p>
         <div class="tesso-dialog-body">
+          <p class="meta">The buttons below are the footer slot.</p>
+        </div>
+        <footer class="tesso-dialog-footer">
           <button type="button" class="tesso-button tesso-button-quiet tesso-button-md" id="cancel">Cancel</button>
           <button type="button" class="tesso-button tesso-button-danger tesso-button-md" id="confirm">Reset count</button>
           <button type="button" class="tesso-button tesso-button-secondary tesso-button-md" id="why">Why?</button>
-        </div>
+        </footer>
         <button type="button" class="tesso-button tesso-button-quiet tesso-button-sm tesso-dialog-close" id="close" aria-label="Close">Close</button>
       </div>
     </dialog>
@@ -65,9 +73,10 @@
       <div class="tesso-dialog-panel" data-tesso-dialog-panel="">
         <h2 id="details-title" class="tesso-dialog-title">Reset is local</h2>
         <p id="details-description" class="tesso-dialog-description">This only clears the count in this tab. The rest of the page stays as it is.</p>
-        <div class="tesso-dialog-body">
+        <div class="tesso-dialog-body"></div>
+        <footer class="tesso-dialog-footer">
           <button type="button" class="tesso-button tesso-button-primary tesso-button-md" id="details-ok">OK</button>
-        </div>
+        </footer>
         <button type="button" class="tesso-button tesso-button-quiet tesso-button-sm tesso-dialog-close" id="details-close" aria-label="Close">Close</button>
       </div>
     </dialog>
@@ -80,26 +89,17 @@
         var details = document.getElementById("details");
         var openers = new WeakMap();
         var pointer = null;
-        function systemDark() {
-          return window.matchMedia("(prefers-color-scheme: dark)").matches;
-        }
         function theme() {
-          var attr = document.documentElement.getAttribute("data-theme");
-          if (attr === "dark" || attr === "light") return attr;
-          return systemDark() ? "dark" : "light";
+          return document.documentElement.classList.contains("dark") ? "dark" : "light";
         }
         function paint() {
-          var attr = document.documentElement.getAttribute("data-theme");
           var current = theme();
           countEl.textContent = String(count);
-          meta.textContent = attr === "light" || attr === "dark"
-            ? 'data-theme="' + attr + '"' + (attr === "dark" ? " .dark" : "")
-            : "system (" + current + ")";
-          document.getElementById("light").className = "tesso-button tesso-button-sm " + (attr === "light" ? "tesso-button-primary" : "tesso-button-quiet");
-          document.getElementById("dark").className = "tesso-button tesso-button-sm " + (attr === "dark" ? "tesso-button-primary" : "tesso-button-quiet");
+          meta.textContent = current === "dark" ? ".dark" : "light";
+          document.getElementById("light").className = "tesso-button tesso-button-sm " + (current === "light" ? "tesso-button-primary" : "tesso-button-quiet");
+          document.getElementById("dark").className = "tesso-button tesso-button-sm " + (current === "dark" ? "tesso-button-primary" : "tesso-button-quiet");
         }
         function setTheme(next) {
-          document.documentElement.setAttribute("data-theme", next);
           document.documentElement.classList.toggle("dark", next === "dark");
           try { localStorage.setItem("theme", next); } catch (e) {}
           paint();
@@ -168,7 +168,6 @@
         document.getElementById("why").addEventListener("click", function () { openDialog(details); });
         document.getElementById("details-ok").addEventListener("click", function () { closeDialog(details); });
         document.getElementById("details-close").addEventListener("click", function () { closeDialog(details); });
-        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", paint);
         paint();
       })();
     </script>

@@ -10,9 +10,9 @@ export function addCommand(cwd, names, { stdout, overwrite }) {
   if (names.length === 0) throw new Error("Name at least one component. Run `tesso list` to see them.");
   assertNoLegacy(cwd);
   const config = readConfig(cwd);
-  if (config.prefix !== "tesso") {
+  if (config.prefix !== "") {
     throw new Error(
-      `Components use --tesso- variables, but tesso.config.json prefix is "${config.prefix}". Set prefix to "tesso" before adding components.`,
+      `Components use plain variables such as --primary, but tesso.config.json prefix is "${config.prefix}". Set prefix to "" before adding components.`,
     );
   }
   const registry = loadRegistry(config);
@@ -85,8 +85,8 @@ export function addCommand(cwd, names, { stdout, overwrite }) {
   lines.push("Wire the pieces that were written:");
   lines.push('  <link rel="stylesheet" href="/tesso.css" />');
   lines.push("  <Button variant=\"primary\" size=\"md\" on_press=\"{{ state.save.clone() }}\">Save</Button>");
-  lines.push("  <Card title=\"Title\" description=\"Supporting text.\"></Card>");
-  lines.push("  <Dialog open=\"{{ state.dialog_open.clone() }}\" title=\"Title\" description=\"What this dialog does.\"></Dialog>");
+  lines.push("  <Card title=\"Title\" description=\"Supporting text.\"><template slot=\"footer\">Footer</template></Card>");
+  lines.push("  <Dialog open=\"{{ state.dialog_open.clone() }}\" title=\"Title\" description=\"What this dialog does.\"><template slot=\"footer\">Actions</template></Dialog>");
   lines.push("");
   lines.push("Import each component in the Rust module that owns the template (`use crate::button::Button`),");
   lines.push("and declare `mod button;` in src/lib.rs. `add` inserts those lines when the files are already there.");

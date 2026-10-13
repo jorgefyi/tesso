@@ -44,7 +44,9 @@ test("add writes component files and refuses to overwrite them", async () => {
     readComponentText("button/button.html"),
   );
   assert.equal(fs.readFileSync(path.join(cwd, "src/button.rs"), "utf8"), readComponentText("button/button.rs"));
-  assert.match(fs.readFileSync(path.join(cwd, "public/tesso.css"), "utf8"), /--tesso-color-accent/);
+  assert.match(fs.readFileSync(path.join(cwd, "public/tesso.css"), "utf8"), /@layer components/);
+  assert.match(fs.readFileSync(path.join(cwd, "public/tesso.css"), "utf8"), /--primary/);
+  assert.doesNotMatch(fs.readFileSync(path.join(cwd, "public/tesso.css"), "utf8"), /--tesso-/);
   assert.match(fs.readFileSync(path.join(cwd, "src/lib.rs"), "utf8"), /mod button;/);
   assert.match(fs.readFileSync(path.join(cwd, "src/app.rs"), "utf8"), /use crate::button::Button;/);
   assert.match(fs.readFileSync(path.join(cwd, "web/index.html"), "utf8"), /href="\/tesso.css"/);
@@ -96,8 +98,9 @@ test("add dialog also installs its button dependency", async () => {
   const html = fs.readFileSync(path.join(cwd, "web/components/dialog.html"), "utf8");
   assert.match(html, /role="dialog"/);
   assert.match(html, /aria-modal="true"/);
-  assert.match(html, /aria-labelledby=/);
-  assert.match(html, /aria-describedby=/);
+  assert.match(html, /aria-labelledby="\{\{ state\.labelled_by\(\) \}\}"/);
+  assert.match(html, /aria-describedby="\{\{ state\.described_by\(\) \}\}"/);
+  assert.match(html, /<Children name="footer"><\/Children>/);
 });
 
 test("list prints the built-in components", async () => {

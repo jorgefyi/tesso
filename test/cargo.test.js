@@ -5,7 +5,7 @@ import { patchCargoToml } from "../src/cargo.js";
 test("appends fusor metadata when the section is missing", () => {
   const { text, notes } = patchCargoToml(`[package]\nname = "demo"\n`);
   assert.match(text, /\[package\.metadata\.fusor\]/);
-  assert.match(text, /assets = "public"/);
+  assert.match(text, /assets = \{ "\/" = "public" \}/);
   assert.match(text, /assets-build = \["npx", "tesso-ui", "build"\]/);
   assert.ok(notes.some((note) => note.includes("package.metadata.fusor")));
 });

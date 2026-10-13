@@ -99,6 +99,24 @@ impl Dialog {
         self.open.set(false);
     }
 
+    /// `None` removes `aria-labelledby`. An empty title has no heading to name.
+    fn labelled_by(&self) -> Option<&str> {
+        if self.title.is_empty() {
+            None
+        } else {
+            Some(self.title_id.as_str())
+        }
+    }
+
+    /// `None` removes `aria-describedby`.
+    fn described_by(&self) -> Option<&str> {
+        if self.description.is_empty() {
+            None
+        } else {
+            Some(self.description_id.as_str())
+        }
+    }
+
     /// A click on the dialog box, outside the panel, is the backdrop.
     /// `::backdrop` itself is not a click target.
     fn on_backdrop_click(&self, event: &web_sys::Event) {

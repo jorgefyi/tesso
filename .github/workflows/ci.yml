@@ -17,7 +17,9 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  fusor:
+  # Released Fusor CLI from crates.io. The v0.1.6 install.sh binary
+  # downloads a musl Tailwind that does not run on ubuntu-latest.
+  fusor-0-1-6:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,14 +31,33 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
       - run: npm ci
-      - name: Install Fusor 0.1.5
-        run: curl -fsSL https://fusor.build/install.sh | sh
-        env:
-          FUSOR_VERSION: v0.1.5
+      - name: Install Fusor CLI 0.1.6
+        run: cargo install fusor-cli --version 0.1.6
+      - name: Build the example on Fusor 0.1.6
+        working-directory: examples/counter-themed
+        run: |
+          npm install
+          fusor install
+          fusor build
+
+  # Current Fusor CLI from main, building the same 0.1.6 example.
+  fusor-main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: dtolnay/rust-toolchain@1.95.0
+        with:
+          targets: wasm32-unknown-unknown
+      - run: npm ci
+      - name: Install Fusor CLI from main
+        run: cargo install --git https://github.com/fusor-rs/fusor fusor-cli
       - name: Build the example
         working-directory: examples/counter-themed
         run: |
           npm install
-          export PATH="$HOME/.fusor/bin:$PATH"
           fusor install
           fusor build
