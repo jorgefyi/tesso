@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { ASSETS_BUILD_COMMAND, ASSETS_BUILD_TOML, ASSETS_TOML } from "./constants.js";
+import { ASSETS_TOML } from "./constants.js";
 
 const SECTION = "[package.metadata.fusor]";
 
@@ -11,13 +11,7 @@ export function patchCargoToml(source) {
   const header = lines.findIndex((line) => line.trim() === SECTION);
 
   if (header === -1) {
-    const block = [
-      "",
-      SECTION,
-      ASSETS_TOML,
-      ASSETS_BUILD_TOML,
-      "",
-    ].join("\n");
+    const block = ["", SECTION, ASSETS_TOML, ""].join("\n");
     const body = text.endsWith("\n") || text.length === 0 ? text : `${text}\n`;
     return {
       text: `${body}${block}`.replace(/\n/g, newline),
@@ -35,7 +29,12 @@ export function patchCargoToml(source) {
   const section = lines.slice(header + 1, end);
   const notes = [];
 
-  // Insert before the section's trailing blank lines so new keys stay inside it visually.
+  const buildIndex = section.findIndex((line) => /^\s*assets-build\s*=/.test(line));
+  if (buildIndex !== -1 && isRetiredAssetsBuild(section[buildIndex])) {
+    section.splice(buildIndex, 1);
+    notes.push("removed assets-build");
+  }
+
   let insertAt = section.length;
   while (insertAt > 0 && section[insertAt - 1].trim() === "") insertAt--;
   const add = (line) => section.splice(insertAt++, 0, line);
@@ -50,19 +49,17 @@ export function patchCargoToml(source) {
     );
   }
 
-  const buildIndex = section.findIndex((line) => /^\s*assets-build\s*=/.test(line));
-  if (buildIndex === -1) {
-    add(ASSETS_BUILD_TOML);
-    notes.push("set assets-build");
-  } else if (section[buildIndex].replace(/\s+/g, "") !== ASSETS_BUILD_TOML.replace(/\s+/g, "")) {
-    // assets-build is a single program + args; appending would corrupt it.
-    notes.push(
-      `kept existing assets-build — Fusor runs one command, so call \`${ASSETS_BUILD_COMMAND}\` from that script yourself`,
-    );
-  }
-
   const next = [...lines.slice(0, header + 1), ...section, ...lines.slice(end)];
   return { text: next.join("\n").replace(/\n/g, newline), notes };
+}
+
+/** `tesso build` no longer exists, so drop the hook init used to write. */
+function isRetiredAssetsBuild(line) {
+  const compact = line.replace(/\s+/g, "");
+  return (
+    compact === 'assets-build=["npx","tesso-ui","build"]' ||
+    compact === 'assets-build=["npx","fusor-tokens","build"]'
+  );
 }
 
 /** The `tailwind` path in `[package.metadata.fusor]`, or null when unset. */

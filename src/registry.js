@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { expandGlobs, loadTokenFile } from "./dtcg.js";
+import { rootCustomProperties } from "./css-tokens.js";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -138,12 +138,11 @@ export function readComponentText(relativeSource) {
 }
 
 export function projectTokenIds(cwd, config) {
-  const files = expandGlobs(cwd, config.tokens);
-  const ids = [];
-  for (const file of files) {
-    for (const token of loadTokenFile(file)) ids.push(token.id);
-  }
-  return ids;
+  const file = path.resolve(cwd, config.outFile);
+  if (!fs.existsSync(file)) return [];
+  const names = rootCustomProperties(fs.readFileSync(file, "utf8"));
+  const prefix = config.prefix ? `${config.prefix}-` : "";
+  return names.map((name) => (prefix && name.startsWith(prefix) ? name.slice(prefix.length) : name));
 }
 
 function isSafeRelative(value) {

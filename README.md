@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/tesso-ui)](https://www.npmjs.com/package/tesso-ui)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-Tesso is a CLI that copies accessible components and plain CSS design tokens into your [Fusor](https://github.com/fusor-rs/fusor) project, so you own and edit the code. Those tokens are [DTCG](https://www.designtokens.org/) files written to `public/tokens.css`. The npm package is `tesso-ui`. The binary is `tesso`.
+Tesso is a CLI that copies accessible components and plain CSS design tokens into your [Fusor](https://github.com/fusor-rs/fusor) project, so you own and edit the code. Those tokens are a CSS file, `public/tokens.css`. The npm package is `tesso-ui`. The binary is `tesso`.
 
 The token file uses 19 plain CSS variables, with no `--tesso-` prefix, including `--background`, `--foreground`, `--primary`, and `--radius`. Values are raw `oklch()` on `:root` and `.dark`. The same file works with or without Tailwind. When the Fusor app sets `tailwind`, `tesso init` writes an `@theme inline` bridge so utilities such as `bg-primary` follow `.dark`.
 
@@ -12,7 +12,7 @@ Tesso requires [Fusor](https://github.com/fusor-rs/fusor) 0.1.6 or newer. That r
 ## Quick start
 
 ```bash
-npm install --save-dev tesso-ui @terrazzo/cli @terrazzo/plugin-css
+npm install --save-dev tesso-ui
 npx tesso-ui init
 npx tesso-ui add button
 fusor dev
@@ -29,7 +29,7 @@ Then add the stylesheets to `<head>`:
 
 ## Install
 
-Node 20 or newer is required. Rust apps stay Node-free until they opt in with `init`. Quick start installs `tesso-ui`, `@terrazzo/cli`, and `@terrazzo/plugin-css`.
+Node 20 or newer is required. Rust apps stay Node-free until they opt in with `init`. Quick start installs `tesso-ui`.
 
 ## Use
 
@@ -42,32 +42,35 @@ npx tesso-ui init
 `init` writes:
 
 - `tesso.config.json`
-- a starter `tokens/` DTCG set: 19 tokens, raw `oklch()` colors and `--radius` for light, and dark color overrides
-- `.tesso/terrazzo.config.ts` (committed; Terrazzo is the engine)
-- `public/`
-- npm devDependencies for Terrazzo and `tesso-ui`
-- `[package.metadata.fusor]` keys `assets = { "/" = "public" }` and `assets-build = ["npx", "tesso-ui", "build"]` when they are missing. An existing `assets = "public"` string is left as it is; Fusor 0.1.6 wants the map
+- `public/tokens.css`, once, with the 19 starter tokens. If that file already exists, `init` leaves it alone. `--force` replaces it with the starter values
+- an npm devDependency on `tesso-ui`
+- `[package.metadata.fusor]` key `assets = { "/" = "public" }` when `assets` is missing. An existing `assets = "public"` string is left as it is; Fusor 0.1.6 wants the map
 - an `@theme inline` block in the stylesheet named by `tailwind`, when that key is set
-
-`.tesso/` is outside Fusor's default `/.fusor-*/` gitignore, so the Terrazzo config can be committed without an extra exception. That ignore is tracked upstream in [fusor-rs/fusor#23](https://github.com/fusor-rs/fusor/issues/23).
 
 It does **not** call `fusor add`. Add the `/tokens.css` and `/tesso.css` stylesheets from Quick start to `<head>`.
 
-To change a color, edit it in `tokens/semantic.tokens.json` (for example `primary`), then rebuild:
-
-```bash
-npx tesso-ui build
-```
-
-`build` validates the config, runs Terrazzo, and writes `public/tokens.css`. It is safe to run twice. `check` validates DTCG, asserts every semantic color resolves, and asserts the CSS would be non-empty without writing `public/tokens.css`.
+To change a color, edit it in `public/tokens.css`, then check the file:
 
 ```bash
 npx tesso-ui check
 ```
 
-Commit `public/tokens.css` so a Fusor build without Node still has the last stylesheet. `assets-build` refreshes it when Node is available.
+`check` reads that CSS file. Every required token must be present on `:root`, and every color on `.dark`. Color values must be `oklch()` or a `var()` that resolves to one. `--radius` must be a length or a `var()`. These foreground and background pairs must meet WCAG AA 4.5:1 in both themes:
 
-`build` and `check` do not move a leftover `.fusor-tokens/` folder. They stop and tell you to run `tesso init --migrate`. That keeps `fusor dev` from moving files on its own. On Fusor 0.1.6 a token edit triggers one rebuild ([fusor-rs/fusor#21](https://github.com/fusor-rs/fusor/issues/21) is fixed in that release). The build stays idempotent.
+| foreground | background |
+| --- | --- |
+| `--foreground` | `--background` |
+| `--card-foreground` | `--card` |
+| `--popover-foreground` | `--popover` |
+| `--primary-foreground` | `--primary` |
+| `--secondary-foreground` | `--secondary` |
+| `--muted-foreground` | `--muted` |
+| `--accent-foreground` | `--accent` |
+| `--primary-foreground` | `--destructive` |
+
+The last pair is the danger button, which has no `--destructive-foreground`. A failure names the token and the theme and exits non-zero. `check` does not write the file.
+
+Commit `public/tokens.css`. Fusor copies `public/` as it is. There is no token build step.
 
 ## Components
 
@@ -145,15 +148,12 @@ Fusor has no element ref. `dialog.rs` looks up `[data-tesso-dialog]` once when `
 [package.metadata.fusor]
 entry = "web/index.html"
 assets = { "/" = "public" }
-assets-build = ["npx", "tesso-ui", "build"]
 tailwind = "web/app.css"
 output = "dist"
 base-path = "/"
 ```
 
 Fusor 0.1.6 wants `assets` as a map and accepts `tailwind`. `tesso init` writes the map when `assets` is missing, and leaves a string that is already there.
-
-`assets-build` is the kebab-case form of fusor-build’s `assets_build`: one program and its arguments, run in the package without a shell before Fusor copies `assets` into the build output. Write each argument as its own string. A single string used to fail with `could not run npx tesso-ui build: No such file or directory` ([fusor-rs/fusor#20](https://github.com/fusor-rs/fusor/issues/20)). The clearer error is fixed in Fusor 0.1.6. The hook is still an argv array.
 
 ```html
 <!doctype html>
@@ -186,9 +186,9 @@ Fusor 0.1.6 wants `assets` as a map and accepts `tailwind`. `tesso init` writes 
 </html>
 ```
 
-`tokens.css` puts light values on `:root` and the dark diff on `.dark`. It does not contain `prefers-color-scheme`. Put `.dark` on `<html>` in the app. The snippet above applies a stored choice, or the OS setting, before first paint. An explicit `light` choice stays light even when the OS is dark. Use Fusor `class:name` for component state, not for the theme switch. See `examples/counter-themed` for the Cargo metadata, the HTML links, a FOUC script, and a Rust `ThemeToggle` component.
+`tokens.css` puts light values on `:root` and dark values on `.dark`. It does not contain `prefers-color-scheme`. Put `.dark` on `<html>` in the app. The snippet above applies a stored choice, or the OS setting, before first paint. An explicit `light` choice stays light even when the OS is dark. Use Fusor `class:name` for component state, not for the theme switch. See `examples/counter-themed` for the Cargo metadata, the HTML links, a FOUC script, and a Rust `ThemeToggle` component.
 
-`tokens/semantic.tokens.json` is the light theme. `tokens/themes/dark.tokens.json` overrides the colors that change in dark. There is no second copy of the light file. `--radius` stays on `:root`. Body copy uses `foreground` or `muted-foreground`. Component spacing, type, and shadows are literals in the component CSS, not tokens.
+`--radius` stays on `:root`. Body copy uses `foreground` or `muted-foreground`. Component spacing, type, and shadows are literals in the component CSS, not tokens.
 
 ```css
 body {
@@ -206,23 +206,20 @@ body {
 ```json
 {
   "$schema": "./node_modules/tesso-ui/schema.json",
-  "tokens": ["tokens/**/*.tokens.json"],
   "outFile": "public/tokens.css",
-  "engine": "terrazzo",
-  "themes": ["light", "dark"],
   "prefix": ""
 }
 ```
 
-`prefix` is empty by default, so the custom property is `--background`. There is no `--tesso-` prefix. A prefix `brand` emits `--brand-background`. Light is `:root`. Dark is `.dark`. An old `themeAttribute` key is ignored.
+`prefix` is empty by default, so the custom property is `--background`. There is no `--tesso-` prefix. A prefix `brand` emits `--brand-background` when `init` writes the file. Light is `:root`. Dark is `.dark`.
 
-New token ids are the CSS names: `primary` → `--primary`, `card-foreground` → `--card-foreground`. A name that would land in a Tailwind theme namespace (`--color-*`, `--spacing`, `--radius-*`, `--font-*`, `--shadow-*`, and the rest) fails `check` and `build`. Bare `--radius` is allowed. The derived steps `--radius-sm`, `--radius-md`, `--radius-lg`, and `--radius-xl` live only in the Tailwind bridge.
+`outFile` is the CSS file the project owns. `init` writes it when it is missing. `check` reads it.
 
 An optional `registry` key is an `http` or `https` URL. `add` and `list` reject it for now and tell you the built-in document has the same shape. Omit the key to use the registry shipped in the package (`registry/registry.json`, `registryUrl: null`).
 
 ## Tokens
 
-The starter is these 19 tokens. Values are raw `oklch()` (and `0.625rem` for radius). Light is `:root`. Dark is `.dark`, and that block only lists colors that change. There is no `--destructive-foreground`.
+The starter is these 19 tokens. Values are raw `oklch()` (and `0.625rem` for radius). Light is `:root`. Dark is `.dark`. There is no `--destructive-foreground`.
 
 `--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--muted`, `--muted-foreground`, `--accent`, `--accent-foreground`, `--destructive`, `--border`, `--input`, `--ring`, `--radius`.
 
@@ -253,71 +250,17 @@ The `tailwind` key and Tailwind 4 (`fusor install` downloads it) shipped in Fuso
 
 ## Registry
 
-Each item names its files, the path they are copied to, CSS appended to `public/tesso.css`, Rust modules, component dependencies, and the DTCG ids the CSS needs. `dialog` depends on `button` and asks for the `web-sys` features `showModal()` uses, including `HtmlDialogElement`. A later release can fetch this document from a URL without changing the item shape.
+Each item names its files, the path they are copied to, CSS appended to `public/tesso.css`, Rust modules, component dependencies, and the token names the CSS needs. `dialog` depends on `button` and asks for the `web-sys` features `showModal()` uses, including `HtmlDialogElement`. A later release can fetch this document from a URL without changing the item shape.
 
-## Engine
+## Renaming old `--ft-*` variables
 
-Terrazzo (`@terrazzo/cli` and `@terrazzo/plugin-css`) is the default. `init` writes a DTCG 2025.10 resolver and a CSS plugin config with `input: { theme: "light" | "dark" }` permutations. The light context is empty: `semantic.tokens.json` in the foundation set is the light source of truth. The CLI then normalizes the stylesheet so aliases resolve to the authored `oklch()` values and the `.dark` block only repeats variables that changed. There is no `prefers-color-scheme` block.
-
-Style Dictionary is a possible later engine (`usesDtcg`, two selectors or a custom format). Setting `"engine": "style-dictionary"` fails with a clear error. A sketch:
-
-```json
-{
-  "source": ["tokens/**/*.tokens.json"],
-  "platforms": {
-    "css": {
-      "transformGroup": "css",
-      "buildPath": "public/",
-      "files": [
-        {
-          "destination": "tokens.css",
-          "format": "css/variables",
-          "options": { "selector": ":root" }
-        }
-      ]
-    }
-  }
-}
-```
-
-## Migrating from fusor-tokens
-
-Tesso is the new name for fusor-tokens. Your tokens and themes carry over as they are. What changes is the package name, the config file and folder, and the CSS prefix, and one command handles all of it.
-
-**1. Run the migration from your app root.**
+`tesso init --migrate` renames `--ft-*` variables that have a matching token. Any other `--ft-*` name is left as it is, and `init` lists it.
 
 ```bash
-npx tesso-ui init
+npx tesso-ui init --migrate
 ```
 
-When it finds `.fusor-tokens/` or `fusor-tokens.config.json`, it asks before moving anything. In CI or any terminal without a prompt, use `npx tesso-ui init --migrate` instead.
-
-`tesso init --migrate` only renames `--ft-*` tokens that have a matching new token. Any other `--ft-*` tokens are left as they are and listed by `init`, so rename or remove them by hand.
-
-**2. Install the new package.** `init` already swapped `fusor-tokens` for `tesso-ui` in your `package.json`, so this just fetches it.
-
-```bash
-npm install
-```
-
-**3. Check that everything moved.**
-
-| fusor-tokens | Tesso |
-| --- | --- |
-| package `fusor-tokens` | package `tesso-ui` |
-| command `fusor-tokens` | command `tesso` |
-| `fusor-tokens.config.json` | `tesso.config.json` |
-| `.fusor-tokens/` | `.tesso/` |
-| `--ft-color-bg` and friends | `--background` and the other plain names |
-| `assets-build = ["npx", "fusor-tokens", "build"]` | `assets-build = ["npx", "tesso-ui", "build"]` |
-
-**Good to know**
-
-- `--ft-` is rewritten in `.css`, `.html`, `.rs`, `.js`, `.mjs` and `.md` files, except under `node_modules`, `target`, `dist`, `.git`, `.tmp`, `tokens/`, and hidden directories other than `.tesso`. If you use the variables anywhere else, such as `.ts` or `.scss`, search for leftovers with `grep -rn -- "--ft-" . --exclude-dir=node_modules`.
-- `assets-build` is updated when it is `["npx", "fusor-tokens", "build"]` or `["npx","fusor-tokens","build"]`. Any other value is left in place, and `init` prints a note so you can point it at `tesso-ui` yourself.
-- If you set your own `prefix` in the config, Tesso keeps that prefix and does not rewrite `--ft-`. The folder, config file, package name, and default `assets-build` still move. When the old prefix was `ft`, or there was no config, the prefix becomes empty. `--ft-color-bg` becomes `--background`, `--ft-color-accent` becomes `--primary`, and the other names in the table below follow. `--ft-*` names with no kept token, such as `--ft-color-success` or `--ft-font-size-2`, stay as they are, and `init` lists them. There is no `--tesso-*` step.
-
-Names with a matching token:
+The rewrite covers `.css`, `.html`, `.rs`, `.js`, `.mjs`, and `.md` files, and skips `node_modules`, `target`, `dist`, `.git`, `.tmp`, and hidden directories. Names with a matching token:
 
 | `--ft-*` | kept token |
 | --- | --- |
@@ -332,10 +275,7 @@ Names with a matching token:
 | `--ft-color-danger` | `--destructive` |
 | `--ft-color-focus-ring` | `--ring` |
 
-- Token JSON files are never touched.
-- `tesso build` and `tesso check` won't run while the old folder or config is still there. They stop and tell you to run `tesso init --migrate`.
-- If you added `!/.fusor-tokens/` to your `.gitignore`, you can delete that line. `.tesso/` isn't caught by Fusor's default ignore rule.
-- `fusor-tokens` 0.1.x keeps working, but it won't get updates.
+`--ft-color-accent-9` stays `--ft-color-accent-9`, because the rewrite does not consume a longer name. There is no `--tesso-*` step. Without `--migrate`, `init` does not rename anything.
 
 ## Try the example
 
@@ -349,7 +289,7 @@ npm run preview
 
 ## Non-goals
 
-No multi-brand themes, no Figma sync, no Rust token runtime, and no crates.io Fusor capability. Tokens are files plus a pre-asset script. The registry is bundled; a remote URL is reserved and not fetched yet. The surface is intentionally small for Fusor pre-1.0.
+No multi-brand themes, no Figma sync, no Rust token runtime, and no crates.io Fusor capability. Tokens are a CSS file you edit. The registry is bundled; a remote URL is reserved and not fetched yet. The surface is intentionally small for Fusor pre-1.0.
 
 ## Contributing
 
@@ -363,10 +303,9 @@ npm test
 
 Tesso requires Fusor 0.1.6 or newer. Fusor is still pre-1.0.
 
-- [fusor-rs/fusor#20](https://github.com/fusor-rs/fusor/issues/20) — `assets-build` is an argv array, not a shell command. The clearer error for a bad value is fixed in Fusor 0.1.6.
-- [fusor-rs/fusor#21](https://github.com/fusor-rs/fusor/issues/21) — `fusor dev` running that hook twice is fixed in Fusor 0.1.6. A token edit triggers one rebuild.
+- [fusor-rs/fusor#20](https://github.com/fusor-rs/fusor/issues/20) — `assets-build` is an argv array, not a shell command. The clearer error for a bad value is fixed in Fusor 0.1.6. Tesso does not set `assets-build`.
+- [fusor-rs/fusor#21](https://github.com/fusor-rs/fusor/issues/21) — `fusor dev` running an assets hook twice is fixed in Fusor 0.1.6.
 - [fusor-rs/fusor#22](https://github.com/fusor-rs/fusor/issues/22) — a Rust char literal such as `'dark'` inside a template being reported as invalid Rust tokens is fixed in Fusor 0.1.6. The example still uses a double-quoted string inside a single-quoted HTML attribute.
-- [fusor-rs/fusor#23](https://github.com/fusor-rs/fusor/issues/23) — still open. `fusor new` ignores `/.fusor-*/`. Tesso uses `.tesso/` so the pipeline config is not ignored.
 - [fusor-rs/fusor#24](https://github.com/fusor-rs/fusor/issues/24) — still open. `fusor add` cannot copy component source, so `tesso add` does it.
 - [fusor-rs/fusor#25](https://github.com/fusor-rs/fusor/issues/25) — still open. Component tags cannot take `on:click`. Pass a callback input, or put the listener on a native element inside the component.
 - [fusor-rs/fusor#26](https://github.com/fusor-rs/fusor/issues/26) — a component template being limited to one native HTML root is fixed in Fusor 0.1.6 (multiple template roots). Dialog's root is still the `<dialog>` element, and the dimmed page is `::backdrop`.

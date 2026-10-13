@@ -1,8 +1,0 @@
-{
-  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
-  "radius": {
-    "$type": "dimension",
-    "$description": "Base corner radius. The Tailwind bridge derives --radius-sm, --radius-md, --radius-lg, and --radius-xl from this value.",
-    "$value": "0.625rem"
-  }
-}

@@ -8,8 +8,8 @@
  */
 
 /**
- * Semantic colors every new theme must define. The CSS name is the id.
- * shadcn v4 has no `--destructive-foreground`.
+ * Semantic colors every theme defines. The CSS name is the id.
+ * There is no `--destructive-foreground`.
  */
 export const SEMANTIC_COLOR_IDS = [
   "background",
@@ -32,31 +32,8 @@ export const SEMANTIC_COLOR_IDS = [
   "ring",
 ];
 
-/** fusor-tokens 0.1 ids. Still accepted so `tesso init --migrate` can build old JSON. */
-export const LEGACY_SEMANTIC_COLOR_IDS = [
-  "color.bg",
-  "color.bg.subtle",
-  "color.bg.muted",
-  "color.fg",
-  "color.fg.muted",
-  "color.fg.subtle",
-  "color.border",
-  "color.border.strong",
-  "color.accent",
-  "color.accent.fg",
-  "color.danger",
-  "color.success",
-  "color.warning",
-  "color.warning.fg",
-  "color.focus.ring",
-];
-
-export const ELEVATION_COLOR_IDS = ["elevation-color.sm", "elevation-color.md", "elevation-color.lg"];
-
-export const LEGACY_SHADOW_COLOR_IDS = ["color.shadow.sm", "color.shadow.md", "color.shadow.lg"];
-
 /**
- * Old fusor-tokens ids that still have a token in the shadcn set.
+ * Old fusor-tokens ids that still have a kept token.
  * Longer ids are applied first, and a rewrite does not consume a longer
  * `--ft-` name (`--ft-color-accent-9` stays; `--ft-color-accent` becomes `--primary`).
  * Ids with no kept equivalent are not listed: migrate leaves those `--ft-*` names alone.
@@ -77,7 +54,7 @@ export const LEGACY_ID_NAMES = {
 /**
  * Tailwind CSS 4 theme namespaces. A custom property in one of these, set on
  * `:root`, overrides the utility that namespace owns. `--radius` itself is
- * shadcn's base and is not `--radius-*`.
+ * the base and is not `--radius-*`.
  */
 const RESERVED = [
   /^color-/,
@@ -104,7 +81,7 @@ export function collidesWithTailwind(plain) {
   return RESERVED.some((pattern) => pattern.test(plain));
 }
 
-/** DTCG id → unprefixed custom-property name, without leading dashes. */
+/** Token id → unprefixed custom-property name, without leading dashes. */
 export function plainName(id) {
   const plain = Object.prototype.hasOwnProperty.call(LEGACY_ID_NAMES, id)
     ? LEGACY_ID_NAMES[id]
@@ -151,7 +128,7 @@ export const BRIDGE_COLOR_NAMES = SEMANTIC_COLOR_IDS;
 
 export const THEME_MARKER = "/* tesso:theme */";
 
-/** `@theme inline` block. Radius steps follow shadcn: sm/md/lg/xl from `--radius`. */
+/** `@theme inline` block. Radius steps sm, md, lg, and xl come from `--radius`. */
 export function renderThemeInline() {
   const lines = [THEME_MARKER, "@theme inline {"];
   for (const name of BRIDGE_COLOR_NAMES) {

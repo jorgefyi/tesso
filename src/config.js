@@ -2,7 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { CONFIG_FILENAME } from "./constants.js";
 
-const THEME_NAME = /^[A-Za-z][A-Za-z0-9_-]*$/;
 const PREFIX_NAME = /^$|^[A-Za-z][A-Za-z0-9-]*$/;
 
 export { CONFIG_FILENAME };
@@ -14,9 +13,7 @@ export function configPath(cwd) {
 export function readConfig(cwd, { warn } = {}) {
   const file = configPath(cwd);
   if (!fs.existsSync(file)) {
-    throw new Error(
-      `Missing ${CONFIG_FILENAME}. Run tesso init in the app root.`,
-    );
+    throw new Error(`Missing ${CONFIG_FILENAME}. Run tesso init in the app root.`);
   }
   let json;
   try {
@@ -27,60 +24,21 @@ export function readConfig(cwd, { warn } = {}) {
   return validateConfig(json, { warn });
 }
 
-export function validateConfig(json, { warn } = {}) {
+export function validateConfig(json) {
   if (!json || typeof json !== "object" || Array.isArray(json)) {
     throw new Error("tesso.config.json must be a JSON object.");
   }
-  const allowed = new Set([
-    "$schema",
-    "tokens",
-    "outFile",
-    "engine",
-    "themeAttribute",
-    "themes",
-    "prefix",
-    "registry",
-  ]);
+  const allowed = new Set(["$schema", "outFile", "prefix", "registry"]);
   for (const key of Object.keys(json)) {
     if (!allowed.has(key)) {
       throw new Error(`Unknown config key "${key}".`);
     }
   }
-  for (const key of ["tokens", "outFile", "engine", "themes", "prefix"]) {
+  for (const key of ["outFile", "prefix"]) {
     if (json[key] == null) throw new Error(`Config is missing "${key}".`);
-  }
-  if (!Array.isArray(json.tokens) || json.tokens.length === 0) {
-    throw new Error('Config "tokens" must be a non-empty array of globs.');
-  }
-  if (!json.tokens.every((item) => typeof item === "string" && item.length > 0)) {
-    throw new Error('Config "tokens" must contain only non-empty strings.');
   }
   if (typeof json.outFile !== "string" || json.outFile.length === 0) {
     throw new Error('Config "outFile" must be a non-empty string.');
-  }
-  if (json.engine !== "terrazzo" && json.engine !== "style-dictionary") {
-    throw new Error('Config "engine" must be "terrazzo" or "style-dictionary".');
-  }
-  if (json.engine === "style-dictionary") {
-    throw new Error(
-      'engine "style-dictionary" is documented as an alternative and is not implemented. Use "terrazzo".',
-    );
-  }
-  if (Object.hasOwn(json, "themeAttribute") && typeof warn === "function") {
-    warn('Ignoring "themeAttribute". Light values use :root and dark values use .dark.');
-  }
-  if (!Array.isArray(json.themes) || json.themes.length === 0) {
-    throw new Error('Config "themes" must be a non-empty array.');
-  }
-  const seen = new Set();
-  for (const theme of json.themes) {
-    if (typeof theme !== "string" || !THEME_NAME.test(theme)) {
-      throw new Error(
-        `Theme "${theme}" must start with a letter and contain only letters, numbers, "_" or "-".`,
-      );
-    }
-    if (seen.has(theme)) throw new Error(`Theme "${theme}" is listed twice.`);
-    seen.add(theme);
   }
   if (typeof json.prefix !== "string" || !PREFIX_NAME.test(json.prefix)) {
     throw new Error(

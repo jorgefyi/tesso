@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { run } from "../src/cli.js";
-import { SEMANTIC_COLOR_IDS } from "../src/constants.js";
+import { renderTokensCss, TOKEN_IDS } from "../src/tokens-css.js";
 
 const repo = path.resolve(import.meta.dirname, "..");
 fs.mkdirSync(path.join(repo, ".tmp"), { recursive: true });
@@ -20,41 +20,45 @@ function capture() {
   };
 }
 
-test("init scaffolds tokens, config, pipeline, and Cargo metadata", async () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), "fusor-init-"));
+test("init writes tokens.css once, config, and Cargo assets", async () => {
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), "tesso-init-"));
   fs.writeFileSync(path.join(cwd, "Cargo.toml"), "[package]\nname = \"demo\"\nedition = \"2021\"\n");
   const io = capture();
   const code = await run(["init", "--no-install", "--cwd", cwd], io);
   assert.equal(code, 0, io.error());
   assert.match(io.text(), /link rel="stylesheet" href="\/tokens\.css"/);
   assert.equal(fs.existsSync(path.join(cwd, "tesso.config.json")), true);
-  assert.equal(fs.existsSync(path.join(cwd, "tokens/themes/dark.tokens.json")), true);
-  assert.equal(fs.existsSync(path.join(cwd, "tokens/themes/light.tokens.json")), false);
-  assert.equal(fs.existsSync(path.join(cwd, "tokens/semantic.tokens.json")), true);
-  assert.equal(fs.existsSync(path.join(cwd, "public")), true);
-  assert.equal(fs.existsSync(path.join(cwd, ".tesso/terrazzo.config.ts")), true);
+  assert.equal(fs.existsSync(path.join(cwd, "tokens")), false);
+  assert.equal(fs.existsSync(path.join(cwd, ".tesso")), false);
+  const cssPath = path.join(cwd, "public/tokens.css");
+  assert.equal(fs.readFileSync(cssPath, "utf8"), renderTokensCss());
   const cargo = fs.readFileSync(path.join(cwd, "Cargo.toml"), "utf8");
   assert.match(cargo, /assets = \{ "\/" = "public" \}/);
-  assert.match(cargo, /assets-build = \["npx", "tesso-ui", "build"\]/);
+  assert.doesNotMatch(cargo, /assets-build/);
   const pkg = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
-  assert.equal(pkg.devDependencies["@terrazzo/cli"], "^2.7.1");
-  assert.equal(pkg.devDependencies["tesso-ui"], "^0.3.1");
+  assert.equal(pkg.devDependencies["tesso-ui"], "^0.4.0");
+  assert.equal(pkg.devDependencies["@terrazzo/cli"], undefined);
 
+  const edited = fs.readFileSync(cssPath, "utf8").replace("oklch(99% 0.005 260)", "oklch(98% 0.005 260)");
+  fs.writeFileSync(cssPath, edited);
   const again = capture();
   assert.equal(await run(["init", "--no-install", "--cwd", cwd], again), 0);
   assert.match(again.text(), /kept existing/);
-  const cargoAgain = fs.readFileSync(path.join(cwd, "Cargo.toml"), "utf8");
-  assert.equal(cargoAgain.split("assets-build").length, 2);
+  assert.match(again.text(), /--force/);
+  assert.equal(fs.readFileSync(cssPath, "utf8"), edited);
+  assert.doesNotMatch(fs.readFileSync(path.join(cwd, "Cargo.toml"), "utf8"), /assets-build/);
+
+  const forced = capture();
+  assert.equal(await run(["init", "--force", "--no-install", "--cwd", cwd], forced), 0, forced.error());
+  assert.match(forced.text(), /replaced public\/tokens.css/);
+  assert.equal(fs.readFileSync(cssPath, "utf8"), renderTokensCss());
 });
 
-test("build and check produce plain light and .dark variables", async () => {
-  const cwd = fs.mkdtempSync(path.join(repo, ".tmp", "build-"));
+test("check accepts the starter and rejects a broken tokens file", async () => {
+  const cwd = fs.mkdtempSync(path.join(repo, ".tmp", "check-"));
   fs.mkdirSync(cwd, { recursive: true });
   const initIo = capture();
   assert.equal(await run(["init", "--no-install", "--cwd", cwd], initIo), 0, initIo.error());
-
-  const buildIo = capture();
-  assert.equal(await run(["build", "--cwd", cwd], buildIo), 0, buildIo.error());
   const cssPath = path.join(cwd, "public/tokens.css");
   const css = fs.readFileSync(cssPath, "utf8");
   assert.match(css, /:root \{/);
@@ -62,122 +66,60 @@ test("build and check produce plain light and .dark variables", async () => {
   assert.doesNotMatch(css, /prefers-color-scheme/);
   assert.doesNotMatch(css, /--tesso-/);
   assert.doesNotMatch(css, /--color-/);
-  assert.doesNotMatch(css, /--font-/);
-  assert.doesNotMatch(css, /--shadow-/);
-  assert.doesNotMatch(css, /--radius-/);
-  assert.doesNotMatch(css, /--spacing/);
-  assert.match(css, /--background: oklch\(99% 0\.005 260\);/);
-  assert.match(css, /--foreground: oklch\(18% 0\.02 260\);/);
-  assert.match(css, /--primary: oklch\(55% 0\.18 264\);/);
-  assert.match(css, /--destructive: oklch\(55% 0\.19 25\);/);
-  assert.match(css, /--radius: 0\.625rem;/);
-  assert.match(css, /--ring: oklch\(70% 0\.16 264\);/);
   assert.doesNotMatch(css, /--destructive-foreground/);
-  assert.doesNotMatch(css, /--success/);
-  assert.doesNotMatch(css, /--warning/);
-  assert.doesNotMatch(css, /--gray-/);
-  assert.doesNotMatch(css, /--space-/);
-  assert.doesNotMatch(css, /--elevation/);
-  assert.doesNotMatch(css, /--palette-/);
-
+  assert.match(css, /--background: oklch\(99% 0\.005 260\);/);
+  assert.match(css, /--radius: 0\.625rem;/);
   const dark = css.split("\n.dark {")[1];
   assert.match(dark, /--background: oklch\(18% 0\.02 260\);/);
-  assert.match(dark, /--foreground: oklch\(99% 0\.005 260\);/);
-  assert.match(dark, /--primary: oklch\(70% 0\.16 264\);/);
-  assert.match(dark, /--ring: oklch\(92% 0\.04 264\);/);
-  assert.match(dark, /--border: oklch\(36% 0\.018 260\);/);
   assert.doesNotMatch(dark, /--radius:/);
 
-  const second = fs.readFileSync(cssPath, "utf8");
-  const rebuild = capture();
-  assert.equal(await run(["build", "--cwd", cwd], rebuild), 0, rebuild.error());
-  assert.equal(fs.readFileSync(cssPath, "utf8"), second);
-
-  const before = fs.readFileSync(cssPath, "utf8");
   const checkIo = capture();
   assert.equal(await run(["check", "--cwd", cwd], checkIo), 0, checkIo.error());
-  assert.match(checkIo.text(), new RegExp(String(SEMANTIC_COLOR_IDS.length)));
-  assert.equal(fs.readFileSync(cssPath, "utf8"), before);
+  assert.match(checkIo.text(), /WCAG AA 4\.5:1/);
+  assert.match(checkIo.text(), new RegExp(String(TOKEN_IDS.length)));
+  assert.equal(fs.readFileSync(cssPath, "utf8"), css);
 
-  const broken = path.join(cwd, "tokens/themes/dark.tokens.json");
-  const original = fs.readFileSync(broken, "utf8");
-  fs.writeFileSync(
-    broken,
-    original.replace(
-      '"ring": { "$type": "color", "$value": "oklch(92% 0.04 264)" }',
-      '"ring": { "$type": "color", "$value": "oklch(70% 0.16 264)" }',
-    ),
-  );
-  const sameRing = capture();
-  assert.equal(await run(["check", "--cwd", cwd], sameRing), 1);
-  assert.match(sameRing.error(), /focus ring/);
-  assert.equal(fs.readFileSync(cssPath, "utf8"), before);
-  fs.writeFileSync(
-    broken,
-    original.replace(
-      '"foreground": { "$type": "color", "$value": "oklch(99% 0.005 260)" }',
-      '"foreground": { "$type": "color", "$value": "{missing}" }',
-    ),
-  );
-  const bad = capture();
-  assert.equal(await run(["check", "--cwd", cwd], bad), 1);
-  assert.match(bad.error(), /missing/);
-  assert.equal(fs.readFileSync(cssPath, "utf8"), before);
+  const missing = css.replace("  --ring: oklch(70% 0.16 264);\n", "");
+  fs.writeFileSync(cssPath, missing);
+  const missingIo = capture();
+  assert.equal(await run(["check", "--cwd", cwd], missingIo), 1);
+  assert.match(missingIo.error(), /missing --ring on :root/);
+
+  const bad = css.replace("--primary: oklch(55% 0.18 264);", "--primary: red;");
+  fs.writeFileSync(cssPath, bad);
+  const badIo = capture();
+  assert.equal(await run(["check", "--cwd", cwd], badIo), 1);
+  assert.match(badIo.error(), /--primary on :root is "red"/);
+  assert.match(badIo.error(), /oklch\(\)/);
+
+  const low = css.replace("--foreground: oklch(18% 0.02 260);", "--foreground: oklch(99% 0.005 260);");
+  fs.writeFileSync(cssPath, low);
+  const lowIo = capture();
+  assert.equal(await run(["check", "--cwd", cwd], lowIo), 1);
+  assert.match(lowIo.error(), /--foreground on --background in :root is/);
+  assert.match(lowIo.error(), /below WCAG AA 4\.5:1/);
 });
 
-test("an old themeAttribute is ignored and CSS still uses .dark", async () => {
-  const cwd = fs.mkdtempSync(path.join(repo, ".tmp", "theme-attr-"));
-  fs.mkdirSync(cwd, { recursive: true });
-  const initIo = capture();
-  assert.equal(await run(["init", "--no-install", "--cwd", cwd], initIo), 0, initIo.error());
-  const configPath = path.join(cwd, "tesso.config.json");
-  const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-  assert.equal(config.themeAttribute, undefined);
-  assert.doesNotMatch(initIo.error(), /themeAttribute/);
-
-  config.themeAttribute = "data-theme";
-  fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
-  const checkIo = capture();
-  assert.equal(await run(["check", "--cwd", cwd], checkIo), 0, checkIo.error());
-  assert.match(checkIo.error(), /Ignoring "themeAttribute"/);
-  assert.match(checkIo.error(), /:root/);
-  assert.match(checkIo.error(), /\.dark/);
-
-  const buildIo = capture();
-  assert.equal(await run(["build", "--cwd", cwd], buildIo), 0, buildIo.error());
-  const css = fs.readFileSync(path.join(cwd, "public/tokens.css"), "utf8");
-  assert.match(css, /:root \{/);
-  assert.match(css, /\n\.dark \{/);
-  assert.doesNotMatch(css, /data-theme/);
-  assert.match(buildIo.error(), /Ignoring "themeAttribute"/);
-});
-
-test("style-dictionary engine is rejected", async () => {
+test("unknown config keys are rejected", async () => {
   const cwd = fs.mkdtempSync(path.join(repo, ".tmp", "engine-"));
   fs.mkdirSync(cwd, { recursive: true });
   fs.writeFileSync(
     path.join(cwd, "tesso.config.json"),
     JSON.stringify({
-      tokens: ["tokens/**/*.tokens.json"],
       outFile: "public/tokens.css",
       engine: "style-dictionary",
-      themeAttribute: "data-theme",
-      themes: ["light", "dark"],
-      prefix: "ft",
+      prefix: "",
     }),
   );
   const io = capture();
   assert.equal(await run(["check", "--cwd", cwd], io), 1);
-  assert.match(io.error(), /style-dictionary/);
+  assert.match(io.error(), /Unknown config key "engine"/);
 });
 
-test("committed example css is a fresh build", async () => {
+test("committed example css matches the starter and passes check", async () => {
   const cwd = path.join(repo, "examples/counter-themed");
   const cssPath = path.join(cwd, "public/tokens.css");
-  const before = fs.readFileSync(cssPath, "utf8");
-  const io = capture();
-  assert.equal(await run(["build", "--cwd", cwd], io), 0, io.error());
-  assert.equal(fs.readFileSync(cssPath, "utf8"), before);
+  assert.equal(fs.readFileSync(cssPath, "utf8"), renderTokensCss());
   const check = capture();
   assert.equal(await run(["check", "--cwd", cwd], check), 0, check.error());
 });
@@ -215,12 +157,13 @@ test("init writes the Tailwind bridge when Fusor sets tailwind", async () => {
   assert.equal(fs.existsSync(path.join(plain, "web/app.css")), false);
 });
 
-test("starter set stays inside the MVP token budget", async () => {
+test("starter set is the 19 plain tokens", async () => {
   const cwd = fs.mkdtempSync(path.join(repo, ".tmp", "count-"));
   fs.mkdirSync(cwd, { recursive: true });
   assert.equal(await run(["init", "--no-install", "--cwd", cwd], capture()), 0);
-  const { validateTokenSet } = await import("../src/dtcg.js");
-  const { readConfig } = await import("../src/config.js");
-  const { ids } = validateTokenSet(cwd, readConfig(cwd));
-  assert.equal(ids.length, 19, `token count ${ids.length}`);
+  const css = fs.readFileSync(path.join(cwd, "public/tokens.css"), "utf8");
+  const root = css.split(".dark")[0];
+  const names = [...root.matchAll(/--([a-z0-9-]+):/g)].map((match) => match[1]);
+  assert.deepEqual(names.sort(), [...TOKEN_IDS].sort());
+  assert.equal(names.length, 19);
 });

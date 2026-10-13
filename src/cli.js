@@ -1,36 +1,33 @@
 import path from "node:path";
 import { addCommand } from "./commands/add.js";
-import { buildCommand } from "./commands/build.js";
 import { checkCommand } from "./commands/check.js";
 import { initCommand } from "./commands/init.js";
 import { listCommand } from "./commands/list.js";
 import { PACKAGE_VERSION } from "./constants.js";
 import { readConfig } from "./config.js";
 
-const HELP = `tesso — DTCG tokens and components for Fusor
+const HELP = `tesso — plain CSS tokens and components for Fusor
 
 Usage:
-  tesso init [--no-install] [--migrate]
-  tesso build
+  tesso init [--force] [--migrate] [--no-install]
   tesso check
   tesso add <component...> [--overwrite]
   tesso list
 
 Commands:
-  init    Write tesso.config.json, starter tokens, the Terrazzo pipeline,
-          npm devDependencies, and Fusor assets-build metadata. If a
-          .fusor-tokens/ folder is present, ask to move it to .tesso/.
-          --migrate does that without a prompt.
-  build   Validate tokens and write public/tokens.css
-  check   Validate DTCG, resolve semantic colors, and assert CSS would
-          be non-empty. Does not write public/tokens.css
+  init    Write tesso.config.json and the tokens CSS file when that file
+          is missing. The file is not overwritten unless you pass --force.
+          --migrate renames matching --ft-* variables in project files.
+  check   Read the tokens CSS file. Require every token, valid oklch(),
+          and WCAG AA contrast for foreground and background pairs.
   add     Copy component source into this Fusor app
   list    Show the components in the built-in registry
 
 Options:
   --cwd <dir>     App root (default: current directory)
-  --no-install    init: do not run npm install
-  --migrate       init: move .fusor-tokens/ to .tesso/ without asking
+  --force         init: replace an existing tokens CSS file
+  --migrate       init: rename matching --ft-* variables
+  --no-install    Accepted. init does not install packages
   --overwrite     add: replace component files that already exist
   --help          Show this help
   --version       Print ${PACKAGE_VERSION}
@@ -53,15 +50,9 @@ export async function run(argv, io = {}) {
       await initCommand(parsed.cwd, {
         stdout,
         stderr,
-        skipInstall: parsed.skipInstall,
         migrate: parsed.migrate,
-        ask: io.ask,
-        isTTY: io.isTTY,
+        force: parsed.force,
       });
-      return 0;
-    }
-    if (parsed.command === "build") {
-      await buildCommand(parsed.cwd, { stdout, stderr });
       return 0;
     }
     if (parsed.command === "check") {
@@ -94,19 +85,21 @@ function readOptionalConfig(cwd, stderr) {
 
 function parseArgs(argv, defaultCwd) {
   let cwd = defaultCwd ?? process.cwd();
-  let skipInstall = process.env.TESSO_SKIP_INSTALL === "1" || process.env.FUSOR_TOKENS_SKIP_INSTALL === "1";
   let help = false;
   let version = false;
   let overwrite = false;
   let migrate = false;
+  let force = false;
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--help" || arg === "-h") help = true;
     else if (arg === "--version" || arg === "-v") version = true;
-    else if (arg === "--no-install") skipInstall = true;
-    else if (arg === "--overwrite") overwrite = true;
+    else if (arg === "--no-install") {
+      /* init no longer installs packages */
+    } else if (arg === "--overwrite") overwrite = true;
     else if (arg === "--migrate") migrate = true;
+    else if (arg === "--force") force = true;
     else if (arg === "--cwd") {
       const value = argv[++i];
       if (!value) throw new Error("--cwd needs a directory.");
@@ -123,8 +116,8 @@ function parseArgs(argv, defaultCwd) {
     cwd,
     help,
     version,
-    skipInstall,
     overwrite,
     migrate,
+    force,
   };
 }

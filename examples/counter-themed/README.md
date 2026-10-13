@@ -2,7 +2,7 @@
 
 A Fusor 0.1.6 app that shows how Tesso lands in a real project. Dependencies are `fusor-core`, `fusor-components`, and `fusor-build` 0.1.6 from crates.io. `Cargo.toml` sets `assets = { "/" = "public" }` and `tailwind = "web/app.css"`. The counter uses copied Button, Card, and Dialog components. Light values are on `:root`. Dark values are on `.dark`.
 
-`public/tokens.css` and `public/tesso.css` are generated or copied and committed. A copy of this folder still has a theme if Node is not installed. `assets-build` refreshes `tokens.css` when you run `fusor build` or `fusor dev`.
+`public/tokens.css` is the token file this app owns, and `public/tesso.css` is the copied component CSS. Both are committed. A copy of this folder still has a theme if Node is not installed.
 
 ## What is wired
 
@@ -10,7 +10,6 @@ A Fusor 0.1.6 app that shows how Tesso lands in a real project. Dependencies are
 
 ```toml
 assets = { "/" = "public" }
-assets-build = ["npx", "tesso-ui", "build"]
 tailwind = "web/app.css"
 ```
 
@@ -33,7 +32,6 @@ From the repo root:
 ```bash
 npm install
 node bin/tesso.js check --cwd examples/counter-themed
-node bin/tesso.js build --cwd examples/counter-themed
 npm run preview
 ```
 
@@ -42,7 +40,7 @@ Open http://127.0.0.1:44731 and switch Light / Dark. The page reads the same `pu
 From this folder, after `npm install` here (the `file:../..` dependency) and the Fusor 0.1.6 CLI:
 
 ```bash
-npx tesso-ui build
+npx tesso-ui check
 fusor install
 fusor dev
 ```
@@ -51,7 +49,7 @@ Rust 1.95 and the `wasm32-unknown-unknown` target match `rust-toolchain.toml`.
 
 ## Edit a color
 
-Change `primary` in `tokens/semantic.tokens.json`, run `tesso build`, and reload. On Fusor 0.1.6, `fusor dev` rebuilds once for that edit. Light colors live in `tokens/semantic.tokens.json`. Dark overrides live only in `tokens/themes/dark.tokens.json`. `--radius` stays on `:root`. Captions use `--muted-foreground`.
+Change a value in `public/tokens.css` and reload. Light and dark colors both live in that file. `--radius` stays on `:root`. Captions use `--muted-foreground`. `tesso check` reports a missing token, a value that is not `oklch()`, and a foreground/background pair below WCAG AA 4.5:1.
 
 ## Without Rust
 

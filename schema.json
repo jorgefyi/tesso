@@ -2,47 +2,20 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/jorgefyi/tesso/raw/main/schema.json",
   "title": "tesso config",
-  "description": "Configuration for the tesso CLI. The starter token set is the shadcn names (--background, --foreground, --card, --card-foreground, --popover, --popover-foreground, --primary, --primary-foreground, --secondary, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --destructive, --border, --input, --ring, --radius) as raw oklch on :root and .dark. Requires Fusor 0.1.6 or newer.",
+  "description": "Configuration for the tesso CLI. Tokens live in the CSS file named by outFile. The starter set is 19 plain names (--background, --foreground, --card, --card-foreground, --popover, --popover-foreground, --primary, --primary-foreground, --secondary, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --destructive, --border, --input, --ring, --radius) as raw oklch on :root and .dark. Requires Fusor 0.1.6 or newer.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["tokens", "outFile", "engine", "themes", "prefix"],
+  "required": ["outFile", "prefix"],
   "properties": {
     "$schema": {
       "type": "string",
       "description": "JSON Schema URL or path. The CLI writes ./node_modules/tesso-ui/schema.json."
     },
-    "tokens": {
-      "type": "array",
-      "description": "Globs for DTCG token JSON files, relative to the app root.",
-      "minItems": 1,
-      "items": { "type": "string", "minLength": 1 }
-    },
     "outFile": {
       "type": "string",
-      "description": "CSS file written by build. Fusor copies it when assets points at its directory.",
+      "description": "CSS file the project owns. tesso init writes it once. tesso check reads it.",
       "minLength": 1,
       "examples": ["public/tokens.css"]
-    },
-    "engine": {
-      "description": "Token engine. MVP ships terrazzo. style-dictionary is reserved.",
-      "enum": ["terrazzo", "style-dictionary"]
-    },
-    "themeAttribute": {
-      "type": "string",
-      "description": "Ignored. Old configs may still include it. Light and dark CSS use :root and .dark.",
-      "minLength": 1,
-      "examples": ["data-theme"]
-    },
-    "themes": {
-      "type": "array",
-      "description": "Theme names. The first is :root. A theme named dark is emitted under .dark. There is no prefers-color-scheme block.",
-      "minItems": 1,
-      "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "minLength": 1,
-        "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
-      }
     },
     "prefix": {
       "type": "string",

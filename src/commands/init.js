@@ -1,35 +1,21 @@
-import { spawn } from "node:child_process";
 import fs from "node:fs";
-import readline from "node:readline";
 import path from "node:path";
 import { patchCargoFile, readFusorTailwind } from "../cargo.js";
-import {
-  ASSETS_BUILD_COMMAND,
-  DEFAULT_CONFIG,
-  PACKAGE_NAME,
-  PACKAGE_VERSION,
-  TERRAZZO_VERSION,
-} from "../constants.js";
+import { DEFAULT_CONFIG, PACKAGE_NAME, PACKAGE_VERSION } from "../constants.js";
 import { configPath, readConfig, writeDefaultConfig } from "../config.js";
-import { expandGlobs } from "../dtcg.js";
-import { hasLegacy, LEGACY_ERROR, migrateProject } from "../migrate.js";
+import { migrateFtNames } from "../migrate.js";
 import { applyThemeInline } from "../names.js";
-import { starterRoot, writePipeline } from "../pipeline.js";
+import { renderTokensCss } from "../tokens-css.js";
 
-export async function initCommand(cwd, { stdout, stderr, skipInstall, migrate, ask, isTTY }) {
-  if (hasLegacy(cwd)) {
-    const proceed = migrate || (await confirmMigration({ stdout, ask, isTTY }));
-    if (!proceed) {
-      stdout.write("Left the fusor-tokens files in place. Nothing was written.\n");
-      return;
-    }
-    const notes = migrateProject(cwd);
-    stdout.write("tesso migrate\n");
-    for (const note of notes) stdout.write(`  ${note}\n`);
-  }
-
+export async function initCommand(cwd, { stdout, stderr, migrate, force }) {
   const created = [];
   const skipped = [];
+  const notes = [];
+
+  if (migrate) {
+    const migrated = migrateFtNames(cwd);
+    notes.push(...migrated);
+  }
 
   const configFile = configPath(cwd);
   if (fs.existsSync(configFile)) skipped.push(path.basename(configFile));
@@ -38,29 +24,27 @@ export async function initCommand(cwd, { stdout, stderr, skipInstall, migrate, a
     created.push(path.basename(configFile));
   }
 
-  const starterTokens = path.join(starterRoot(), "tokens");
-  copyTree(starterTokens, path.join(cwd, "tokens"), cwd, created, skipped);
-
-  const publicDir = path.join(cwd, "public");
-  if (!fs.existsSync(publicDir)) {
-    fs.mkdirSync(publicDir, { recursive: true });
-    created.push("public/");
-  }
-
   const config = readConfig(cwd, { warn: (message) => stderr?.write(`${message}\n`) });
-  const tokenFiles = expandGlobs(cwd, config.tokens);
-  writePipeline(cwd, config, tokenFiles);
+  const tokenFile = path.resolve(cwd, config.outFile);
+  const tokenLabel = config.outFile.split(path.sep).join("/");
+  if (fs.existsSync(tokenFile) && !force) {
+    skipped.push(`${tokenLabel} (pass --force to replace it)`);
+  } else {
+    fs.mkdirSync(path.dirname(tokenFile), { recursive: true });
+    const existed = fs.existsSync(tokenFile);
+    fs.writeFileSync(tokenFile, renderTokensCss(config.prefix));
+    if (existed) notes.push(`replaced ${tokenLabel}`);
+    else created.push(tokenLabel);
+  }
 
   const pkgNotes = ensurePackageJson(cwd);
   const cargo = patchCargoFile(cwd);
   const theme = writeTailwindBridge(cwd);
 
-  if (!skipInstall) await installTerrazzo(cwd);
-
   const lines = ["tesso init"];
   if (created.length) lines.push(`  created ${created.join(", ")}`);
   if (skipped.length) lines.push(`  kept existing ${skipped.join(", ")}`);
-  lines.push("  wrote .tesso/terrazzo.config.ts");
+  for (const note of notes) lines.push(`  ${note}`);
   for (const note of pkgNotes) lines.push(`  ${note}`);
   for (const note of cargo.notes) lines.push(`  ${note}`);
   if (theme) lines.push(`  ${theme}`);
@@ -68,31 +52,9 @@ export async function initCommand(cwd, { stdout, stderr, skipInstall, migrate, a
   lines.push("Add this to the HTML <head>, before other styles:");
   lines.push('  <link rel="stylesheet" href="/tokens.css" />');
   lines.push("");
-  lines.push("Then edit a color under tokens/ and run:");
-  lines.push("  tesso build");
-  lines.push("");
+  lines.push(`Edit ${tokenLabel}, then run tesso check.`);
   lines.push("Add components with `tesso list` and `tesso add button`.");
-  lines.push("");
-  lines.push(`Fusor runs \`${ASSETS_BUILD_COMMAND}\` from assets-build before copying public/.`);
   stdout.write(`${lines.join("\n")}\n`);
-}
-
-function copyTree(from, to, cwd, created, skipped) {
-  fs.mkdirSync(to, { recursive: true });
-  for (const ent of fs.readdirSync(from, { withFileTypes: true })) {
-    const src = path.join(from, ent.name);
-    const dest = path.join(to, ent.name);
-    if (ent.isDirectory()) {
-      copyTree(src, dest, cwd, created, skipped);
-      continue;
-    }
-    const label = path.relative(cwd, dest).split(path.sep).join("/");
-    if (fs.existsSync(dest)) skipped.push(label);
-    else {
-      fs.copyFileSync(src, dest);
-      created.push(label);
-    }
-  }
 }
 
 function ensurePackageJson(cwd) {
@@ -112,39 +74,14 @@ function ensurePackageJson(cwd) {
     throw new Error("package.json must be a JSON object.");
   }
   pkg.devDependencies ??= {};
-  const wanted = {
-    [PACKAGE_NAME]: `^${PACKAGE_VERSION}`,
-    "@terrazzo/cli": TERRAZZO_VERSION,
-    "@terrazzo/plugin-css": TERRAZZO_VERSION,
-  };
-  const added = [];
-  for (const [name, version] of Object.entries(wanted)) {
-    if (pkg.dependencies?.[name] || pkg.devDependencies?.[name]) continue;
-    pkg.devDependencies[name] = version;
-    added.push(name);
+  if (pkg.dependencies?.[PACKAGE_NAME] || pkg.devDependencies?.[PACKAGE_NAME]) {
+    notes.push("npm devDependencies already present");
+  } else {
+    pkg.devDependencies[PACKAGE_NAME] = `^${PACKAGE_VERSION}`;
+    notes.push(`added devDependencies: ${PACKAGE_NAME}`);
   }
   fs.writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`);
-  if (added.length) notes.push(`added devDependencies: ${added.join(", ")}`);
-  else if (fs.existsSync(file)) notes.push("npm devDependencies already present");
   return notes;
-}
-
-async function confirmMigration({ stdout, ask, isTTY }) {
-  const message =
-    "Found .fusor-tokens/ or fusor-tokens.config.json. Move them to .tesso/ and rename --ft- variables to plain names such as --foreground? [y/N] ";
-  if (typeof ask === "function") {
-    const answer = await ask(message);
-    return /^y(es)?$/i.test(String(answer).trim());
-  }
-  const interactive = isTTY ?? Boolean(process.stdin.isTTY);
-  if (!interactive) throw new Error(LEGACY_ERROR);
-  const rl = readline.createInterface({ input: process.stdin, output: stdout });
-  try {
-    const answer = await new Promise((resolve) => rl.question(message, resolve));
-    return /^y(es)?$/i.test(String(answer).trim());
-  } finally {
-    rl.close();
-  }
 }
 
 function writeTailwindBridge(cwd) {
@@ -163,19 +100,4 @@ function writeTailwindBridge(cwd) {
   if (applied.created) return `created ${label} with @import "tailwindcss" and @theme inline`;
   if (applied.changed) return `wrote @theme inline into ${label}`;
   return `kept the tesso @theme inline block in ${label}`;
-}
-
-function installTerrazzo(cwd) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(
-      "npm",
-      ["install", "--save-dev", `@terrazzo/cli@${TERRAZZO_VERSION}`, `@terrazzo/plugin-css@${TERRAZZO_VERSION}`],
-      { cwd, stdio: "inherit" },
-    );
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`npm install exited ${code}. Re-run init or install @terrazzo/cli yourself.`));
-    });
-  });
 }

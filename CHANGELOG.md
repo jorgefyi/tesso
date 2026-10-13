@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.0
+
+Tokens are a CSS file the project owns.
+
+### Breaking changes
+
+- `tesso init` writes `public/tokens.css` (the `outFile` path) once. The 19 values are the same raw `oklch()` colors as 0.3.1, on `:root` and `.dark`. `init` does not overwrite that file. `--force` replaces it with the starter.
+- `tesso build` is removed. Token JSON, the resolver, `.tesso/`, and `terrazzo.config.ts` are removed.
+- `tesso.config.json` keeps `outFile` and `prefix`. `tokens`, `engine`, `themes`, and `themeAttribute` are unknown keys. There is no style-dictionary option.
+- `@terrazzo/cli`, `@terrazzo/plugin-css`, and `@terrazzo/token-tools` are not dependencies, and `init` does not install them.
+- `init` does not set Fusor `assets-build`. An existing hook that is exactly `npx tesso-ui build` or `npx fusor-tokens build` is removed. `assets = { "/" = "public" }` is still added when `assets` is missing.
+- `tesso check` reads the CSS file. Every required token must be set on `:root`, and every color on `.dark`. Colors must be `oklch()` or `var()`. `--radius` must be a length or `var()`. Foreground and background pairs, including `--primary-foreground` on `--destructive`, must meet WCAG AA 4.5:1 in both themes. Failure prints the problem and exits non-zero.
+- `tesso init --migrate` only renames matching `--ft-*` names in project source and lists the names it left alone. It does not move folders or rewrite an older config.
+- `tesso init` records the devDependency `tesso-ui` as `^0.4.0`.
+
 ## 0.3.1
 
 Docs patch. `themeAttribute` is ignored. Light and dark CSS are unchanged.
@@ -23,7 +38,7 @@ Plain token names and a Tailwind bridge. Nothing has shipped with a `--tesso-` p
 
 - The default prefix is empty. Custom properties are `--background`, `--primary`, and `--radius`, not `--tesso-background`. A custom prefix still prefixes the token file (`--brand-background`). `tesso add` requires an empty prefix because the copied components use the plain names.
 - Light values live on `:root`. Dark values live on `.dark`. `tokens.css` no longer emits `@media (prefers-color-scheme: dark)` or a `[data-theme]` selector. The app puts `.dark` on `<html>`.
-- The starter is the shadcn set only: `--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--muted`, `--muted-foreground`, `--accent`, `--accent-foreground`, `--destructive`, `--border`, `--input`, `--ring`, `--radius`. Values are raw `oklch()` (and `0.625rem` for `--radius`). There is no `--destructive-foreground`, and no `--success`, `--warning`, `--subtle-foreground`, `--border-strong`, `--elevation-*`, `--space-*`, `--family-*`, `--type-size-*`, `--weight-*`, `--line-height-*`, `--gray-*`, or `--palette-*`.
+- The starter is these 19 tokens: `--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--muted`, `--muted-foreground`, `--accent`, `--accent-foreground`, `--destructive`, `--border`, `--input`, `--ring`, `--radius`. Values are raw `oklch()` (and `0.625rem` for `--radius`). There is no `--destructive-foreground`, and no `--success`, `--warning`, `--subtle-foreground`, `--border-strong`, `--elevation-*`, `--space-*`, `--family-*`, `--type-size-*`, `--weight-*`, `--line-height-*`, `--gray-*`, or `--palette-*`.
 - `tesso init --migrate` still moves `.fusor-tokens/` and, when the old prefix was `ft` or there was no config, rewrites `--ft-*` names that have a kept token (`--ft-color-bg` → `--background`, `--ft-color-accent` → `--primary`), not to `--tesso-*`. Names with no kept token stay as they are, and `init` lists them. A custom prefix is kept and `--ft-` is not rewritten. Token JSON is not rewritten. A full fusor-tokens JSON file still contains ids that are not in this set; those ids are not given new names, and a name that would collide with a Tailwind theme namespace fails `check` and `build`.
 - New apps get `assets = { "/" = "public" }`, which Fusor 0.1.6 requires. An existing `assets = "public"` string is left alone.
 - Card and Dialog take a `footer` named child. Dialog sets `aria-labelledby` and `aria-describedby` only when the title or description is non-empty. Named children and optional attributes require Fusor 0.1.6 or newer. Button, Card, and Dialog all build on that release.
@@ -63,4 +78,4 @@ Documentation refresh. No token or CLI behavior change.
 
 ## 0.1.0
 
-First release of the DTCG to `public/tokens.css` pipeline for Fusor, with light and dark themes.
+First release of the token pipeline that wrote `public/tokens.css` for Fusor, with light and dark themes.

@@ -1,13 +1,5 @@
 {
   "$schema": "./node_modules/tesso-ui/schema.json",
-  "tokens": [
-    "tokens/**/*.tokens.json"
-  ],
   "outFile": "public/tokens.css",
-  "engine": "terrazzo",
-  "themes": [
-    "light",
-    "dark"
-  ],
   "prefix": ""
 }

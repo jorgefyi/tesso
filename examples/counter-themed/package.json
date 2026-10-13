@@ -3,12 +3,9 @@
   "private": true,
   "description": "Example Fusor app wired to tesso-ui. The file: dependency points at this repo.",
   "scripts": {
-    "tokens:build": "tesso build",
     "tokens:check": "tesso check"
   },
   "devDependencies": {
-    "@terrazzo/cli": "^2.7.1",
-    "@terrazzo/plugin-css": "^2.7.1",
     "tesso-ui": "file:../.."
   }
 }

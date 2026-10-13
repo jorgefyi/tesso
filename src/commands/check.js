@@ -1,35 +1,18 @@
-import { SEMANTIC_COLOR_IDS } from "../constants.js";
+import fs from "node:fs";
+import path from "node:path";
+import { checkTokensCss } from "../css-tokens.js";
 import { readConfig } from "../config.js";
-import { selectorFor } from "../css.js";
-import { validateTokenSet } from "../dtcg.js";
-import { assertNoLegacy } from "../migrate.js";
-import { cssVariable } from "../names.js";
-import { compileCssToTemp } from "../pipeline.js";
 
 export async function checkCommand(cwd, { stdout, stderr }) {
-  assertNoLegacy(cwd);
   const config = readConfig(cwd, { warn: (message) => stderr?.write(`${message}\n`) });
-  const { files, ids } = validateTokenSet(cwd, config);
-  const css = await compileCssToTemp(cwd, config, files, ids);
-  assertCss(css, config);
-  stdout.write(
-    `ok — ${ids.length} tokens, ${SEMANTIC_COLOR_IDS.length} semantic colors resolve, CSS would be non-empty\n`,
-  );
-}
-
-export function assertCss(css, config) {
-  if (!css || !css.trim()) throw new Error("CSS output would be empty.");
-  const light = selectorFor(config.themes[0], 0);
-  if (!css.includes(`${light} {`)) throw new Error(`CSS is missing selector ${light}.`);
-  if (css.includes("prefers-color-scheme")) {
-    throw new Error("CSS must not include prefers-color-scheme. Put .dark on <html> in the app.");
+  const file = path.resolve(cwd, config.outFile);
+  if (!fs.existsSync(file)) {
+    throw new Error(`Missing ${config.outFile}. Run tesso init to write it.`);
   }
-  if (config.themes.includes("dark")) {
-    const dark = selectorFor("dark", config.themes.indexOf("dark"));
-    if (!css.includes(`${dark} {`)) throw new Error(`CSS is missing selector ${dark}.`);
+  const css = fs.readFileSync(file, "utf8");
+  const result = checkTokensCss(css, config);
+  if (result.errors.length) {
+    throw new Error(result.errors.join("\n"));
   }
-  for (const id of ["background", "foreground", "primary"]) {
-    const name = cssVariable(id, config.prefix);
-    if (!css.includes(`${name}:`)) throw new Error(`CSS is missing ${name}.`);
-  }
+  stdout.write(`${result.summary}\n`);
 }

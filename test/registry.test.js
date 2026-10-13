@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { expandGlobs, loadTokenFile } from "../src/dtcg.js";
 import { loadRegistry, validateRegistry } from "../src/registry.js";
+import { TOKEN_IDS } from "../src/tokens-css.js";
 
 const repo = path.resolve(import.meta.dirname, "..");
 
@@ -33,11 +33,7 @@ test("component css uses plain variables inside @layer components", () => {
 
 test("registry tokens exist in the starter set", () => {
   const registry = loadRegistry();
-  const files = expandGlobs(repo, ["src/starter/tokens/**/*.tokens.json"]);
-  const ids = new Set();
-  for (const file of files) {
-    for (const token of loadTokenFile(file)) ids.add(token.id);
-  }
+  const ids = new Set(TOKEN_IDS);
   for (const item of registry.items) {
     for (const token of item.tokens) {
       assert.equal(ids.has(token), true, `${item.name} token ${token}`);

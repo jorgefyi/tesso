@@ -23,7 +23,6 @@ fusor-build = { version = "0.1.6" }
 [package.metadata.fusor]
 entry = "web/index.html"
 assets = { "/" = "public" }
-assets-build = ["npx", "tesso-ui", "build"]
 tailwind = "web/app.css"
 output = "dist"
 base-path = "/"

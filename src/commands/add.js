@@ -1,14 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readConfig } from "../config.js";
-import { assertNoLegacy } from "../migrate.js";
 import { loadRegistry, projectTokenIds, readComponentText, resolveItems } from "../registry.js";
 
 const CSS_TARGET = "public/tesso.css";
 
 export function addCommand(cwd, names, { stdout, stderr, overwrite }) {
   if (names.length === 0) throw new Error("Name at least one component. Run `tesso list` to see them.");
-  assertNoLegacy(cwd);
   const config = readConfig(cwd, { warn: (message) => stderr?.write(`${message}\n`) });
   if (config.prefix !== "") {
     throw new Error(
