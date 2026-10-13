@@ -5,9 +5,7 @@
 
 Tesso is a small CLI that turns [DTCG](https://www.designtokens.org/) design tokens into `public/tokens.css` and copies accessible, token-based components into a [Fusor](https://github.com/fusor-rs/fusor) app. You own the files it writes. The npm package is `tesso-ui`. The binary is `tesso`.
 
-The token file uses plain CSS variables: `--background`, `--foreground`, `--primary`, `--radius`, and the rest of the set below. The same file works with or without Tailwind. When the Fusor app sets `tailwind`, `tesso init` writes an `@theme inline` bridge so utilities such as `bg-primary` follow `.dark`.
-
-Tesso follows the approach of [shadcn/ui](https://ui.shadcn.com/) for token names, the `.dark` class, and the Tailwind theme bridge. It is not an official shadcn project.
+The token file uses plain CSS variables, with no `--tesso-` prefix: `--background`, `--foreground`, `--primary`, `--radius`, and the rest of the 19-token set below. Values are raw `oklch()` on `:root` and `.dark`. The same file works with or without Tailwind. When the Fusor app sets `tailwind`, `tesso init` writes an `@theme inline` bridge so utilities such as `bg-primary` follow `.dark`.
 
 Tesso requires [Fusor](https://github.com/fusor-rs/fusor) 0.1.6 or newer. That release has the assets map, the `tailwind` key, named children, and optional attributes that Card and Dialog use.
 
@@ -48,7 +46,7 @@ npx tesso-ui init
 `init` writes:
 
 - `tesso.config.json`
-- a starter `tokens/` DTCG set (primitives, semantic aliases, light and dark)
+- a starter `tokens/` DTCG set: 19 tokens, raw `oklch()` colors and `--radius` for light, and dark color overrides
 - `.tesso/terrazzo.config.ts` (committed; Terrazzo is the engine)
 - `public/`
 - npm devDependencies for Terrazzo and `tesso-ui`
@@ -91,7 +89,7 @@ npx tesso-ui add button card dialog
 
 It does not replace a file that is already there unless you pass `--overwrite`. If any requested component already has a file, `add` writes none of that component's files and exits 1. A dependency that is already complete is left in place. An unknown name writes nothing.
 
-Components require `"prefix": ""`. They read plain variables such as `--primary`. `tesso add` refuses a non-empty prefix. Their CSS is wrapped in `@layer components`, so a utility class on the same element overrides the component rule. Tailwind's layer order is theme, base, components, utilities.
+Components require `"prefix": ""`. They read plain variables such as `--primary`. `tesso add` refuses a non-empty prefix. Their CSS is wrapped in `@layer components`, so a utility class on the same element overrides the component rule without `!important`. Tailwind's layer order is theme, base, components, utilities.
 
 Card and Dialog use a named `footer` child (`<Children name="footer">`, filled with `<template slot="footer">`). Named children shipped in Fusor 0.1.6. Spacing, type, and shadows in the component CSS are literals. The rules read only the tokens in the starter set.
 
@@ -103,7 +101,7 @@ The parent module that owns the page template must import each component (`use c
 <Button variant="primary" size="md" on_press="{{ state.save.clone() }}">Save</Button>
 ```
 
-`variant` is `primary`, `secondary`, `quiet`, or `danger`. `size` is `sm`, `md`, or `lg`. Both are `&'static str` literals. `on_press` is `Rc<dyn Fn()>`. Fusor component tags cannot take `on:click` (that attribute is only for native elements), so the copied button calls `on:click` on its own `<button>` and the page passes the callback. Keyboard focus draws a ring from `--ring`. The danger variant uses `--primary-foreground` for its text. shadcn v4 has no `--destructive-foreground`, and in this palette `--primary-foreground` is light on the light-theme destructive fill and dark on the lighter dark-theme fill.
+`variant` is `primary`, `secondary`, `quiet`, or `danger`. `size` is `sm`, `md`, or `lg`. Both are `&'static str` literals. `on_press` is `Rc<dyn Fn()>`. Fusor component tags cannot take `on:click` (that attribute is only for native elements), so the copied button calls `on:click` on its own `<button>` and the page passes the callback. Keyboard focus draws a ring from `--ring`. The danger variant uses `--primary-foreground` for its text. There is no `--destructive-foreground`. `--primary-foreground` is light on the light-theme destructive fill and dark on the lighter dark-theme fill.
 
 ### Card
 
@@ -226,7 +224,7 @@ body {
 }
 ```
 
-`prefix` is empty by default, so the custom property is `--background`. A prefix `brand` emits `--brand-background`. `themeAttribute` is only used for themes other than the first and `dark`. Light is `:root`. Dark is `.dark`.
+`prefix` is empty by default, so the custom property is `--background`. There is no `--tesso-` prefix. A prefix `brand` emits `--brand-background`. `themeAttribute` is only used for themes other than the first and `dark`. Light is `:root`. Dark is `.dark`.
 
 New token ids are the CSS names: `primary` → `--primary`, `card-foreground` → `--card-foreground`. A name that would land in a Tailwind theme namespace (`--color-*`, `--spacing`, `--radius-*`, `--font-*`, `--shadow-*`, and the rest) fails `check` and `build`. Bare `--radius` is allowed. The derived steps `--radius-sm`, `--radius-md`, `--radius-lg`, and `--radius-xl` live only in the Tailwind bridge.
 
@@ -377,15 +375,16 @@ Tesso requires Fusor 0.1.6 or newer. Fusor is still pre-1.0.
 - [fusor-rs/fusor#20](https://github.com/fusor-rs/fusor/issues/20) — `assets-build` is an argv array, not a shell command. The clearer error for a bad value is fixed in Fusor 0.1.6.
 - [fusor-rs/fusor#21](https://github.com/fusor-rs/fusor/issues/21) — `fusor dev` running that hook twice is fixed in Fusor 0.1.6. A token edit triggers one rebuild.
 - [fusor-rs/fusor#22](https://github.com/fusor-rs/fusor/issues/22) — a Rust char literal such as `'dark'` inside a template being reported as invalid Rust tokens is fixed in Fusor 0.1.6. The example still uses a double-quoted string inside a single-quoted HTML attribute.
-- [fusor-rs/fusor#23](https://github.com/fusor-rs/fusor/issues/23) — `fusor new` ignores `/.fusor-*/`. Tesso uses `.tesso/` so the pipeline config is not ignored.
-- [fusor-rs/fusor#24](https://github.com/fusor-rs/fusor/issues/24) — `fusor add` cannot copy component source, so `tesso add` does it.
-- [fusor-rs/fusor#25](https://github.com/fusor-rs/fusor/issues/25) says component tags cannot take `on:click`. Pass a callback input, or put the listener on a native element inside the component.
+- [fusor-rs/fusor#23](https://github.com/fusor-rs/fusor/issues/23) — still open. `fusor new` ignores `/.fusor-*/`. Tesso uses `.tesso/` so the pipeline config is not ignored.
+- [fusor-rs/fusor#24](https://github.com/fusor-rs/fusor/issues/24) — still open. `fusor add` cannot copy component source, so `tesso add` does it.
+- [fusor-rs/fusor#25](https://github.com/fusor-rs/fusor/issues/25) — still open. Component tags cannot take `on:click`. Pass a callback input, or put the listener on a native element inside the component.
 - [fusor-rs/fusor#26](https://github.com/fusor-rs/fusor/issues/26) — a component template being limited to one native HTML root is fixed in Fusor 0.1.6 (multiple template roots). Dialog's root is still the `<dialog>` element, and the dimmed page is `::backdrop`.
-- [fusor-rs/fusor#27](https://github.com/fusor-rs/fusor/issues/27) says there is no element ref. Dialog finds its `<dialog>` with `[data-tesso-dialog]` once when it opens. The same issue covers `web-sys`: fusor-core doesn't enable `HtmlDialogElement`, `HtmlElement`, `Node` or `EventTarget`, so `add dialog` adds them.
+- [fusor-rs/fusor#27](https://github.com/fusor-rs/fusor/issues/27) — still open. There is no element ref. Dialog finds its `<dialog>` with `[data-tesso-dialog]` once when it opens. The same issue covers `web-sys`: fusor-core doesn't enable `HtmlDialogElement`, `HtmlElement`, `Node` or `EventTarget`, so `add dialog` adds them.
 - [fusor-rs/fusor#28](https://github.com/fusor-rs/fusor/issues/28) — `<Children>` appearing once per component is fixed in Fusor 0.1.6 (named children). Card and Dialog use `<Children name="footer">`.
-- [fusor-rs/fusor#29](https://github.com/fusor-rs/fusor/issues/29) says `fusor build` doesn't download its tools. On a fresh machine it exits until you run `fusor install`.
+- [fusor-rs/fusor#29](https://github.com/fusor-rs/fusor/issues/29) — still open. `fusor build` doesn't download its tools. On a fresh machine it exits until you run `fusor install`.
+- [fusor-rs/fusor#52](https://github.com/fusor-rs/fusor/issues/52) — a component `#[input]` is still a required struct field. `Option<&str>` only omits the HTML attribute. Optional attributes shipped in Fusor 0.1.6. Dialog uses them for `aria-labelledby` and `aria-describedby`.
+- [fusor-rs/fusor#53](https://github.com/fusor-rs/fusor/issues/53) — the Fusor 0.1.6 install script's Tailwind download does not run on glibc hosts such as GitHub's Ubuntu runners.
 - Fusor 0.1.6 wants `assets = { "/" = "public" }` and accepts `tailwind = "web/app.css"`.
-- Optional attributes (`Option<&str>` sets the attribute for `Some` and removes it for `None`) shipped in Fusor 0.1.6. Dialog uses them for `aria-labelledby` and `aria-describedby`. Component `#[input]` fields are still required struct fields.
 - An author `display` rule on `dialog` overrides the user-agent rule `dialog:not([open]) { display: none }`. Dialog sets `display` only on `.tesso-dialog[open]`.
 - A literal component attribute is `&str`, not `String`.
 

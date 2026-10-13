@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.1
+
+README-only patch. No token or CLI behavior change.
+
+### Changed
+
+- The README matches what 0.3.0 shipped: no `--tesso-` prefix, 19 plain tokens as raw `oklch()` on `:root` and `.dark`, an `@theme inline` bridge when Fusor sets `tailwind`, component CSS in `@layer components` so a utility overrides a component rule without `!important`, Card and Dialog `footer` slots, Fusor 0.1.6 or newer, and literal spacing, type, and shadows.
+- `npx tesso-ui init --migrate` is documented as renaming only `--ft-*` names that have a matching token, and listing the rest.
+- Fusor notes match the 0.3.0 release: #20, #21, #22, #26, and #28 are fixed in Fusor 0.1.6. #23, #24, #25, #27, and #29 stay open. #52 and #53 are included.
+- `tesso init` records the devDependency `tesso-ui` as `^0.3.1`.
+
 ## 0.3.0
 
 Plain token names and a Tailwind bridge. Nothing has shipped with a `--tesso-` prefix, so there is no migration for that name.

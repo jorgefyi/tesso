@@ -16,7 +16,7 @@ export const TOKEN_TYPES = new Set([
 ]);
 
 export const TERRAZZO_VERSION = "^2.7.1";
-export const PACKAGE_VERSION = "0.3.0";
+export const PACKAGE_VERSION = "0.3.1";
 export const PACKAGE_NAME = "tesso-ui";
 
 export const CONFIG_FILENAME = "tesso.config.json";

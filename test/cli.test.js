@@ -38,7 +38,7 @@ test("init scaffolds tokens, config, pipeline, and Cargo metadata", async () => 
   assert.match(cargo, /assets-build = \["npx", "tesso-ui", "build"\]/);
   const pkg = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
   assert.equal(pkg.devDependencies["@terrazzo/cli"], "^2.7.1");
-  assert.equal(pkg.devDependencies["tesso-ui"], "^0.3.0");
+  assert.equal(pkg.devDependencies["tesso-ui"], "^0.3.1");
 
   const again = capture();
   assert.equal(await run(["init", "--no-install", "--cwd", cwd], again), 0);
