@@ -306,6 +306,8 @@ npx tesso-ui init
 
 When it finds `.fusor-tokens/` or `fusor-tokens.config.json`, it asks before moving anything. In CI or any terminal without a prompt, use `npx tesso-ui init --migrate` instead.
 
+`tesso init --migrate` only renames `--ft-*` tokens that have a matching new token. Any other `--ft-*` tokens are left as they are and listed by `init`, so rename or remove them by hand.
+
 **2. Install the new package.** `init` already swapped `fusor-tokens` for `tesso-ui` in your `package.json`, so this just fetches it.
 
 ```bash
