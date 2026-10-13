@@ -6,10 +6,10 @@ import { loadRegistry, projectTokenIds, readComponentText, resolveItems } from "
 
 const CSS_TARGET = "public/tesso.css";
 
-export function addCommand(cwd, names, { stdout, overwrite }) {
+export function addCommand(cwd, names, { stdout, stderr, overwrite }) {
   if (names.length === 0) throw new Error("Name at least one component. Run `tesso list` to see them.");
   assertNoLegacy(cwd);
-  const config = readConfig(cwd);
+  const config = readConfig(cwd, { warn: (message) => stderr?.write(`${message}\n`) });
   if (config.prefix !== "") {
     throw new Error(
       `Components use plain variables such as --primary, but tesso.config.json prefix is "${config.prefix}". Set prefix to "" before adding components.`,

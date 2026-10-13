@@ -125,6 +125,33 @@ test("build and check produce plain light and .dark variables", async () => {
   assert.equal(fs.readFileSync(cssPath, "utf8"), before);
 });
 
+test("an old themeAttribute is ignored and CSS still uses .dark", async () => {
+  const cwd = fs.mkdtempSync(path.join(repo, ".tmp", "theme-attr-"));
+  fs.mkdirSync(cwd, { recursive: true });
+  const initIo = capture();
+  assert.equal(await run(["init", "--no-install", "--cwd", cwd], initIo), 0, initIo.error());
+  const configPath = path.join(cwd, "tesso.config.json");
+  const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  assert.equal(config.themeAttribute, undefined);
+  assert.doesNotMatch(initIo.error(), /themeAttribute/);
+
+  config.themeAttribute = "data-theme";
+  fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+  const checkIo = capture();
+  assert.equal(await run(["check", "--cwd", cwd], checkIo), 0, checkIo.error());
+  assert.match(checkIo.error(), /Ignoring "themeAttribute"/);
+  assert.match(checkIo.error(), /:root/);
+  assert.match(checkIo.error(), /\.dark/);
+
+  const buildIo = capture();
+  assert.equal(await run(["build", "--cwd", cwd], buildIo), 0, buildIo.error());
+  const css = fs.readFileSync(path.join(cwd, "public/tokens.css"), "utf8");
+  assert.match(css, /:root \{/);
+  assert.match(css, /\n\.dark \{/);
+  assert.doesNotMatch(css, /data-theme/);
+  assert.match(buildIo.error(), /Ignoring "themeAttribute"/);
+});
+
 test("style-dictionary engine is rejected", async () => {
   const cwd = fs.mkdtempSync(path.join(repo, ".tmp", "engine-"));
   fs.mkdirSync(cwd, { recursive: true });

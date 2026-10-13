@@ -40,7 +40,7 @@ export function renderTerrazzoConfig(config, resolverPath, outFile) {
   const outDir = path.dirname(outFile).split(path.sep).join("/");
   const filename = path.basename(outFile);
   const blocks = config.themes.map((theme, index) => {
-    const selector = selectorFor(theme, index, config.themeAttribute);
+    const selector = selectorFor(theme, index);
     return `        {
           input: { theme: "${theme}" },
           prepare: (contents) => \`${selector} {\\n\${contents}\\n}\`,
@@ -115,7 +115,6 @@ export async function compileCss(cwd, config, tokenFiles, tokenIds, outFile) {
   const css = finalizeTokensCss(fs.readFileSync(rawPath, "utf8"), {
     prefix: config.prefix,
     themes: config.themes,
-    themeAttribute: config.themeAttribute,
     tokenIds,
   });
   fs.mkdirSync(path.dirname(rawPath), { recursive: true });
@@ -137,7 +136,6 @@ export async function compileCssToTemp(cwd, config, tokenFiles, tokenIds) {
     return finalizeTokensCss(raw, {
       prefix: config.prefix,
       themes: config.themes,
-      themeAttribute: config.themeAttribute,
       tokenIds,
     });
   } finally {

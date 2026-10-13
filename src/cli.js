@@ -52,6 +52,7 @@ export async function run(argv, io = {}) {
     if (parsed.command === "init") {
       await initCommand(parsed.cwd, {
         stdout,
+        stderr,
         skipInstall: parsed.skipInstall,
         migrate: parsed.migrate,
         ask: io.ask,
@@ -60,19 +61,19 @@ export async function run(argv, io = {}) {
       return 0;
     }
     if (parsed.command === "build") {
-      await buildCommand(parsed.cwd, { stdout });
+      await buildCommand(parsed.cwd, { stdout, stderr });
       return 0;
     }
     if (parsed.command === "check") {
-      await checkCommand(parsed.cwd, { stdout });
+      await checkCommand(parsed.cwd, { stdout, stderr });
       return 0;
     }
     if (parsed.command === "list") {
-      listCommand(readOptionalConfig(parsed.cwd), { stdout });
+      listCommand(readOptionalConfig(parsed.cwd, stderr), { stdout });
       return 0;
     }
     if (parsed.command === "add") {
-      addCommand(parsed.cwd, parsed.args, { stdout, overwrite: parsed.overwrite });
+      addCommand(parsed.cwd, parsed.args, { stdout, stderr, overwrite: parsed.overwrite });
       return 0;
     }
     stderr.write(`Unknown command "${parsed.command ?? ""}".\n\n${HELP}`);
@@ -83,9 +84,9 @@ export async function run(argv, io = {}) {
   }
 }
 
-function readOptionalConfig(cwd) {
+function readOptionalConfig(cwd, stderr) {
   try {
-    return readConfig(cwd);
+    return readConfig(cwd, { warn: (message) => stderr?.write(`${message}\n`) });
   } catch {
     return {};
   }

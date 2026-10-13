@@ -16,7 +16,7 @@ import { hasLegacy, LEGACY_ERROR, migrateProject } from "../migrate.js";
 import { applyThemeInline } from "../names.js";
 import { starterRoot, writePipeline } from "../pipeline.js";
 
-export async function initCommand(cwd, { stdout, skipInstall, migrate, ask, isTTY }) {
+export async function initCommand(cwd, { stdout, stderr, skipInstall, migrate, ask, isTTY }) {
   if (hasLegacy(cwd)) {
     const proceed = migrate || (await confirmMigration({ stdout, ask, isTTY }));
     if (!proceed) {
@@ -47,7 +47,7 @@ export async function initCommand(cwd, { stdout, skipInstall, migrate, ask, isTT
     created.push("public/");
   }
 
-  const config = readConfig(cwd);
+  const config = readConfig(cwd, { warn: (message) => stderr?.write(`${message}\n`) });
   const tokenFiles = expandGlobs(cwd, config.tokens);
   writePipeline(cwd, config, tokenFiles);
 

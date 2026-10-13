@@ -6,9 +6,9 @@ import { assertNoLegacy } from "../migrate.js";
 import { cssVariable } from "../names.js";
 import { compileCssToTemp } from "../pipeline.js";
 
-export async function checkCommand(cwd, { stdout }) {
+export async function checkCommand(cwd, { stdout, stderr }) {
   assertNoLegacy(cwd);
-  const config = readConfig(cwd);
+  const config = readConfig(cwd, { warn: (message) => stderr?.write(`${message}\n`) });
   const { files, ids } = validateTokenSet(cwd, config);
   const css = await compileCssToTemp(cwd, config, files, ids);
   assertCss(css, config);
@@ -19,13 +19,13 @@ export async function checkCommand(cwd, { stdout }) {
 
 export function assertCss(css, config) {
   if (!css || !css.trim()) throw new Error("CSS output would be empty.");
-  const light = selectorFor(config.themes[0], 0, config.themeAttribute);
+  const light = selectorFor(config.themes[0], 0);
   if (!css.includes(`${light} {`)) throw new Error(`CSS is missing selector ${light}.`);
   if (css.includes("prefers-color-scheme")) {
     throw new Error("CSS must not include prefers-color-scheme. Put .dark on <html> in the app.");
   }
   if (config.themes.includes("dark")) {
-    const dark = selectorFor("dark", config.themes.indexOf("dark"), config.themeAttribute);
+    const dark = selectorFor("dark", config.themes.indexOf("dark"));
     if (!css.includes(`${dark} {`)) throw new Error(`CSS is missing selector ${dark}.`);
   }
   for (const id of ["background", "foreground", "primary"]) {

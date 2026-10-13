@@ -42,7 +42,6 @@ export const DEFAULT_CONFIG = {
   tokens: ["tokens/**/*.tokens.json"],
   outFile: "public/tokens.css",
   engine: "terrazzo",
-  themeAttribute: "data-theme",
   themes: ["light", "dark"],
   prefix: DEFAULT_PREFIX,
 };
