@@ -24,8 +24,8 @@
     },
     "registry": {
       "type": "string",
-      "description": "Reserved. An http(s) URL returning the same JSON document as the built-in registry. Omit it until remote registries exist.",
-      "pattern": "^https?://.+"
+      "description": "Registry base URL or a local folder of component JSON. Omit it to use https://tesso.fyi/r/.",
+      "minLength": 1
     }
   }
 }

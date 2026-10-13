@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.4.1
+
+Components are fetched from a registry. The docs site is a Fusor app.
+
+### Added
+
+- Each component is one JSON file in `registry/` (`button.json`, `card.json`, `dialog.json`). The file lists the name, dependencies, files and their contents, CSS variables, and the minimum tesso-ui and Fusor versions. `registry/components/` and `registry/registry.json` are gone. That JSON is the only copy shipped in the package.
+- `tesso add` and `tesso list` read `https://tesso.fyi/r/` by default. `tesso add button` fetches `https://tesso.fyi/r/button.json`. `--registry` takes a base URL or a local folder, so CI and offline use can read a checkout. `tesso.config.json` may set the same `registry` value. The flag wins. The command prints which registry it used.
+- If this CLI is older than the file's `tessoUi`, `add` writes nothing and names the version required. If `Cargo.toml` pins an older `fusor-core` than the file's `fusor`, it refuses the same way.
+- If the registry cannot be reached, `add` and `list` fail and name the URL.
+- A target file that already exists and differs is skipped. `add` says so and exits 0. `--diff` prints the diff and does not write. `--force` overwrites. `--overwrite` is the same as `--force`.
+- `site/` is a Fusor app that uses `tokens.css`, Button, Card, and Dialog. It has a landing page and docs for install, init, check, add, and each component. An `assets-build` hook copies `registry/` to `/r/*.json` and writes an index for `tesso list`.
+- `vercel.json` sets `git.deploymentEnabled` to false, so a push does not deploy, including a push to main. GitHub Actions deploys production on `v*` tags and a preview on pull requests with `vercel build` and `vercel deploy --prebuilt`. The job prints a notice and stays green when `VERCEL_TOKEN`, `VERCEL_ORG_ID`, or `VERCEL_PROJECT_ID` is missing.
+- CI builds the site on Fusor 0.1.6 and on Fusor main.
+
+### Changed
+
+- `tesso init` records the devDependency `tesso-ui` as `^0.4.1`.
+
 ## 0.4.0
 
 Tokens are a CSS file the project owns.

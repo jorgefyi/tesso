@@ -39,6 +39,12 @@ jobs:
           npm install
           fusor install
           fusor build
+      - name: Build the site on Fusor 0.1.6
+        working-directory: site
+        run: |
+          npm install
+          fusor install
+          fusor build
 
   # Current Fusor CLI from main, building the same 0.1.6 example.
   fusor-main:
@@ -57,6 +63,12 @@ jobs:
         run: cargo install --git https://github.com/fusor-rs/fusor fusor-cli
       - name: Build the example
         working-directory: examples/counter-themed
+        run: |
+          npm install
+          fusor install
+          fusor build
+      - name: Build the site
+        working-directory: site
         run: |
           npm install
           fusor install

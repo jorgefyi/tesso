@@ -4,9 +4,15 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { run } from "../src/cli.js";
-import { readComponentText } from "../src/registry.js";
 
 const repo = path.resolve(import.meta.dirname, "..");
+const registry = path.join(repo, "registry");
+
+function componentFile(name, target) {
+  const item = JSON.parse(fs.readFileSync(path.join(registry, `${name}.json`), "utf8"));
+  const file = item.files.find((entry) => entry.target === target);
+  return file.content.endsWith("\n") ? file.content : `${file.content}\n`;
+}
 
 function capture() {
   let out = "";
@@ -35,15 +41,16 @@ async function app() {
   return cwd;
 }
 
-test("add writes component files and refuses to overwrite them", async () => {
+test("add writes component files and skips a file that differs", async () => {
   const cwd = await app();
   const io = capture();
-  assert.equal(await run(["add", "button", "card", "--cwd", cwd], io), 0, io.error());
+  assert.equal(await run(["add", "button", "card", "--registry", registry, "--cwd", cwd], io), 0, io.error());
+  assert.match(io.text(), new RegExp(registry.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   assert.equal(
     fs.readFileSync(path.join(cwd, "web/components/button.html"), "utf8"),
-    readComponentText("button/button.html"),
+    componentFile("button", "web/components/button.html"),
   );
-  assert.equal(fs.readFileSync(path.join(cwd, "src/button.rs"), "utf8"), readComponentText("button/button.rs"));
+  assert.equal(fs.readFileSync(path.join(cwd, "src/button.rs"), "utf8"), componentFile("button", "src/button.rs"));
   assert.match(fs.readFileSync(path.join(cwd, "public/tesso.css"), "utf8"), /@layer components/);
   assert.match(fs.readFileSync(path.join(cwd, "public/tesso.css"), "utf8"), /--primary/);
   assert.doesNotMatch(fs.readFileSync(path.join(cwd, "public/tesso.css"), "utf8"), /--tesso-/);
@@ -54,22 +61,29 @@ test("add writes component files and refuses to overwrite them", async () => {
 
   fs.writeFileSync(path.join(cwd, "web/components/button.html"), "<!-- local edit -->\n");
   const again = capture();
-  assert.equal(await run(["add", "button", "--cwd", cwd], again), 1);
-  assert.match(again.text(), /refused to overwrite web\/components\/button.html/);
+  assert.equal(await run(["add", "button", "--registry", registry, "--cwd", cwd], again), 0, again.error());
+  assert.match(again.text(), /skipped web\/components\/button.html/);
+  assert.match(again.text(), /--force/);
+  assert.equal(fs.readFileSync(path.join(cwd, "web/components/button.html"), "utf8"), "<!-- local edit -->\n");
+
+  const preview = capture();
+  assert.equal(await run(["add", "button", "--diff", "--registry", registry, "--cwd", cwd], preview), 0, preview.error());
+  assert.match(preview.text(), /--- web\/components\/button.html/);
+  assert.match(preview.text(), /-<\!-- local edit -->/);
   assert.equal(fs.readFileSync(path.join(cwd, "web/components/button.html"), "utf8"), "<!-- local edit -->\n");
 
   const overwrite = capture();
-  assert.equal(await run(["add", "button", "--overwrite", "--cwd", cwd], overwrite), 0, overwrite.error());
+  assert.equal(await run(["add", "button", "--force", "--registry", registry, "--cwd", cwd], overwrite), 0, overwrite.error());
   assert.equal(
     fs.readFileSync(path.join(cwd, "web/components/button.html"), "utf8"),
-    readComponentText("button/button.html"),
+    componentFile("button", "web/components/button.html"),
   );
 });
 
 test("add rejects an unknown component", async () => {
   const cwd = await app();
   const io = capture();
-  assert.equal(await run(["add", "slider", "--cwd", cwd], io), 1);
+  assert.equal(await run(["add", "slider", "--registry", registry, "--cwd", cwd], io), 1);
   assert.match(io.error(), /Unknown component slider/);
   assert.equal(fs.existsSync(path.join(cwd, "src/slider.rs")), false);
 });
@@ -77,7 +91,7 @@ test("add rejects an unknown component", async () => {
 test("add dialog also installs its button dependency", async () => {
   const cwd = await app();
   const io = capture();
-  assert.equal(await run(["add", "dialog", "--cwd", cwd], io), 0, io.error());
+  assert.equal(await run(["add", "dialog", "--registry", registry, "--cwd", cwd], io), 0, io.error());
   assert.equal(fs.existsSync(path.join(cwd, "src/dialog.rs")), true);
   assert.equal(fs.existsSync(path.join(cwd, "src/dialog_a11y.rs")), true);
   assert.equal(fs.existsSync(path.join(cwd, "src/button.rs")), true);
@@ -103,9 +117,30 @@ test("add dialog also installs its button dependency", async () => {
   assert.match(html, /<Children name="footer"><\/Children>/);
 });
 
+test("add refuses a component that needs a newer tesso-ui", async () => {
+  const cwd = await app();
+  const folder = fs.mkdtempSync(path.join(os.tmpdir(), "tesso-registry-"));
+  const button = JSON.parse(fs.readFileSync(path.join(registry, "button.json"), "utf8"));
+  button.tessoUi = "9.0.0";
+  fs.writeFileSync(path.join(folder, "button.json"), `${JSON.stringify(button)}\n`);
+  const io = capture();
+  assert.equal(await run(["add", "button", "--registry", folder, "--cwd", cwd], io), 1);
+  assert.match(io.error(), /button requires tesso-ui 9\.0\.0 or newer/);
+  assert.match(io.error(), /This CLI is 0\.4\.1/);
+  assert.equal(fs.existsSync(path.join(cwd, "src/button.rs")), false);
+});
+
+test("add fails clearly when the registry cannot be reached", async () => {
+  const cwd = await app();
+  const io = capture();
+  assert.equal(await run(["add", "button", "--registry", "http://127.0.0.1:9/r/", "--cwd", cwd], io), 1);
+  assert.match(io.error(), /Could not reach the registry at http:\/\/127\.0\.0\.1:9\/r\/button\.json/);
+  assert.equal(fs.existsSync(path.join(cwd, "src/button.rs")), false);
+});
+
 test("list prints the built-in components", async () => {
   const io = capture();
-  assert.equal(await run(["list", "--cwd", repo], io), 0, io.error());
+  assert.equal(await run(["list", "--registry", registry, "--cwd", repo], io), 0, io.error());
   assert.match(io.text(), /button/);
   assert.match(io.text(), /card/);
   assert.match(io.text(), /dialog/);

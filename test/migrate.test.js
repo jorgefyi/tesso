@@ -35,7 +35,7 @@ test("init --migrate renames matching --ft- names and lists the rest", async () 
   assert.doesNotMatch(appCss, /--tesso-/);
   assert.equal(fs.existsSync(path.join(cwd, ".tesso")), false);
   const pkg = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
-  assert.equal(pkg.devDependencies["tesso-ui"], "^0.4.0");
+  assert.equal(pkg.devDependencies["tesso-ui"], "^0.4.1");
 });
 
 test("init without --migrate leaves --ft- names alone", async () => {

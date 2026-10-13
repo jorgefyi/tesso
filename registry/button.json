@@ -1,0 +1,42 @@
+{
+  "name": "button",
+  "title": "Button",
+  "description": "Button with primary, secondary, quiet, and danger variants, sm/md/lg sizes, and a visible focus ring.",
+  "dependencies": [],
+  "cssVariables": [
+    "--background",
+    "--foreground",
+    "--muted",
+    "--border",
+    "--primary",
+    "--primary-foreground",
+    "--secondary",
+    "--secondary-foreground",
+    "--destructive",
+    "--ring",
+    "--radius"
+  ],
+  "tessoUi": "0.4.1",
+  "fusor": "0.1.6",
+  "files": [
+    {
+      "target": "web/components/button.html",
+      "content": "<template rust:component=\"Button\">\n  <button\n    type=\"button\"\n    class=\"tesso-button\"\n    class:tesso-button-primary='state.variant == \"primary\"'\n    class:tesso-button-secondary='state.variant == \"secondary\"'\n    class:tesso-button-quiet='state.variant == \"quiet\"'\n    class:tesso-button-danger='state.variant == \"danger\"'\n    class:tesso-button-sm='state.size == \"sm\"'\n    class:tesso-button-md='state.size == \"md\"'\n    class:tesso-button-lg='state.size == \"lg\"'\n    on:click=\"state.press()\"\n  >\n    <Children></Children>\n  </button>\n</template>\n"
+    },
+    {
+      "target": "src/button.rs",
+      "content": "//! Button copied by `tesso add button`.\n//!\n//! Fusor component tags do not accept `on:click` (that attribute is only for\n//! native elements, and the name is not a snake_case input). The page passes\n//! an `on_press` callback instead. `variant` and `size` are static strings:\n//! `variant=\"primary\"` and `size=\"md\"`.\n//!\n//! Variants: primary, secondary, quiet, danger.\n//! Sizes: sm, md, lg.\n\nuse std::rc::Rc;\n\nuse fusor::prelude::*;\n\n#[derive(FromInputs)]\npub struct Button {\n    #[input]\n    variant: &'static str,\n    #[input]\n    size: &'static str,\n    #[input]\n    on_press: Rc<dyn Fn()>,\n}\n\nimpl Button {\n    fn press(&self) {\n        (self.on_press)();\n    }\n}\n\nfusor::template!(\"web/components/button.html\");\n"
+    }
+  ],
+  "css": {
+    "target": "public/tesso.css",
+    "marker": "button",
+    "content": "@layer components {\n  .tesso-button {\n    appearance: none;\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    gap: 0.5rem;\n    min-height: 2.5rem;\n    padding: 0.5rem 1rem;\n    border: 1px solid var(--border);\n    border-radius: calc(var(--radius) - 2px);\n    background: var(--background);\n    color: var(--foreground);\n    font: 500 0.875rem/1.25 system-ui, sans-serif;\n    cursor: pointer;\n  }\n\n  .tesso-button:focus {\n    outline: none;\n  }\n\n  .tesso-button:focus-visible {\n    outline: 2px solid var(--ring);\n    outline-offset: 2px;\n  }\n\n  .tesso-button:disabled {\n    opacity: 0.55;\n    cursor: not-allowed;\n  }\n\n  .tesso-button-primary {\n    background: var(--primary);\n    color: var(--primary-foreground);\n    border-color: transparent;\n  }\n\n  .tesso-button-secondary {\n    background: var(--secondary);\n    color: var(--secondary-foreground);\n    border-color: var(--border);\n  }\n\n  .tesso-button-quiet {\n    background: var(--muted);\n    color: var(--foreground);\n    border-color: transparent;\n  }\n\n  /* There's no --destructive-foreground; the danger button uses --primary-foreground for its text. */\n  .tesso-button-danger {\n    background: var(--destructive);\n    color: var(--primary-foreground);\n    border-color: transparent;\n  }\n\n  .tesso-button-sm {\n    min-height: 2rem;\n    padding: 0.25rem 0.75rem;\n    font-size: 0.75rem;\n  }\n\n  .tesso-button-lg {\n    min-height: 3rem;\n    padding: 0.75rem 1.25rem;\n    font-size: 1rem;\n  }\n}\n"
+  },
+  "rustModules": [
+    {
+      "module": "button",
+      "use": "use crate::button::Button;"
+    }
+  ]
+}

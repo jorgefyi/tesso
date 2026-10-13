@@ -1,11 +1,27 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readConfig } from "../config.js";
-import { loadRegistry, projectTokenIds, readComponentText, resolveItems } from "../registry.js";
+import { unifiedDiff } from "../diff.js";
+import { rootCustomProperties } from "../css-tokens.js";
+import {
+  assertCliVersion,
+  assertFusorVersion,
+  loadComponents,
+  resolveRegistry,
+  tokenIds,
+} from "../registry.js";
 
 const CSS_TARGET = "public/tesso.css";
 
-export function addCommand(cwd, names, { stdout, stderr, overwrite }) {
+function projectTokenIds(cwd, config) {
+  const file = path.resolve(cwd, config.outFile);
+  if (!fs.existsSync(file)) return [];
+  const names = rootCustomProperties(fs.readFileSync(file, "utf8"));
+  const prefix = config.prefix ? `${config.prefix}-` : "";
+  return names.map((name) => (prefix && name.startsWith(prefix) ? name.slice(prefix.length) : name));
+}
+
+export async function addCommand(cwd, names, { stdout, stderr, force, diff, registry }) {
   if (names.length === 0) throw new Error("Name at least one component. Run `tesso list` to see them.");
   const config = readConfig(cwd, { warn: (message) => stderr?.write(`${message}\n`) });
   if (config.prefix !== "") {
@@ -13,12 +29,16 @@ export function addCommand(cwd, names, { stdout, stderr, overwrite }) {
       `Components use plain variables such as --primary, but tesso.config.json prefix is "${config.prefix}". Set prefix to "" before adding components.`,
     );
   }
-  const registry = loadRegistry(config);
-  const items = resolveItems(registry, names);
+  const source = resolveRegistry(registry ?? config.registry, cwd);
+  const items = await loadComponents(source, names);
+  assertCliVersion(items);
+  const cargoFile = path.join(cwd, "Cargo.toml");
+  if (fs.existsSync(cargoFile)) assertFusorVersion(fs.readFileSync(cargoFile, "utf8"), items);
+
   const ids = new Set(projectTokenIds(cwd, config));
   const missing = [];
   for (const item of items) {
-    for (const token of item.tokens) {
+    for (const token of tokenIds(item)) {
       if (!ids.has(token)) missing.push(`${item.name} needs ${token}`);
     }
   }
@@ -26,97 +46,114 @@ export function addCommand(cwd, names, { stdout, stderr, overwrite }) {
     throw new Error(`Token set is missing tokens these components use:\n${missing.map((line) => `  ${line}`).join("\n")}`);
   }
 
-  const requested = new Set(names);
   const written = [];
-  const refused = [];
+  const skipped = [];
   const kept = [];
   const notes = [];
-  let failed = false;
+  const diffs = [];
 
   for (const item of items) {
-    const explicit = requested.has(item.name);
-    const plan = item.files.map((file) => ({
-      source: file.source,
-      target: path.join(cwd, file.target),
-      label: file.target,
-    }));
-    const existing = plan.filter((file) => fs.existsSync(file.target));
-    if (existing.length && !overwrite) {
-      const verb = explicit ? "refused to overwrite" : "kept";
-      for (const file of existing) {
-        const line = `${verb} ${file.label}`;
-        if (explicit) refused.push(line);
-        else kept.push(line);
-      }
-      if (explicit) {
-        failed = true;
-        const fresh = plan.filter((file) => !fs.existsSync(file.target));
-        for (const file of fresh) kept.push(`left ${file.label} unwritten because another ${item.name} file already exists`);
-        continue;
-      }
-      if (existing.length !== plan.length) {
-        failed = true;
-        refused.push(`refused to update ${item.name}: some of its files already exist and others do not`);
-        continue;
-      }
+    for (const file of item.files) {
+      const result = placeFile(cwd, file.target, ensureNewline(file.content), { force, diff });
+      collect(result, { written, skipped, kept, diffs });
+    }
+    if (item.css) collect(placeCss(cwd, item, { force, diff }), { written, skipped, kept, diffs });
+    if (!diff || force) {
       notes.push(...ensureRust(cwd, item));
-      continue;
+      notes.push(...ensureCargoFeatures(cwd, item));
     }
-    for (const file of plan) {
-      fs.mkdirSync(path.dirname(file.target), { recursive: true });
-      fs.writeFileSync(file.target, readComponentText(file.source));
-      written.push(file.label);
-    }
-    const cssNote = writeCssSection(cwd, item, overwrite);
-    if (cssNote) notes.push(cssNote);
-    notes.push(...ensureRust(cwd, item));
-    notes.push(...ensureCargoFeatures(cwd, item));
   }
-  notes.push(...ensureStylesheetLink(cwd));
+  if (!diff || force) notes.push(...ensureStylesheetLink(cwd));
 
-  const lines = [`tesso add ${names.join(" ")}`];
+  const lines = [`tesso add ${names.join(" ")}`, `  registry ${source.label}`];
   if (written.length) lines.push(`  wrote ${written.join(", ")}`);
   for (const note of notes) lines.push(`  ${note}`);
   for (const note of kept) lines.push(`  ${note}`);
-  for (const note of refused) lines.push(`  ${note} (pass --overwrite to replace it)`);
+  for (const note of skipped) lines.push(`  ${note}`);
+  if (diffs.length) {
+    lines.push("");
+    lines.push(diffs.join("\n"));
+  }
   lines.push("");
   lines.push("Wire the pieces that were written:");
   lines.push('  <link rel="stylesheet" href="/tesso.css" />');
-  lines.push("  <Button variant=\"primary\" size=\"md\" on_press=\"{{ state.save.clone() }}\">Save</Button>");
-  lines.push("  <Card title=\"Title\" description=\"Supporting text.\"><template slot=\"footer\">Footer</template></Card>");
-  lines.push("  <Dialog open=\"{{ state.dialog_open.clone() }}\" title=\"Title\" description=\"What this dialog does.\"><template slot=\"footer\">Actions</template></Dialog>");
+  lines.push('  <Button variant="primary" size="md" on_press="{{ state.save.clone() }}">Save</Button>');
+  lines.push('  <Card title="Title" description="Supporting text."><template slot="footer">Footer</template></Card>');
+  lines.push('  <Dialog open="{{ state.dialog_open.clone() }}" title="Title" description="What this dialog does."><template slot="footer">Actions</template></Dialog>');
   lines.push("");
   lines.push("Import each component in the Rust module that owns the template (`use crate::button::Button`),");
   lines.push("and declare `mod button;` in src/lib.rs. `add` inserts those lines when the files are already there.");
   lines.push("Dialog traps focus while it is open. See examples/counter-themed for a working page.");
   stdout.write(`${lines.join("\n")}\n`);
-  if (failed) {
-    throw new Error("Refused to overwrite existing component files. Re-run with --overwrite to replace them.");
-  }
 }
 
-function writeCssSection(cwd, item, overwrite) {
+function collect(result, buckets) {
+  if (!result) return;
+  if (result.wrote) buckets.written.push(result.wrote);
+  if (result.skipped) buckets.skipped.push(result.skipped);
+  if (result.kept) buckets.kept.push(result.kept);
+  if (result.diff) buckets.diffs.push(result.diff);
+}
+
+function placeFile(cwd, label, next, { force, diff }) {
+  const dest = path.join(cwd, label);
+  if (!fs.existsSync(dest)) {
+    const preview = diff ? unifiedDiff(label, "", next) : null;
+    if (diff && !force) return { diff: preview, skipped: `would write ${label}` };
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.writeFileSync(dest, next);
+    return { wrote: label, diff: preview };
+  }
+  const current = fs.readFileSync(dest, "utf8");
+  if (current === next) return { kept: `kept ${label}` };
+  const preview = diff ? unifiedDiff(label, current, next) : null;
+  if (!force) {
+    return {
+      diff: preview,
+      skipped: `skipped ${label} (it differs from the registry; pass --force to overwrite)`,
+    };
+  }
+  fs.writeFileSync(dest, next);
+  return { wrote: label, diff: preview };
+}
+
+function placeCss(cwd, item, options) {
   const marker = item.css.marker;
   const start = `/* tesso:${marker} */`;
   const end = `/* /tesso:${marker} */`;
-  const body = readComponentText(item.css.source).trim();
-  const block = `${start}\n${body}\n${end}\n`;
-  const file = path.join(cwd, CSS_TARGET);
-  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const block = `${start}\n${item.css.content.trim()}\n${end}\n`;
+  const label = item.css.target || CSS_TARGET;
+  const file = path.join(cwd, label);
   const current = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
   const pattern = new RegExp(`${escapeRegExp(start)}[\\s\\S]*?${escapeRegExp(end)}\\n?`);
-  if (pattern.test(current)) {
-    if (!overwrite) return `kept ${CSS_TARGET} section ${marker}`;
-    fs.writeFileSync(file, current.replace(pattern, block));
-    return `updated ${CSS_TARGET} section ${marker}`;
+  const hadSection = pattern.test(current);
+  let next;
+  if (!current) next = block;
+  else if (hadSection) next = current.replace(pattern, block);
+  else next = `${current.trimEnd()}\n\n${block}`;
+  if (!next.endsWith("\n")) next = `${next}\n`;
+  if (current === next) return { kept: `kept ${label} section ${marker}` };
+  const preview = options.diff ? unifiedDiff(label, current, next) : null;
+  if (hadSection && !options.force) {
+    return {
+      diff: preview,
+      skipped: `skipped ${label} section ${marker} (it differs from the registry; pass --force to overwrite)`,
+    };
   }
-  const next = current.length === 0 ? block : `${current.trimEnd()}\n\n${block}`;
-  fs.writeFileSync(file, next.endsWith("\n") ? next : `${next}\n`);
-  return `updated ${CSS_TARGET} (${marker})`;
+  if (options.diff && !options.force) return { diff: preview, skipped: `would write ${label} (${marker})` };
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, next);
+  return { wrote: `${label} (${marker})`, diff: preview };
+}
+
+function ensureNewline(text) {
+  return text.endsWith("\n") ? text : `${text}\n`;
 }
 
 function ensureRust(cwd, item) {
   const notes = [];
+  const modules = item.rustModules ?? [];
+  if (modules.length === 0) return notes;
   const lib = path.join(cwd, "src/lib.rs");
   if (!fs.existsSync(lib)) {
     notes.push("no src/lib.rs — declare the new modules next to mod app");
@@ -124,7 +161,7 @@ function ensureRust(cwd, item) {
   }
   let source = fs.readFileSync(lib, "utf8");
   let changed = false;
-  for (const rustModule of item.rustModules) {
+  for (const rustModule of modules) {
     const declaration = `mod ${rustModule.module};`;
     if (new RegExp(`^\\s*(pub\\s+)?mod\\s+${rustModule.module}\\s*;`, "m").test(source)) continue;
     source = source.endsWith("\n") ? `${source}${declaration}\n` : `${source}\n${declaration}\n`;
@@ -136,13 +173,13 @@ function ensureRust(cwd, item) {
   }
   const app = path.join(cwd, "src/app.rs");
   if (!fs.existsSync(app)) {
-    const uses = item.rustModules.filter((rustModule) => rustModule.use).map((rustModule) => rustModule.use);
+    const uses = modules.filter((rustModule) => rustModule.use).map((rustModule) => rustModule.use);
     if (uses.length) notes.push(`add to the page module: ${uses.join(" ")}`);
     return notes;
   }
   let appSource = fs.readFileSync(app, "utf8");
   let appChanged = false;
-  for (const rustModule of item.rustModules) {
+  for (const rustModule of modules) {
     if (!rustModule.use || appSource.includes(rustModule.use)) continue;
     const uses = [...appSource.matchAll(/^use [^\n]*;\n/gm)];
     if (uses.length) {
