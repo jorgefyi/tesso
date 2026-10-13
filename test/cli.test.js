@@ -69,15 +69,16 @@ test("build and check produce plain light and .dark variables", async () => {
   assert.match(css, /--background: oklch\(99% 0\.005 260\);/);
   assert.match(css, /--foreground: oklch\(18% 0\.02 260\);/);
   assert.match(css, /--primary: oklch\(55% 0\.18 264\);/);
-  assert.match(css, /--space-1: 4px;/);
-  assert.match(css, /--space-4: 16px;/);
+  assert.match(css, /--destructive: oklch\(55% 0\.19 25\);/);
   assert.match(css, /--radius: 0\.625rem;/);
-  assert.match(css, /--type-size-2: 14px;/);
-  assert.match(css, /--line-height-normal: 1\.5;/);
-  assert.match(css, /--family-sans: system-ui, -apple-system, "Segoe UI", sans-serif;/);
-  assert.match(css, /--elevation-md: 0 4px 12px oklch\(18% 0\.02 260 \/ 0\.12\);/);
-  assert.match(css, /--warning-foreground: oklch\(46% 0\.12 85\);/);
   assert.match(css, /--ring: oklch\(70% 0\.16 264\);/);
+  assert.doesNotMatch(css, /--destructive-foreground/);
+  assert.doesNotMatch(css, /--success/);
+  assert.doesNotMatch(css, /--warning/);
+  assert.doesNotMatch(css, /--gray-/);
+  assert.doesNotMatch(css, /--space-/);
+  assert.doesNotMatch(css, /--elevation/);
+  assert.doesNotMatch(css, /--palette-/);
 
   const dark = css.split("\n.dark {")[1];
   assert.match(dark, /--background: oklch\(18% 0\.02 260\);/);
@@ -85,11 +86,6 @@ test("build and check produce plain light and .dark variables", async () => {
   assert.match(dark, /--primary: oklch\(70% 0\.16 264\);/);
   assert.match(dark, /--ring: oklch\(92% 0\.04 264\);/);
   assert.match(dark, /--border: oklch\(36% 0\.018 260\);/);
-  assert.match(dark, /--border-strong: oklch\(52% 0\.016 260\);/);
-  assert.match(dark, /--warning-foreground: oklch\(68% 0\.15 85\);/);
-  assert.match(dark, /--elevation-md: 0 4px 12px oklch\(99% 0\.005 260 \/ 0\.10\);/);
-  assert.doesNotMatch(dark, /--space-1/);
-  assert.doesNotMatch(dark, /--family-/);
   assert.doesNotMatch(dark, /--radius:/);
 
   const second = fs.readFileSync(cssPath, "utf8");
@@ -108,18 +104,24 @@ test("build and check produce plain light and .dark variables", async () => {
   fs.writeFileSync(
     broken,
     original.replace(
-      '"ring": { "$type": "color", "$value": "{palette-accent.3}" }',
-      '"ring": { "$type": "color", "$value": "{palette-accent.6}" }',
+      '"ring": { "$type": "color", "$value": "oklch(92% 0.04 264)" }',
+      '"ring": { "$type": "color", "$value": "oklch(70% 0.16 264)" }',
     ),
   );
   const sameRing = capture();
   assert.equal(await run(["check", "--cwd", cwd], sameRing), 1);
   assert.match(sameRing.error(), /focus ring/);
   assert.equal(fs.readFileSync(cssPath, "utf8"), before);
-  fs.writeFileSync(broken, original.replace("{gray.12}", "{gray.missing}"));
+  fs.writeFileSync(
+    broken,
+    original.replace(
+      '"foreground": { "$type": "color", "$value": "oklch(99% 0.005 260)" }',
+      '"foreground": { "$type": "color", "$value": "{missing}" }',
+    ),
+  );
   const bad = capture();
   assert.equal(await run(["check", "--cwd", cwd], bad), 1);
-  assert.match(bad.error(), /gray\.missing/);
+  assert.match(bad.error(), /missing/);
   assert.equal(fs.readFileSync(cssPath, "utf8"), before);
 });
 
@@ -193,5 +195,5 @@ test("starter set stays inside the MVP token budget", async () => {
   const { validateTokenSet } = await import("../src/dtcg.js");
   const { readConfig } = await import("../src/config.js");
   const { ids } = validateTokenSet(cwd, readConfig(cwd));
-  assert.ok(ids.length >= 60 && ids.length <= 80, `token count ${ids.length}`);
+  assert.equal(ids.length, 19, `token count ${ids.length}`);
 });

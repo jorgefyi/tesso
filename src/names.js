@@ -7,7 +7,10 @@
  * bridge into the app's Tailwind stylesheet, where those namespaces belong.
  */
 
-/** Semantic colors every new theme must define. The CSS name is the id. */
+/**
+ * Semantic colors every new theme must define. The CSS name is the id.
+ * shadcn v4 has no `--destructive-foreground`.
+ */
 export const SEMANTIC_COLOR_IDS = [
   "background",
   "foreground",
@@ -24,15 +27,9 @@ export const SEMANTIC_COLOR_IDS = [
   "accent",
   "accent-foreground",
   "destructive",
-  "destructive-foreground",
   "border",
   "input",
   "ring",
-  "success",
-  "warning",
-  "warning-foreground",
-  "subtle-foreground",
-  "border-strong",
 ];
 
 /** fusor-tokens 0.1 ids. Still accepted so `tesso init --migrate` can build old JSON. */
@@ -59,8 +56,10 @@ export const ELEVATION_COLOR_IDS = ["elevation-color.sm", "elevation-color.md", 
 export const LEGACY_SHADOW_COLOR_IDS = ["color.shadow.sm", "color.shadow.md", "color.shadow.lg"];
 
 /**
- * Old DTCG ids → plain CSS names. Longer ids are applied first when rewriting
- * `--ft-*`, so `--ft-color-accent-fg` is not swallowed by `--ft-color-accent`.
+ * Old fusor-tokens ids that still have a token in the shadcn set.
+ * Longer ids are applied first, and a rewrite does not consume a longer
+ * `--ft-` name (`--ft-color-accent-9` stays; `--ft-color-accent` becomes `--primary`).
+ * Ids with no kept equivalent are not listed: migrate leaves those `--ft-*` names alone.
  */
 export const LEGACY_ID_NAMES = {
   "color.bg": "background",
@@ -68,63 +67,11 @@ export const LEGACY_ID_NAMES = {
   "color.bg.muted": "muted",
   "color.fg": "foreground",
   "color.fg.muted": "muted-foreground",
-  "color.fg.subtle": "subtle-foreground",
   "color.border": "border",
-  "color.border.strong": "border-strong",
   "color.accent": "primary",
   "color.accent.fg": "primary-foreground",
   "color.danger": "destructive",
-  "color.success": "success",
-  "color.warning": "warning",
-  "color.warning.fg": "warning-foreground",
   "color.focus.ring": "ring",
-  "color.shadow.sm": "elevation-color-sm",
-  "color.shadow.md": "elevation-color-md",
-  "color.shadow.lg": "elevation-color-lg",
-  "color.gray.0": "gray-0",
-  "color.gray.1": "gray-1",
-  "color.gray.2": "gray-2",
-  "color.gray.3": "gray-3",
-  "color.gray.4": "gray-4",
-  "color.gray.5": "gray-5",
-  "color.gray.6": "gray-6",
-  "color.gray.7": "gray-7",
-  "color.gray.8": "gray-8",
-  "color.gray.9": "gray-9",
-  "color.gray.10": "gray-10",
-  "color.gray.11": "gray-11",
-  "color.gray.12": "gray-12",
-  "color.accent.3": "palette-accent-3",
-  "color.accent.6": "palette-accent-6",
-  "color.accent.9": "palette-accent-9",
-  "color.accent.11": "palette-accent-11",
-  "color.danger.6": "palette-danger-6",
-  "color.danger.9": "palette-danger-9",
-  "color.danger.11": "palette-danger-11",
-  "color.success.6": "palette-success-6",
-  "color.success.9": "palette-success-9",
-  "color.success.11": "palette-success-11",
-  "color.warning.6": "palette-warning-6",
-  "color.warning.9": "palette-warning-9",
-  "color.warning.11": "palette-warning-11",
-  "shadow.sm": "elevation-sm",
-  "shadow.md": "elevation-md",
-  "shadow.lg": "elevation-lg",
-  "radius.none": "corner-none",
-  "radius.sm": "corner-sm",
-  "radius.md": "corner-md",
-  "radius.lg": "corner-lg",
-  "radius.full": "corner-full",
-  "font.family.sans": "family-sans",
-  "font.family.mono": "family-mono",
-  "font.size.1": "type-size-1",
-  "font.size.2": "type-size-2",
-  "font.size.3": "type-size-3",
-  "font.size.4": "type-size-4",
-  "font.size.5": "type-size-5",
-  "font.weight.regular": "weight-regular",
-  "font.weight.medium": "weight-medium",
-  "font.weight.semibold": "weight-semibold",
 };
 
 /**
@@ -188,8 +135,15 @@ export function legacyVariableRewrites() {
 
 export function rewriteLegacyVariables(text) {
   let next = text;
-  for (const [from, to] of legacyVariableRewrites()) next = next.replaceAll(from, to);
+  for (const [from, to] of legacyVariableRewrites()) {
+    next = next.replace(new RegExp(`${escapeRegExp(from)}(?![A-Za-z0-9-])`, "g"), to);
+  }
   return next;
+}
+
+/** `--ft-*` names still present after a rewrite. Sorted, unique. */
+export function unmappedLegacyNames(text) {
+  return [...new Set(text.match(/--ft-[A-Za-z0-9-]+/g) ?? [])].sort();
 }
 
 /** Colors the Tailwind bridge exposes as `--color-*`. */

@@ -4,43 +4,43 @@
     color: var(--card-foreground);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: var(--elevation-md);
-    padding: var(--space-6);
+    box-shadow: 0 0.25rem 0.75rem oklch(0% 0 0 / 0.12);
+    padding: 1.5rem;
   }
 
   .tesso-card-header {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
 
   .tesso-card-title {
     margin: 0;
     color: var(--card-foreground);
-    font-size: var(--type-size-4);
-    font-weight: var(--weight-semibold);
-    line-height: var(--line-height-tight);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
   }
 
   .tesso-card-description {
     margin: 0;
     color: var(--muted-foreground);
-    font-size: var(--type-size-2);
-    line-height: var(--line-height-normal);
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 
   .tesso-card-body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: 1rem;
   }
 
   .tesso-card-footer {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-top: var(--space-4);
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 
   .tesso-card-title[hidden],

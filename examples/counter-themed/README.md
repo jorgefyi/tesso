@@ -1,6 +1,6 @@
 # Shift counter
 
-A Fusor app that shows how Tesso lands in a real project. It tracks Fusor `main` (the next release after 0.1.5): git dependencies, `assets = { "/" = "public" }`, `tailwind = "web/app.css"`, named children, and optional attributes. The counter uses copied Button, Card, and Dialog components plus CSS variables. Light values are on `:root`. Dark values are on `.dark`.
+A Fusor 0.1.6 app that shows how Tesso lands in a real project. Dependencies are `fusor-core`, `fusor-components`, and `fusor-build` 0.1.6 from crates.io. `Cargo.toml` sets `assets = { "/" = "public" }` and `tailwind = "web/app.css"`. The counter uses copied Button, Card, and Dialog components. Light values are on `:root`. Dark values are on `.dark`.
 
 `public/tokens.css` and `public/tesso.css` are generated or copied and committed. A copy of this folder still has a theme if Node is not installed. `assets-build` refreshes `tokens.css` when you run `fusor build` or `fusor dev`.
 
@@ -24,7 +24,7 @@ The page components were copied with `tesso add button card dialog`:
 
 `src/app.rs` imports `Button`, `Card`, and `Dialog`. The card body is the default child. A `<template slot="footer">` fills `<Children name="footer">` on the card and on each dialog. Reset opens a dialog. Why, inside that dialog, opens a second one on top. Because that click opens one dialog from another, Escape closes only the top dialog. Cancel, the close button, a click outside the panel, and Escape set that dialog's signal to false. Confirm sets the count to zero and closes. Focus returns to the control that opened the dialog.
 
-Named children and the optional `aria-labelledby` / `aria-describedby` attributes need Fusor main. Button alone still builds on Fusor 0.1.5.
+Named children and the optional `aria-labelledby` / `aria-describedby` attributes need Fusor 0.1.6 or newer. Button, Card, and Dialog all build on that release.
 
 ## Commands
 
@@ -39,7 +39,7 @@ npm run preview
 
 Open http://127.0.0.1:44731 and switch Light / Dark. The page reads the same `public/tokens.css` Fusor would copy. The preview is a static stand-in of the three components. Tailwind utilities such as `bg-primary` appear after `fusor build`.
 
-From this folder, after `npm install` here (the `file:../..` dependency) and a Fusor CLI built from `main`:
+From this folder, after `npm install` here (the `file:../..` dependency) and the Fusor 0.1.6 CLI:
 
 ```bash
 npx tesso-ui build
@@ -47,11 +47,11 @@ fusor install
 fusor dev
 ```
 
-Install that CLI with `cargo install --git https://github.com/fusor-rs/fusor fusor-cli`. Rust 1.95 and the `wasm32-unknown-unknown` target match `rust-toolchain.toml`.
+Rust 1.95 and the `wasm32-unknown-unknown` target match `rust-toolchain.toml`.
 
 ## Edit a color
 
-Change `palette-accent.9` in `tokens/color.tokens.json`, run `tesso build`, and reload. On Fusor main, `fusor dev` rebuilds once for that edit. Light semantic colors live in `tokens/semantic.tokens.json`. Dark overrides live only in `tokens/themes/dark.tokens.json`. `warning` is the badge fill; warning text uses `warning-foreground`. Light `subtle-foreground` is about 3.5:1 on `background` and is not for body text.
+Change `primary` in `tokens/semantic.tokens.json`, run `tesso build`, and reload. On Fusor 0.1.6, `fusor dev` rebuilds once for that edit. Light colors live in `tokens/semantic.tokens.json`. Dark overrides live only in `tokens/themes/dark.tokens.json`. `--radius` stays on `:root`. Captions use `--muted-foreground`.
 
 ## Without Rust
 

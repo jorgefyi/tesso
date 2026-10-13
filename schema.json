@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/jorgefyi/tesso/raw/main/schema.json",
   "title": "tesso config",
-  "description": "Configuration for the tesso CLI. CSS variables for light and dark themes, plus an optional component registry URL.",
+  "description": "Configuration for the tesso CLI. The starter token set is the shadcn names (--background, --foreground, --card, --card-foreground, --popover, --popover-foreground, --primary, --primary-foreground, --secondary, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --destructive, --border, --input, --ring, --radius) as raw oklch on :root and .dark. Requires Fusor 0.1.6 or newer.",
   "type": "object",
   "additionalProperties": false,
   "required": ["tokens", "outFile", "engine", "themeAttribute", "themes", "prefix"],

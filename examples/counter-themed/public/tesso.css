@@ -5,14 +5,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
-    min-height: var(--space-10);
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--border-strong);
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
     border-radius: calc(var(--radius) - 2px);
     background: var(--background);
     color: var(--foreground);
-    font: var(--weight-medium) var(--type-size-2) / var(--line-height-tight) var(--family-sans);
+    font: 500 0.875rem/1.25 system-ui, sans-serif;
     cursor: pointer;
   }
 
@@ -39,7 +39,7 @@
   .tesso-button-secondary {
     background: var(--secondary);
     color: var(--secondary-foreground);
-    border-color: var(--border-strong);
+    border-color: var(--border);
   }
 
   .tesso-button-quiet {
@@ -48,22 +48,24 @@
     border-color: transparent;
   }
 
+  /* shadcn v4 has no --destructive-foreground. --primary-foreground is near-white
+     on the light destructive fill and near-black on the lighter dark fill. */
   .tesso-button-danger {
     background: var(--destructive);
-    color: var(--destructive-foreground);
+    color: var(--primary-foreground);
     border-color: transparent;
   }
 
   .tesso-button-sm {
-    min-height: var(--space-8);
-    padding: var(--space-1) var(--space-3);
-    font-size: var(--type-size-1);
+    min-height: 2rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
   }
 
   .tesso-button-lg {
-    min-height: var(--space-12);
-    padding: var(--space-3) var(--space-5);
-    font-size: var(--type-size-3);
+    min-height: 3rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
   }
 }
 /* /tesso:button */
@@ -75,43 +77,43 @@
     color: var(--card-foreground);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: var(--elevation-md);
-    padding: var(--space-6);
+    box-shadow: 0 0.25rem 0.75rem oklch(0% 0 0 / 0.12);
+    padding: 1.5rem;
   }
 
   .tesso-card-header {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
 
   .tesso-card-title {
     margin: 0;
     color: var(--card-foreground);
-    font-size: var(--type-size-4);
-    font-weight: var(--weight-semibold);
-    line-height: var(--line-height-tight);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
   }
 
   .tesso-card-description {
     margin: 0;
     color: var(--muted-foreground);
-    font-size: var(--type-size-2);
-    line-height: var(--line-height-normal);
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 
   .tesso-card-body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: 1rem;
   }
 
   .tesso-card-footer {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-top: var(--space-4);
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 
   .tesso-card-title[hidden],
@@ -142,7 +144,7 @@
     max-width: none;
     max-height: none;
     margin: 0;
-    padding: var(--space-4);
+    padding: 1rem;
   }
 
   .tesso-dialog::backdrop {
@@ -151,49 +153,49 @@
 
   .tesso-dialog-panel {
     position: relative;
-    width: min(100%, calc(var(--space-12) * 10));
-    max-height: calc(100vh - var(--space-8));
+    width: min(100%, 30rem);
+    max-height: calc(100vh - 2rem);
     overflow: auto;
-    padding: var(--space-6);
+    padding: 1.5rem;
     background: var(--popover);
     color: var(--popover-foreground);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: var(--elevation-lg);
+    box-shadow: 0 0.75rem 2rem oklch(0% 0 0 / 0.18);
   }
 
   .tesso-dialog-title {
     margin: 0;
-    padding-right: var(--space-12);
-    font-size: var(--type-size-4);
-    font-weight: var(--weight-semibold);
-    line-height: var(--line-height-tight);
+    padding-right: 3rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
   }
 
   .tesso-dialog-description {
-    margin: var(--space-2) 0 0;
+    margin: 0.5rem 0 0;
     color: var(--muted-foreground);
-    font: var(--weight-regular) var(--type-size-2) / var(--line-height-normal) var(--family-sans);
+    font: 400 0.875rem/1.5 system-ui, sans-serif;
   }
 
   .tesso-dialog-body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    margin-top: var(--space-4);
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 
   .tesso-dialog-footer {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-top: var(--space-4);
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 
   .tesso-dialog-close {
     position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
+    top: 0.75rem;
+    right: 0.75rem;
   }
 
   .tesso-dialog-title[hidden],

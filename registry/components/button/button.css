@@ -4,14 +4,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
-    min-height: var(--space-10);
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--border-strong);
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
     border-radius: calc(var(--radius) - 2px);
     background: var(--background);
     color: var(--foreground);
-    font: var(--weight-medium) var(--type-size-2) / var(--line-height-tight) var(--family-sans);
+    font: 500 0.875rem/1.25 system-ui, sans-serif;
     cursor: pointer;
   }
 
@@ -38,7 +38,7 @@
   .tesso-button-secondary {
     background: var(--secondary);
     color: var(--secondary-foreground);
-    border-color: var(--border-strong);
+    border-color: var(--border);
   }
 
   .tesso-button-quiet {
@@ -47,21 +47,23 @@
     border-color: transparent;
   }
 
+  /* shadcn v4 has no --destructive-foreground. --primary-foreground is near-white
+     on the light destructive fill and near-black on the lighter dark fill. */
   .tesso-button-danger {
     background: var(--destructive);
-    color: var(--destructive-foreground);
+    color: var(--primary-foreground);
     border-color: transparent;
   }
 
   .tesso-button-sm {
-    min-height: var(--space-8);
-    padding: var(--space-1) var(--space-3);
-    font-size: var(--type-size-1);
+    min-height: 2rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
   }
 
   .tesso-button-lg {
-    min-height: var(--space-12);
-    padding: var(--space-3) var(--space-5);
-    font-size: var(--type-size-3);
+    min-height: 3rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
   }
 }

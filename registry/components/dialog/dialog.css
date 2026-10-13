@@ -17,7 +17,7 @@
     max-width: none;
     max-height: none;
     margin: 0;
-    padding: var(--space-4);
+    padding: 1rem;
   }
 
   .tesso-dialog::backdrop {
@@ -26,49 +26,49 @@
 
   .tesso-dialog-panel {
     position: relative;
-    width: min(100%, calc(var(--space-12) * 10));
-    max-height: calc(100vh - var(--space-8));
+    width: min(100%, 30rem);
+    max-height: calc(100vh - 2rem);
     overflow: auto;
-    padding: var(--space-6);
+    padding: 1.5rem;
     background: var(--popover);
     color: var(--popover-foreground);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: var(--elevation-lg);
+    box-shadow: 0 0.75rem 2rem oklch(0% 0 0 / 0.18);
   }
 
   .tesso-dialog-title {
     margin: 0;
-    padding-right: var(--space-12);
-    font-size: var(--type-size-4);
-    font-weight: var(--weight-semibold);
-    line-height: var(--line-height-tight);
+    padding-right: 3rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
   }
 
   .tesso-dialog-description {
-    margin: var(--space-2) 0 0;
+    margin: 0.5rem 0 0;
     color: var(--muted-foreground);
-    font: var(--weight-regular) var(--type-size-2) / var(--line-height-normal) var(--family-sans);
+    font: 400 0.875rem/1.5 system-ui, sans-serif;
   }
 
   .tesso-dialog-body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    margin-top: var(--space-4);
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 
   .tesso-dialog-footer {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-top: var(--space-4);
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 
   .tesso-dialog-close {
     position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
+    top: 0.75rem;
+    right: 0.75rem;
   }
 
   .tesso-dialog-title[hidden],

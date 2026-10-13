@@ -46,7 +46,7 @@ export function patchCargoToml(source) {
     notes.push(`set ${ASSETS_TOML}`);
   } else if (/^\s*assets\s*=\s*"/.test(section[assetsIndex])) {
     notes.push(
-      'kept assets as a directory string — Fusor 0.1.5 wants assets = "public"; Fusor main wants assets = { "/" = "public" }',
+      'kept assets as a directory string — Fusor 0.1.6 wants assets = { "/" = "public" }',
     );
   }
 

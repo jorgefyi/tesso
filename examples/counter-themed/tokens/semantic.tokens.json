@@ -1,40 +1,21 @@
 {
   "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
-  "background": { "$type": "color", "$value": "{gray.0}" },
-  "foreground": { "$type": "color", "$value": "{gray.12}" },
-  "card": { "$type": "color", "$value": "{gray.1}" },
-  "card-foreground": { "$type": "color", "$value": "{gray.12}" },
-  "popover": { "$type": "color", "$value": "{gray.1}" },
-  "popover-foreground": { "$type": "color", "$value": "{gray.12}" },
-  "primary": { "$type": "color", "$value": "{palette-accent.9}" },
-  "primary-foreground": { "$type": "color", "$value": "{gray.0}" },
-  "secondary": { "$type": "color", "$value": "{gray.2}" },
-  "secondary-foreground": { "$type": "color", "$value": "{gray.12}" },
-  "muted": { "$type": "color", "$value": "{gray.2}" },
-  "muted-foreground": { "$type": "color", "$value": "{gray.9}" },
-  "accent": { "$type": "color", "$value": "{gray.3}" },
-  "accent-foreground": { "$type": "color", "$value": "{gray.12}" },
-  "destructive": { "$type": "color", "$value": "{palette-danger.9}" },
-  "destructive-foreground": { "$type": "color", "$value": "{gray.0}" },
-  "border": { "$type": "color", "$value": "{gray.4}" },
-  "input": { "$type": "color", "$value": "{gray.4}" },
-  "ring": { "$type": "color", "$value": "{palette-accent.6}" },
-  "success": { "$type": "color", "$value": "{palette-success.9}" },
-  "warning": {
-    "$type": "color",
-    "$description": "Fill and badge color. Do not use this for text.",
-    "$value": "{palette-warning.9}"
-  },
-  "warning-foreground": {
-    "$type": "color",
-    "$description": "Warning text on background and card. warning.11 stays readable on light surfaces.",
-    "$value": "{palette-warning.11}"
-  },
-  "subtle-foreground": { "$type": "color", "$value": "{gray.7}" },
-  "border-strong": { "$type": "color", "$value": "{gray.6}" },
-  "elevation-color": {
-    "sm": { "$type": "color", "$value": "oklch(18% 0.02 260 / 0.08)" },
-    "md": { "$type": "color", "$value": "oklch(18% 0.02 260 / 0.12)" },
-    "lg": { "$type": "color", "$value": "oklch(18% 0.02 260 / 0.18)" }
-  }
+  "background": { "$type": "color", "$value": "oklch(99% 0.005 260)" },
+  "foreground": { "$type": "color", "$value": "oklch(18% 0.02 260)" },
+  "card": { "$type": "color", "$value": "oklch(97% 0.006 260)" },
+  "card-foreground": { "$type": "color", "$value": "oklch(18% 0.02 260)" },
+  "popover": { "$type": "color", "$value": "oklch(97% 0.006 260)" },
+  "popover-foreground": { "$type": "color", "$value": "oklch(18% 0.02 260)" },
+  "primary": { "$type": "color", "$value": "oklch(55% 0.18 264)" },
+  "primary-foreground": { "$type": "color", "$value": "oklch(99% 0.005 260)" },
+  "secondary": { "$type": "color", "$value": "oklch(94% 0.008 260)" },
+  "secondary-foreground": { "$type": "color", "$value": "oklch(18% 0.02 260)" },
+  "muted": { "$type": "color", "$value": "oklch(94% 0.008 260)" },
+  "muted-foreground": { "$type": "color", "$value": "oklch(44% 0.018 260)" },
+  "accent": { "$type": "color", "$value": "oklch(91% 0.01 260)" },
+  "accent-foreground": { "$type": "color", "$value": "oklch(18% 0.02 260)" },
+  "destructive": { "$type": "color", "$value": "oklch(55% 0.19 25)" },
+  "border": { "$type": "color", "$value": "oklch(86% 0.012 260)" },
+  "input": { "$type": "color", "$value": "oklch(86% 0.012 260)" },
+  "ring": { "$type": "color", "$value": "oklch(70% 0.16 264)" }
 }

@@ -32,7 +32,7 @@ export const DEFAULT_PREFIX = "";
 export const ASSETS_BUILD_ARGV = ["npx", "tesso-ui", "build"];
 export const ASSETS_BUILD_COMMAND = ASSETS_BUILD_ARGV.join(" ");
 export const ASSETS_BUILD_TOML = `assets-build = [${ASSETS_BUILD_ARGV.map((a) => JSON.stringify(a)).join(", ")}]`;
-/** Fusor main publishes assets as a URL map. 0.1.5 still wants `assets = "public"`. */
+/** Fusor 0.1.6 publishes assets as a URL map. */
 export const ASSETS_TOML = 'assets = { "/" = "public" }';
 
 export const LEGACY_ASSETS_BUILD_ARGV = ["npx", "fusor-tokens", "build"];

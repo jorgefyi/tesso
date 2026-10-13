@@ -17,9 +17,8 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  # Button, tokens, and the empty prefix on the latest Fusor release.
-  # Card and Dialog need named children and optional attributes, which 0.1.5 rejects.
-  fusor-0-1-5:
+  # Released Fusor: Button, Card, and Dialog, plus the Tailwind bridge.
+  fusor-0-1-6:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,31 +30,19 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
       - run: npm ci
-      - name: Install Fusor 0.1.5
+      - name: Install Fusor 0.1.6
         run: curl -fsSL https://fusor.build/install.sh | sh
         env:
-          FUSOR_VERSION: v0.1.5
-      - name: Build a button-only app on Fusor 0.1.5
+          FUSOR_VERSION: v0.1.6
+      - name: Build the example on Fusor 0.1.6
+        working-directory: examples/counter-themed
         run: |
-          set -euo pipefail
+          npm install
           export PATH="$HOME/.fusor/bin:$PATH"
-          fusor new "$RUNNER_TEMP/button-app" --skip-install --yes
-          node bin/tesso.js init --no-install --cwd "$RUNNER_TEMP/button-app"
-          node bin/tesso.js add button --cwd "$RUNNER_TEMP/button-app"
-          node -e '
-            const fs = require("fs");
-            const path = require("path");
-            const file = path.join(process.env.RUNNER_TEMP, "button-app", "package.json");
-            const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
-            pkg.devDependencies["tesso-ui"] = "file:" + process.env.GITHUB_WORKSPACE;
-            fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n");
-          '
-          npm install --prefix "$RUNNER_TEMP/button-app"
-          cd "$RUNNER_TEMP/button-app"
           fusor install
           fusor build
 
-  # The themed example: Tailwind bridge, named footer slots, optional aria.
+  # Current Fusor CLI from main, building the same 0.1.6 example.
   fusor-main:
     runs-on: ubuntu-latest
     steps:

@@ -8,16 +8,16 @@ Plain token names and a Tailwind bridge. Nothing has shipped with a `--tesso-` p
 
 - The default prefix is empty. Custom properties are `--background`, `--primary`, and `--radius`, not `--tesso-background`. A custom prefix still prefixes the token file (`--brand-background`). `tesso add` requires an empty prefix because the copied components use the plain names.
 - Light values live on `:root`. Dark values live on `.dark`. `tokens.css` no longer emits `@media (prefers-color-scheme: dark)` or a `[data-theme]` selector. The app puts `.dark` on `<html>`.
-- Starter token ids are the plain names (`background`, `primary`, `radius`, `elevation.md`, `family.sans`, `type-size.2`, and the rest listed in the README). Old fusor-tokens JSON (`color.bg`, `color.accent`, and the rest) still builds. Those ids map straight to the plain names. `color.accent` becomes `--primary`, because that id was the brand color. The new `--accent` is the subtle hover surface.
-- `tesso init --migrate` still moves `.fusor-tokens/` and, when the old prefix was `ft` or there was no config, rewrites `--ft-*` in source files to the plain names (`--ft-color-bg` → `--background`), not to `--tesso-*`. A custom prefix is kept and `--ft-` is not rewritten. Token JSON is not rewritten.
-- New apps get `assets = { "/" = "public" }`, which Fusor main requires. An existing `assets = "public"` string is left alone so a Fusor 0.1.5 app keeps building.
-- Card and Dialog take a `footer` named child. Dialog sets `aria-labelledby` and `aria-describedby` only when the title or description is non-empty. Named children and optional attributes need Fusor main (the next release after 0.1.5). Button still builds on Fusor 0.1.5.
-- Component CSS is wrapped in `@layer components`.
+- The starter is the shadcn set only: `--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--muted`, `--muted-foreground`, `--accent`, `--accent-foreground`, `--destructive`, `--border`, `--input`, `--ring`, `--radius`. Values are raw `oklch()` (and `0.625rem` for `--radius`). There is no `--destructive-foreground`, and no `--success`, `--warning`, `--subtle-foreground`, `--border-strong`, `--elevation-*`, `--space-*`, `--family-*`, `--type-size-*`, `--weight-*`, `--line-height-*`, `--gray-*`, or `--palette-*`.
+- `tesso init --migrate` still moves `.fusor-tokens/` and, when the old prefix was `ft` or there was no config, rewrites `--ft-*` names that have a kept token (`--ft-color-bg` → `--background`, `--ft-color-accent` → `--primary`), not to `--tesso-*`. Names with no kept token stay as they are, and `init` lists them. A custom prefix is kept and `--ft-` is not rewritten. Token JSON is not rewritten. A full fusor-tokens JSON file still contains ids that are not in this set; those ids are not given new names, and a name that would collide with a Tailwind theme namespace fails `check` and `build`.
+- New apps get `assets = { "/" = "public" }`, which Fusor 0.1.6 requires. An existing `assets = "public"` string is left alone.
+- Card and Dialog take a `footer` named child. Dialog sets `aria-labelledby` and `aria-describedby` only when the title or description is non-empty. Named children and optional attributes require Fusor 0.1.6 or newer. Button, Card, and Dialog all build on that release.
+- Component CSS is wrapped in `@layer components`. Spacing, type, and shadows in those rules are literals. The danger button uses `--primary-foreground` for its text because there is no `--destructive-foreground`.
+- Tesso requires Fusor 0.1.6 or newer.
 
 ### Added
 
-- `tesso init` reads `tailwind = "web/app.css"` from `[package.metadata.fusor]` and writes `@theme inline` mappings (`--color-primary: var(--primary)`, and `--radius-sm` / `--radius-md` / `--radius-lg` / `--radius-xl` from `--radius`). `bg-primary` follows `.dark`. The token file itself never sets Tailwind's `--color-*`, `--radius-*`, `--font-*`, `--shadow-*`, or `--spacing` namespaces.
-- Extra tokens (`--success`, `--warning`, `--elevation-*`, `--space-*`, `--family-sans`, `--type-size-*`, `--gray-*`, `--palette-accent-*`, and the rest) use the same unprefixed style.
+- `tesso init` reads `tailwind = "web/app.css"` from `[package.metadata.fusor]` and writes `@theme inline` mappings (`--color-primary: var(--primary)` for each kept color, and `--radius-sm` / `--radius-md` / `--radius-lg` / `--radius-xl` from `--radius`). `bg-primary` follows `.dark`. The token file itself never sets Tailwind's `--color-*`, `--radius-*`, `--font-*`, `--shadow-*`, or `--spacing` namespaces.
 - A token name that would collide with a Tailwind theme namespace fails `check` and `build`.
 
 ## 0.2.0

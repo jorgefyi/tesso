@@ -226,6 +226,12 @@ export function validateTokenSet(cwd, config) {
         throw new Error(`Theme "${theme}" token ${id} does not resolve {${target}}.`);
       }
     }
+    if (overlay.has("background")) {
+      const radius = overlay.get("radius");
+      if (!radius || radius.$type !== "dimension") {
+        throw new Error(`Theme "${theme}" does not define a dimension token radius.`);
+      }
+    }
     assertDistinctRoles(overlay, theme);
     for (const id of overlay.keys()) {
       plainName(id);
@@ -236,9 +242,12 @@ export function validateTokenSet(cwd, config) {
 
   const baseTheme = config.themes[0];
   if (overlays.has("dark") && overlays.has(baseTheme)) {
-    const shadowIds = overlays.get(baseTheme).has("elevation-color.sm")
+    const base = overlays.get(baseTheme);
+    const shadowIds = base.has("elevation-color.sm")
       ? ELEVATION_COLOR_IDS
-      : LEGACY_SHADOW_COLOR_IDS;
+      : base.has("color.shadow.sm")
+        ? LEGACY_SHADOW_COLOR_IDS
+        : [];
     for (const id of shadowIds) {
       const light = leafValue(overlays.get(baseTheme).get(id), overlays.get(baseTheme));
       const dark = leafValue(overlays.get("dark").get(id), overlays.get("dark"));
