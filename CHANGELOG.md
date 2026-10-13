@@ -13,7 +13,7 @@ Docs patch. `themeAttribute` is ignored. Light and dark CSS are unchanged.
 - `themeAttribute` is no longer written. A config that still sets it is ignored. Light stays on `:root` and dark on `.dark`.
 - `tesso init` records the devDependency `tesso-ui` as `^0.3.1`.
 - The button note says there's no `--destructive-foreground`; the danger button uses `--primary-foreground` for its text.
-- `NOTICE` carries the MIT copyright notice for the starter `--radius` value `0.625rem`. The starter colors are not that palette.
+- No starter colors or component code match a published palette. `--radius` stays `0.625rem`, a common value, so no notice file is included.
 
 ## 0.3.0
 

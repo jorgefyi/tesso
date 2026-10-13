@@ -35,8 +35,7 @@
     "schema.json",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE",
-    "NOTICE"
+    "LICENSE"
   ],
   "engines": {
     "node": ">=20"
