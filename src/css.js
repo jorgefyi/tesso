@@ -1,19 +1,24 @@
 import { makeCSSVar } from "@terrazzo/token-tools/css";
+import { cssVariable, plainName } from "./names.js";
 
 /**
  * Terrazzo's CSS plugin lowercases camelCase ids and re-emits aliases
  * without the leading "--". Rewrite the file into the Tesso contract:
- * :root keeps every token, and later themes only redeclare values that differ.
+ * :root keeps every token, and .dark only redeclares values that differ.
+ * There is no prefers-color-scheme block; the app decides when to set .dark.
  */
 export function finalizeTokensCss(raw, { prefix, themes, themeAttribute, tokenIds }) {
   const rename = new Map();
   for (const id of tokenIds) {
-    const rawName = `${prefix}-${id.replaceAll(".", "-")}`;
-    const desired = `--${rawName}`;
+    const plain = plainName(id);
+    const desired = cssVariable(id, prefix);
+    const rawName = prefix ? `${prefix}-${plain}` : plain;
     rename.set(desired, desired);
     rename.set(rawName, desired);
+    rename.set(plain, desired);
     rename.set(makeCSSVar(rawName), desired);
     rename.set(makeCSSVar(desired), desired);
+    rename.set(makeCSSVar(plain), desired);
   }
 
   const blocks = topLevelRules(stripComments(raw));
@@ -60,17 +65,6 @@ export function finalizeTokensCss(raw, { prefix, themes, themeAttribute, tokenId
     lines.push("}", "");
   }
 
-  const dark = sections.find((section) => section.theme === "dark");
-  if (dark) {
-    const explicit = themes[0];
-    lines.push("@media (prefers-color-scheme: dark) {");
-    lines.push(`  :root:not([${themeAttribute}="${explicit}"]) {`);
-    for (const [name, value] of sortDecls(dark.decls)) {
-      lines.push(`    ${name}: ${value};`);
-    }
-    lines.push("  }");
-    lines.push("}", "");
-  }
   const css = `${lines.join("\n").trimEnd()}\n`;
   if (!css.includes("--")) {
     throw new Error("Generated CSS has no custom properties.");
@@ -78,11 +72,14 @@ export function finalizeTokensCss(raw, { prefix, themes, themeAttribute, tokenId
   return css;
 }
 
+/**
+ * Light values live on `:root`. Dark values live on `.dark` (a class on `<html>`).
+ * Any further theme still uses the configured attribute.
+ */
 export function selectorFor(theme, index, themeAttribute) {
-  const attr = `[${themeAttribute}="${theme}"]`;
-  if (index === 0) return `:root, ${attr}`;
-  if (theme === "dark") return `${attr}, .dark`;
-  return attr;
+  if (index === 0) return ":root";
+  if (theme === "dark") return ".dark";
+  return `[${themeAttribute}="${theme}"]`;
 }
 
 function diffTheme(base, theme) {

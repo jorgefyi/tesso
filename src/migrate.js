@@ -11,6 +11,7 @@ import {
   PACKAGE_VERSION,
   PIPELINE_DIR,
 } from "./constants.js";
+import { rewriteLegacyVariables } from "./names.js";
 
 const SKIP_DIRS = new Set(["node_modules", "target", "dist", ".git", ".tmp"]);
 const TEXT_EXTENSIONS = new Set([".css", ".html", ".rs", ".js", ".mjs", ".md"]);
@@ -36,9 +37,11 @@ export function assertNoLegacy(cwd) {
 /**
  * Move `.fusor-tokens/` to `.tesso/` and `fusor-tokens.config.json` to
  * `tesso.config.json`. When the old prefix was `ft` (or there was no config,
- * so the 0.1 default applies), rewrite `--ft-` to `--tesso-` in project
- * CSS, HTML, Rust, JS, and Markdown. Token JSON is left alone: DTCG values
- * are not CSS variables. A custom prefix is kept and `--ft-` is not touched.
+ * so the 0.1 default applies), rewrite `--ft-*` to the plain names
+ * (`--ft-color-fg` becomes `--foreground`) in project CSS, HTML, Rust, JS,
+ * and Markdown. Token JSON is left alone: DTCG values are not CSS variables,
+ * and the build maps those old ids itself. A custom prefix is kept and
+ * `--ft-` is not touched. There is no `--tesso-*` step.
  */
 export function migrateProject(cwd) {
   const state = legacyState(cwd);
@@ -72,7 +75,7 @@ export function migrateProject(cwd) {
     fs.unlinkSync(file);
     notes.push(
       rewritePrefix
-        ? "renamed fusor-tokens.config.json to tesso.config.json and set prefix to tesso"
+        ? "renamed fusor-tokens.config.json to tesso.config.json and cleared prefix so variables are plain names"
         : `renamed fusor-tokens.config.json to tesso.config.json and kept prefix ${config.prefix}`,
     );
   }
@@ -82,10 +85,15 @@ export function migrateProject(cwd) {
   if (rewritePrefix) {
     const rewritten = rewritePrefixInTree(cwd);
     notes.push(
-      rewritten.length
-        ? `renamed --ft- to --tesso- in ${rewritten.join(", ")}`
+      rewritten.files.length
+        ? `renamed --ft- variables to plain names in ${rewritten.files.join(", ")}`
         : "no --ft- references found outside token JSON",
     );
+    if (rewritten.leftover.length) {
+      notes.push(
+        `left unmapped --ft- names in ${rewritten.leftover.join(", ")} — those ids are not in the fusor-tokens starter`,
+      );
+    }
   } else {
     notes.push("left --ft- references alone because the config prefix was not ft");
   }
@@ -133,7 +141,8 @@ function rewriteCargo(cwd) {
 }
 
 function rewritePrefixInTree(cwd) {
-  const rewritten = [];
+  const files = [];
+  const leftover = [];
   const visit = (dir) => {
     for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
       if (ent.name.startsWith(".") && ent.name !== PIPELINE_DIR) continue;
@@ -147,15 +156,17 @@ function rewritePrefixInTree(cwd) {
       if (!TEXT_EXTENSIONS.has(path.extname(ent.name))) continue;
       const text = fs.readFileSync(full, "utf8");
       if (!text.includes("--ft-")) continue;
-      const next = text.replaceAll("--ft-", "--tesso-");
+      const next = rewriteLegacyVariables(text);
       if (next !== text) {
         fs.writeFileSync(full, next);
-        rewritten.push(path.relative(cwd, full).split(path.sep).join("/"));
+        const label = path.relative(cwd, full).split(path.sep).join("/");
+        files.push(label);
+        if (next.includes("--ft-")) leftover.push(label);
       }
     }
   };
   visit(cwd);
-  return rewritten;
+  return { files, leftover };
 }
 
 export { LEGACY_ERROR };

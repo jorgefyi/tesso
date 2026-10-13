@@ -66,11 +66,12 @@ test("init --migrate moves the folder, prefix, and --ft- references", async () =
   assert.equal(fs.existsSync(path.join(cwd, ".tesso/terrazzo.config.ts")), true);
   assert.equal(fs.existsSync(path.join(cwd, "fusor-tokens.config.json")), false);
   const config = JSON.parse(fs.readFileSync(path.join(cwd, "tesso.config.json"), "utf8"));
-  assert.equal(config.prefix, "tesso");
-  assert.match(fs.readFileSync(path.join(cwd, "public/app.css"), "utf8"), /var\(--tesso-color-fg\)/);
+  assert.equal(config.prefix, "");
+  assert.match(fs.readFileSync(path.join(cwd, "public/app.css"), "utf8"), /var\(--foreground\)/);
   assert.doesNotMatch(fs.readFileSync(path.join(cwd, "public/app.css"), "utf8"), /--ft-/);
+  assert.doesNotMatch(fs.readFileSync(path.join(cwd, "public/app.css"), "utf8"), /--tesso-/);
   const pkg = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
-  assert.equal(pkg.devDependencies["tesso-ui"], "^0.2.0");
+  assert.equal(pkg.devDependencies["tesso-ui"], "^0.3.0");
   assert.equal(pkg.devDependencies["fusor-tokens"], undefined);
   const cargo = fs.readFileSync(path.join(cwd, "Cargo.toml"), "utf8");
   assert.match(cargo, /assets-build = \["npx", "tesso-ui", "build"\]/);
@@ -79,8 +80,11 @@ test("init --migrate moves the folder, prefix, and --ft- references", async () =
   const build = capture();
   assert.equal(await run(["build", "--cwd", cwd], build), 0, build.error());
   const css = fs.readFileSync(path.join(cwd, "public/tokens.css"), "utf8");
-  assert.match(css, /--tesso-color-bg:/);
+  assert.match(css, /--background:/);
+  assert.match(css, /--foreground:/);
   assert.doesNotMatch(css, /--ft-/);
+  assert.doesNotMatch(css, /--tesso-/);
+  assert.doesNotMatch(css, /prefers-color-scheme/);
 });
 
 test("a custom prefix is kept and --ft- is not rewritten", async () => {

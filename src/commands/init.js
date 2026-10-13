@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import fs from "node:fs";
 import readline from "node:readline";
 import path from "node:path";
-import { patchCargoFile } from "../cargo.js";
+import { patchCargoFile, readFusorTailwind } from "../cargo.js";
 import {
   ASSETS_BUILD_COMMAND,
   DEFAULT_CONFIG,
@@ -13,6 +13,7 @@ import {
 import { configPath, readConfig, writeDefaultConfig } from "../config.js";
 import { expandGlobs } from "../dtcg.js";
 import { hasLegacy, LEGACY_ERROR, migrateProject } from "../migrate.js";
+import { applyThemeInline } from "../names.js";
 import { starterRoot, writePipeline } from "../pipeline.js";
 
 export async function initCommand(cwd, { stdout, skipInstall, migrate, ask, isTTY }) {
@@ -52,6 +53,7 @@ export async function initCommand(cwd, { stdout, skipInstall, migrate, ask, isTT
 
   const pkgNotes = ensurePackageJson(cwd);
   const cargo = patchCargoFile(cwd);
+  const theme = writeTailwindBridge(cwd);
 
   if (!skipInstall) await installTerrazzo(cwd);
 
@@ -61,6 +63,7 @@ export async function initCommand(cwd, { stdout, skipInstall, migrate, ask, isTT
   lines.push("  wrote .tesso/terrazzo.config.ts");
   for (const note of pkgNotes) lines.push(`  ${note}`);
   for (const note of cargo.notes) lines.push(`  ${note}`);
+  if (theme) lines.push(`  ${theme}`);
   lines.push("");
   lines.push("Add this to the HTML <head>, before other styles:");
   lines.push('  <link rel="stylesheet" href="/tokens.css" />');
@@ -128,7 +131,7 @@ function ensurePackageJson(cwd) {
 
 async function confirmMigration({ stdout, ask, isTTY }) {
   const message =
-    "Found .fusor-tokens/ or fusor-tokens.config.json. Move them to .tesso/ and rename --ft- to --tesso-? [y/N] ";
+    "Found .fusor-tokens/ or fusor-tokens.config.json. Move them to .tesso/ and rename --ft- variables to plain names such as --foreground? [y/N] ";
   if (typeof ask === "function") {
     const answer = await ask(message);
     return /^y(es)?$/i.test(String(answer).trim());
@@ -142,6 +145,24 @@ async function confirmMigration({ stdout, ask, isTTY }) {
   } finally {
     rl.close();
   }
+}
+
+function writeTailwindBridge(cwd) {
+  const cargoFile = path.join(cwd, "Cargo.toml");
+  if (!fs.existsSync(cargoFile)) return null;
+  const relative = readFusorTailwind(fs.readFileSync(cargoFile, "utf8"));
+  if (!relative) return null;
+  const file = path.resolve(cwd, relative);
+  const before = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null;
+  const applied = applyThemeInline(before);
+  if (applied.changed) {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, applied.text);
+  }
+  const label = relative.split(path.sep).join("/");
+  if (applied.created) return `created ${label} with @import "tailwindcss" and @theme inline`;
+  if (applied.changed) return `wrote @theme inline into ${label}`;
+  return `kept the tesso @theme inline block in ${label}`;
 }
 
 function installTerrazzo(cwd) {

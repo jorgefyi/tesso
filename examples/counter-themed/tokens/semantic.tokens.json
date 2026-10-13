@@ -1,47 +1,40 @@
 {
   "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
-  "color": {
-    "bg": {
-      "$type": "color",
-      "$value": "{color.gray.0}",
-      "subtle": { "$type": "color", "$value": "{color.gray.1}" },
-      "muted": { "$type": "color", "$value": "{color.gray.2}" }
-    },
-    "fg": {
-      "$type": "color",
-      "$value": "{color.gray.12}",
-      "muted": { "$type": "color", "$value": "{color.gray.9}" },
-      "subtle": { "$type": "color", "$value": "{color.gray.7}" }
-    },
-    "border": {
-      "$type": "color",
-      "$value": "{color.gray.4}",
-      "strong": { "$type": "color", "$value": "{color.gray.6}" }
-    },
-    "accent": {
-      "$type": "color",
-      "$value": "{color.accent.9}",
-      "fg": { "$type": "color", "$value": "{color.gray.0}" }
-    },
-    "danger": { "$type": "color", "$value": "{color.danger.9}" },
-    "success": { "$type": "color", "$value": "{color.success.9}" },
-    "warning": {
-      "$type": "color",
-      "$description": "Fill and badge color. Do not use this for text.",
-      "$value": "{color.warning.9}",
-      "fg": {
-        "$type": "color",
-        "$description": "Warning text on bg and bg.subtle.",
-        "$value": "{color.warning.11}"
-      }
-    },
-    "focus": {
-      "ring": { "$type": "color", "$value": "{color.accent.6}" }
-    },
-    "shadow": {
-      "sm": { "$type": "color", "$value": "oklch(18% 0.02 260 / 0.08)" },
-      "md": { "$type": "color", "$value": "oklch(18% 0.02 260 / 0.12)" },
-      "lg": { "$type": "color", "$value": "oklch(18% 0.02 260 / 0.18)" }
-    }
+  "background": { "$type": "color", "$value": "{gray.0}" },
+  "foreground": { "$type": "color", "$value": "{gray.12}" },
+  "card": { "$type": "color", "$value": "{gray.1}" },
+  "card-foreground": { "$type": "color", "$value": "{gray.12}" },
+  "popover": { "$type": "color", "$value": "{gray.1}" },
+  "popover-foreground": { "$type": "color", "$value": "{gray.12}" },
+  "primary": { "$type": "color", "$value": "{palette-accent.9}" },
+  "primary-foreground": { "$type": "color", "$value": "{gray.0}" },
+  "secondary": { "$type": "color", "$value": "{gray.2}" },
+  "secondary-foreground": { "$type": "color", "$value": "{gray.12}" },
+  "muted": { "$type": "color", "$value": "{gray.2}" },
+  "muted-foreground": { "$type": "color", "$value": "{gray.9}" },
+  "accent": { "$type": "color", "$value": "{gray.3}" },
+  "accent-foreground": { "$type": "color", "$value": "{gray.12}" },
+  "destructive": { "$type": "color", "$value": "{palette-danger.9}" },
+  "destructive-foreground": { "$type": "color", "$value": "{gray.0}" },
+  "border": { "$type": "color", "$value": "{gray.4}" },
+  "input": { "$type": "color", "$value": "{gray.4}" },
+  "ring": { "$type": "color", "$value": "{palette-accent.6}" },
+  "success": { "$type": "color", "$value": "{palette-success.9}" },
+  "warning": {
+    "$type": "color",
+    "$description": "Fill and badge color. Do not use this for text.",
+    "$value": "{palette-warning.9}"
+  },
+  "warning-foreground": {
+    "$type": "color",
+    "$description": "Warning text on background and card. warning.11 stays readable on light surfaces.",
+    "$value": "{palette-warning.11}"
+  },
+  "subtle-foreground": { "$type": "color", "$value": "{gray.7}" },
+  "border-strong": { "$type": "color", "$value": "{gray.6}" },
+  "elevation-color": {
+    "sm": { "$type": "color", "$value": "oklch(18% 0.02 260 / 0.08)" },
+    "md": { "$type": "color", "$value": "oklch(18% 0.02 260 / 0.12)" },
+    "lg": { "$type": "color", "$value": "oklch(18% 0.02 260 / 0.18)" }
   }
 }

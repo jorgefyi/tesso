@@ -115,22 +115,28 @@ function fusorFontFamily(value) {
     .join(", ");
 }
 
+const tessoLegacyNames = {"color.bg":"background","color.bg.subtle":"card","color.bg.muted":"muted","color.fg":"foreground","color.fg.muted":"muted-foreground","color.fg.subtle":"subtle-foreground","color.border":"border","color.border.strong":"border-strong","color.accent":"primary","color.accent.fg":"primary-foreground","color.danger":"destructive","color.success":"success","color.warning":"warning","color.warning.fg":"warning-foreground","color.focus.ring":"ring","color.shadow.sm":"elevation-color-sm","color.shadow.md":"elevation-color-md","color.shadow.lg":"elevation-color-lg","color.gray.0":"gray-0","color.gray.1":"gray-1","color.gray.2":"gray-2","color.gray.3":"gray-3","color.gray.4":"gray-4","color.gray.5":"gray-5","color.gray.6":"gray-6","color.gray.7":"gray-7","color.gray.8":"gray-8","color.gray.9":"gray-9","color.gray.10":"gray-10","color.gray.11":"gray-11","color.gray.12":"gray-12","color.accent.3":"palette-accent-3","color.accent.6":"palette-accent-6","color.accent.9":"palette-accent-9","color.accent.11":"palette-accent-11","color.danger.6":"palette-danger-6","color.danger.9":"palette-danger-9","color.danger.11":"palette-danger-11","color.success.6":"palette-success-6","color.success.9":"palette-success-9","color.success.11":"palette-success-11","color.warning.6":"palette-warning-6","color.warning.9":"palette-warning-9","color.warning.11":"palette-warning-11","shadow.sm":"elevation-sm","shadow.md":"elevation-md","shadow.lg":"elevation-lg","radius.none":"corner-none","radius.sm":"corner-sm","radius.md":"corner-md","radius.lg":"corner-lg","radius.full":"corner-full","font.family.sans":"family-sans","font.family.mono":"family-mono","font.size.1":"type-size-1","font.size.2":"type-size-2","font.size.3":"type-size-3","font.size.4":"type-size-4","font.size.5":"type-size-5","font.weight.regular":"weight-regular","font.weight.medium":"weight-medium","font.weight.semibold":"weight-semibold"};
+function tessoPlainName(id) {
+  if (Object.prototype.hasOwnProperty.call(tessoLegacyNames, id)) return tessoLegacyNames[id];
+  return String(id).replace(/\./g, "-");
+}
+
 export default defineConfig({
   tokens: [".tesso/resolver.json"],
   outDir: "public",
   plugins: [
     css({
       filename: "tokens.css",
-      variableName: (token) => "tesso-" + token.id.replace(/\./g, "-"),
+      variableName: (token) => "" + tessoPlainName(token.id),
       transform: fusorCssValue,
       permutations: [
         {
           input: { theme: "light" },
-          prepare: (contents) => `:root, [data-theme="light"] {\n${contents}\n}`,
+          prepare: (contents) => `:root {\n${contents}\n}`,
         },
         {
           input: { theme: "dark" },
-          prepare: (contents) => `[data-theme="dark"], .dark {\n${contents}\n}`,
+          prepare: (contents) => `.dark {\n${contents}\n}`,
         }
       ],
     }),

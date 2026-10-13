@@ -18,16 +18,16 @@ test("the bundled registry is valid and its files exist", () => {
   assert.deepEqual(dialog.dependencies, ["button"]);
 });
 
-test("component css uses only --tesso- variables", () => {
+test("component css uses plain variables inside @layer components", () => {
   const registry = loadRegistry();
+  const reserved = /var\(--(?:tesso-|ft-|color-|font-|shadow-|radius-|spacing|text-|leading-)/;
   for (const item of registry.items) {
     const css = fs.readFileSync(path.join(repo, "registry/components", item.css.source), "utf8");
+    assert.match(css, /@layer components/);
     assert.doesNotMatch(css, /--ft-/);
+    assert.doesNotMatch(css, reserved, item.name);
     const variables = css.match(/var\(--[^)]+\)/g) ?? [];
     assert.ok(variables.length > 0, item.name);
-    for (const variable of variables) {
-      assert.match(variable, /^var\(--tesso-/, `${item.name} ${variable}`);
-    }
   }
 });
 
@@ -50,14 +50,15 @@ test("dialog markup is a native modal wired to the tested decisions", () => {
   assert.match(html, /<dialog/);
   assert.match(html, /role="dialog"/);
   assert.match(html, /aria-modal="true"/);
-  assert.match(html, /aria-labelledby="\{\{ state\.title_id\.as_str\(\) \}\}"/);
-  assert.match(html, /aria-describedby="\{\{ state\.description_id\.as_str\(\) \}\}"/);
+  assert.match(html, /aria-labelledby="\{\{ state\.labelled_by\(\) \}\}"/);
+  assert.match(html, /aria-describedby="\{\{ state\.described_by\(\) \}\}"/);
+  assert.match(html, /<Children name="footer"><\/Children>/);
   assert.match(html, /on:click="state\.on_backdrop_click\(&event\)"/);
   assert.match(html, /on:cancel="state\.on_cancel\(&event\)"/);
   assert.match(html, /on:close="state\.on_native_close\(\)"/);
   const css = fs.readFileSync(path.join(repo, "registry/components/dialog/dialog.css"), "utf8");
   assert.match(css, /\.tesso-dialog::backdrop/);
-  assert.match(css, /var\(--tesso-color-fg\)/);
+  assert.match(css, /var\(--foreground\)/);
   assert.doesNotMatch(css, /\.tesso-dialog\s*\{[^}]*display\s*:/);
   const rust = fs.readFileSync(path.join(repo, "registry/components/dialog/dialog.rs"), "utf8");
   assert.match(rust, /\.show_modal\(\)/);

@@ -29,13 +29,13 @@
     },
     "themeAttribute": {
       "type": "string",
-      "description": "HTML attribute that selects a theme. Default data-theme.",
+      "description": "Kept so existing configs load. Light and dark CSS use :root and .dark. This attribute is only used for themes other than the first and dark.",
       "minLength": 1,
       "examples": ["data-theme"]
     },
     "themes": {
       "type": "array",
-      "description": "Theme names. The first is the :root default. A theme named dark also emits the .dark class.",
+      "description": "Theme names. The first is :root. A theme named dark is emitted under .dark. There is no prefers-color-scheme block.",
       "minItems": 1,
       "uniqueItems": true,
       "items": {
@@ -46,8 +46,8 @@
     },
     "prefix": {
       "type": "string",
-      "description": "CSS variable prefix without leading dashes. tesso becomes --tesso-.",
-      "pattern": "^[A-Za-z][A-Za-z0-9-]*$"
+      "description": "Optional CSS variable prefix without leading dashes. Empty emits plain names such as --background. A custom prefix emits --brand-background.",
+      "pattern": "^$|^[A-Za-z][A-Za-z0-9-]*$"
     },
     "registry": {
       "type": "string",
