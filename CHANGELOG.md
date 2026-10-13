@@ -15,6 +15,10 @@ Components are fetched from a registry. The docs site is a Fusor app.
 - `vercel.json` sets `git.deploymentEnabled` to false, so a push does not deploy, including a push to main. GitHub Actions deploys production on `v*` tags and a preview on pull requests with `vercel build` and `vercel deploy --prebuilt`. The job prints a notice and stays green when `VERCEL_TOKEN`, `VERCEL_ORG_ID`, or `VERCEL_PROJECT_ID` is missing.
 - CI builds the site on Fusor 0.1.6 and on Fusor main.
 
+### Fixed
+
+- Component CSS declares `@layer properties, theme, base, components, utilities` before its rules. Tailwind's preflight was loading afterward and, because `components` had been created first, it wiped padding, button fills, radii, and sizes.
+
 ### Changed
 
 - `tesso init` records the devDependency `tesso-ui` as `^0.4.1`.

@@ -28,6 +28,7 @@
           "/docs/button": "button",
           "/docs/card": "card",
           "/docs/dialog": "dialog",
+          "/test": "test",
         };
         var page = known[path] || "missing";
         var style = document.createElement("style");
@@ -164,6 +165,39 @@ fusor dev</pre>
             <p><code>title</code> and <code>description</code> are static strings. An empty one hides that line and omits <code>aria-labelledby</code> or <code>aria-describedby</code>. Adding dialog also adds button, which it depends on.</p>
             <Button variant="primary" size="md" on_press="{{ state.open_dialog.clone() }}">Open dialog</Button>
             <pre>{{ state.dialog_snippet() }}</pre>
+          </section>
+
+          <section data-page="test" hidden="{{ state.hide_test() }}">
+            <h1>Test</h1>
+            <div>
+              <Button variant="primary" size="sm" on_press="{{ state.noop.clone() }}">Primary sm</Button>
+              <Button variant="primary" size="md" on_press="{{ state.noop.clone() }}">Primary md</Button>
+              <Button variant="primary" size="lg" on_press="{{ state.noop.clone() }}">Primary lg</Button>
+            </div>
+            <div>
+              <Button variant="secondary" size="sm" on_press="{{ state.noop.clone() }}">Secondary sm</Button>
+              <Button variant="secondary" size="md" on_press="{{ state.noop.clone() }}">Secondary md</Button>
+              <Button variant="secondary" size="lg" on_press="{{ state.noop.clone() }}">Secondary lg</Button>
+            </div>
+            <div>
+              <Button variant="quiet" size="sm" on_press="{{ state.noop.clone() }}">Quiet sm</Button>
+              <Button variant="quiet" size="md" on_press="{{ state.noop.clone() }}">Quiet md</Button>
+              <Button variant="quiet" size="lg" on_press="{{ state.noop.clone() }}">Quiet lg</Button>
+            </div>
+            <div>
+              <Button variant="danger" size="sm" on_press="{{ state.noop.clone() }}">Danger sm</Button>
+              <Button variant="danger" size="md" on_press="{{ state.noop.clone() }}">Danger md</Button>
+              <Button variant="danger" size="lg" on_press="{{ state.noop.clone() }}">Danger lg</Button>
+            </div>
+            <Card title="Card" description="A card on the test page.">
+              <p>Body</p>
+              <template slot="footer">
+                <p>Footer</p>
+              </template>
+            </Card>
+            <div>
+              <Button variant="primary" size="md" on_press="{{ state.open_dialog.clone() }}">Open dialog</Button>
+            </div>
           </section>
 
           <section data-page="missing" hidden="{{ state.hide_missing() }}">

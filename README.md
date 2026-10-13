@@ -87,7 +87,7 @@ A file that is missing is written. A file that already matches is kept. A file t
 
 If this CLI is older than the file's minimum `tesso-ui` version, `add` writes nothing and names the version it needs. If `Cargo.toml` depends on an older `fusor-core` than the file's minimum Fusor version, it refuses the same way. If the registry cannot be reached, `add` fails and names the URL.
 
-Components require `"prefix": ""`. They read plain variables such as `--primary`. `tesso add` refuses a non-empty prefix. Their CSS is wrapped in `@layer components`, so a utility class on the same element overrides the component rule without `!important`. Tailwind's layer order is theme, base, components, utilities.
+Components require `"prefix": ""`. They read plain variables such as `--primary`. `tesso add` refuses a non-empty prefix. Their CSS is wrapped in `@layer components`, so a utility class on the same element overrides the component rule without `!important`. Each component's CSS first declares `@layer properties, theme, base, components, utilities`. `tesso.css` is linked before Tailwind, and that statement keeps preflight from landing in a later layer and wiping padding, fills, and sizes.
 
 Card and Dialog use a named `footer` child (`<Children name="footer">`, filled with `<template slot="footer">`). Named children shipped in Fusor 0.1.6. Spacing, type, and shadows in the component CSS are literals. The rules read only the tokens in the starter set.
 

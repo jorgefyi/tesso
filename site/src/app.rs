@@ -62,6 +62,9 @@ impl App {
     fn hide_dialog(&self) -> bool {
         self.route != "/docs/dialog"
     }
+    fn hide_test(&self) -> bool {
+        self.route != "/test"
+    }
     fn hide_missing(&self) -> bool {
         matches!(
             self.route.as_str(),
@@ -72,6 +75,7 @@ impl App {
                 | "/docs/button"
                 | "/docs/card"
                 | "/docs/dialog"
+                | "/test"
         )
     }
 
@@ -169,6 +173,7 @@ fn title_for(route: &str) -> &'static str {
         "/docs/button" => "Button — Tesso",
         "/docs/card" => "Card — Tesso",
         "/docs/dialog" => "Dialog — Tesso",
+        "/test" => "Test — Tesso",
         _ => "Not found — Tesso",
     }
 }
