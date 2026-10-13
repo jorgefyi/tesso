@@ -12,6 +12,8 @@ Docs patch. `themeAttribute` is ignored. Light and dark CSS are unchanged.
 - Fusor notes match the 0.3.0 release: #20, #21, #22, #26, and #28 are fixed in Fusor 0.1.6. #23, #24, #25, #27, and #29 stay open. [#52](https://github.com/fusor-rs/fusor/issues/52) and [#53](https://github.com/fusor-rs/fusor/issues/53) are included.
 - `themeAttribute` is no longer written. A config that still sets it is ignored. Light stays on `:root` and dark on `.dark`.
 - `tesso init` records the devDependency `tesso-ui` as `^0.3.1`.
+- The button note says there's no `--destructive-foreground`; the danger button uses `--primary-foreground` for its text.
+- `NOTICE` carries the MIT copyright notice for the starter `--radius` value `0.625rem`. The starter colors are not that palette.
 
 ## 0.3.0
 

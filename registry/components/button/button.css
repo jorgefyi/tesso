@@ -47,8 +47,7 @@
     border-color: transparent;
   }
 
-  /* shadcn v4 has no --destructive-foreground. --primary-foreground is near-white
-     on the light destructive fill and near-black on the lighter dark fill. */
+  /* There's no --destructive-foreground; the danger button uses --primary-foreground for its text. */
   .tesso-button-danger {
     background: var(--destructive);
     color: var(--primary-foreground);

@@ -92,7 +92,7 @@ The parent module that owns the page template must import each component (`use c
 <Button variant="primary" size="md" on_press="{{ state.save.clone() }}">Save</Button>
 ```
 
-`variant` is `primary`, `secondary`, `quiet`, or `danger`. `size` is `sm`, `md`, or `lg`. Both are `&'static str` literals. `on_press` is `Rc<dyn Fn()>`. Fusor component tags cannot take `on:click` (that attribute is only for native elements), so the copied button calls `on:click` on its own `<button>` and the page passes the callback. Keyboard focus draws a ring from `--ring`. The danger variant uses `--primary-foreground` for its text. There is no `--destructive-foreground`. `--primary-foreground` is light on the light-theme destructive fill and dark on the lighter dark-theme fill.
+`variant` is `primary`, `secondary`, `quiet`, or `danger`. `size` is `sm`, `md`, or `lg`. Both are `&'static str` literals. `on_press` is `Rc<dyn Fn()>`. Fusor component tags cannot take `on:click` (that attribute is only for native elements), so the copied button calls `on:click` on its own `<button>` and the page passes the callback. Keyboard focus draws a ring from `--ring`. There's no `--destructive-foreground`; the danger button uses `--primary-foreground` for its text. That color is light on the light-theme destructive fill and dark on the lighter dark-theme fill.
 
 ### Card
 
