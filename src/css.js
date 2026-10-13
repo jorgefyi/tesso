@@ -7,7 +7,7 @@ import { cssVariable, plainName } from "./names.js";
  * :root keeps every token, and .dark only redeclares values that differ.
  * There is no prefers-color-scheme block; the app decides when to set .dark.
  */
-export function finalizeTokensCss(raw, { prefix, themes, themeAttribute, tokenIds }) {
+export function finalizeTokensCss(raw, { prefix, themes, tokenIds }) {
   const rename = new Map();
   for (const id of tokenIds) {
     const plain = plainName(id);
@@ -36,7 +36,7 @@ export function finalizeTokensCss(raw, { prefix, themes, themeAttribute, tokenId
 
   const themeSelectors = themes.map((theme, index) => ({
     theme,
-    selector: selectorFor(theme, index, themeAttribute),
+    selector: selectorFor(theme, index),
   }));
 
   const base = bySelector.get(normalizeSelector(themeSelectors[0].selector));
@@ -74,12 +74,12 @@ export function finalizeTokensCss(raw, { prefix, themes, themeAttribute, tokenId
 
 /**
  * Light values live on `:root`. Dark values live on `.dark` (a class on `<html>`).
- * Any further theme still uses the configured attribute.
+ * Any further theme is a class of that name. `themeAttribute` is not read.
  */
-export function selectorFor(theme, index, themeAttribute) {
+export function selectorFor(theme, index) {
   if (index === 0) return ":root";
   if (theme === "dark") return ".dark";
-  return `[${themeAttribute}="${theme}"]`;
+  return `.${theme}`;
 }
 
 function diffTheme(base, theme) {

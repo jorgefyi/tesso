@@ -4,9 +4,9 @@ import { validateTokenSet } from "../dtcg.js";
 import { assertNoLegacy } from "../migrate.js";
 import { compileCss } from "../pipeline.js";
 
-export async function buildCommand(cwd, { stdout }) {
+export async function buildCommand(cwd, { stdout, stderr }) {
   assertNoLegacy(cwd);
-  const config = readConfig(cwd);
+  const config = readConfig(cwd, { warn: (message) => stderr?.write(`${message}\n`) });
   const { files, ids } = validateTokenSet(cwd, config);
   const css = await compileCss(cwd, config, files, ids, config.outFile);
   const count = (css.match(/--/g) ?? []).length;

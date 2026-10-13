@@ -5,7 +5,6 @@
   ],
   "outFile": "public/tokens.css",
   "engine": "terrazzo",
-  "themeAttribute": "data-theme",
   "themes": [
     "light",
     "dark"

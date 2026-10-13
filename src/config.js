@@ -11,7 +11,7 @@ export function configPath(cwd) {
   return path.join(cwd, CONFIG_FILENAME);
 }
 
-export function readConfig(cwd) {
+export function readConfig(cwd, { warn } = {}) {
   const file = configPath(cwd);
   if (!fs.existsSync(file)) {
     throw new Error(
@@ -24,10 +24,10 @@ export function readConfig(cwd) {
   } catch (error) {
     throw new Error(`${CONFIG_FILENAME} is not valid JSON (${error.message}).`);
   }
-  return validateConfig(json);
+  return validateConfig(json, { warn });
 }
 
-export function validateConfig(json) {
+export function validateConfig(json, { warn } = {}) {
   if (!json || typeof json !== "object" || Array.isArray(json)) {
     throw new Error("tesso.config.json must be a JSON object.");
   }
@@ -46,7 +46,7 @@ export function validateConfig(json) {
       throw new Error(`Unknown config key "${key}".`);
     }
   }
-  for (const key of ["tokens", "outFile", "engine", "themeAttribute", "themes", "prefix"]) {
+  for (const key of ["tokens", "outFile", "engine", "themes", "prefix"]) {
     if (json[key] == null) throw new Error(`Config is missing "${key}".`);
   }
   if (!Array.isArray(json.tokens) || json.tokens.length === 0) {
@@ -66,8 +66,8 @@ export function validateConfig(json) {
       'engine "style-dictionary" is documented as an alternative and is not implemented. Use "terrazzo".',
     );
   }
-  if (typeof json.themeAttribute !== "string" || json.themeAttribute.length === 0) {
-    throw new Error('Config "themeAttribute" must be a non-empty string.');
+  if (Object.hasOwn(json, "themeAttribute") && typeof warn === "function") {
+    warn('Ignoring "themeAttribute". Light values use :root and dark values use .dark.');
   }
   if (!Array.isArray(json.themes) || json.themes.length === 0) {
     throw new Error('Config "themes" must be a non-empty array.');

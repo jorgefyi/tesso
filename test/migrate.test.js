@@ -77,7 +77,7 @@ test("init --migrate moves the folder, prefix, and --ft- references", async () =
   assert.match(io.text(), /left these --ft- names unchanged \(no kept token\): --ft-color-success, --ft-font-size-2/);
   assert.doesNotMatch(appCss, /--tesso-/);
   const pkg = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
-  assert.equal(pkg.devDependencies["tesso-ui"], "^0.3.0");
+  assert.equal(pkg.devDependencies["tesso-ui"], "^0.3.1");
   assert.equal(pkg.devDependencies["fusor-tokens"], undefined);
   const cargo = fs.readFileSync(path.join(cwd, "Cargo.toml"), "utf8");
   assert.match(cargo, /assets-build = \["npx", "tesso-ui", "build"\]/);

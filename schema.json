@@ -5,7 +5,7 @@
   "description": "Configuration for the tesso CLI. The starter token set is the shadcn names (--background, --foreground, --card, --card-foreground, --popover, --popover-foreground, --primary, --primary-foreground, --secondary, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --destructive, --border, --input, --ring, --radius) as raw oklch on :root and .dark. Requires Fusor 0.1.6 or newer.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["tokens", "outFile", "engine", "themeAttribute", "themes", "prefix"],
+  "required": ["tokens", "outFile", "engine", "themes", "prefix"],
   "properties": {
     "$schema": {
       "type": "string",
@@ -29,7 +29,7 @@
     },
     "themeAttribute": {
       "type": "string",
-      "description": "Kept so existing configs load. Light and dark CSS use :root and .dark. This attribute is only used for themes other than the first and dark.",
+      "description": "Ignored. Old configs may still include it. Light and dark CSS use :root and .dark.",
       "minLength": 1,
       "examples": ["data-theme"]
     },
