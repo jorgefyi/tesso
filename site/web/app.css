@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/* Inter 4.001 (InterVariable.woff2): cv11 is single-story a, cv05 is lower-case l with a tail. */
+@font-face {
+  font-family: InterVariable;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/InterVariable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+
 /* tesso:theme */
 @theme inline {
   --color-background: var(--background);
@@ -43,68 +60,204 @@ body {
   min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
-  font: 400 0.9375rem/1.5 system-ui, sans-serif;
+  font-family: InterVariable, sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-feature-settings: "cv11", "cv05";
 }
 
 a {
   color: var(--foreground);
 }
 
+code,
+pre {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-feature-settings: normal;
+}
+
 code {
-  font-family: ui-monospace, monospace;
   font-size: 0.85em;
 }
 
 .frame {
-  width: min(100% - 2rem, 64rem);
+  width: min(100% - 3rem, 75rem);
   margin: 0 auto;
-  padding: 1.5rem 0 4rem;
+  padding: 0 0 1.5rem;
 }
 
 .top {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem 1rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border);
+  gap: 1.25rem;
+  min-height: 4rem;
 }
 
 .mark {
-  font-weight: 600;
+  color: var(--foreground);
+  font-weight: 500;
+  font-size: 0.9375rem;
   letter-spacing: -0.03em;
   text-decoration: none;
 }
 
 .nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
+  align-items: center;
+  gap: 1.25rem;
+  margin-left: auto;
 }
 
 .nav a {
-  padding: 0.2rem 0.55rem;
-  border-radius: calc(var(--radius) - 4px);
   color: var(--muted-foreground);
+  font-size: 0.9375rem;
   text-decoration: none;
 }
 
-.nav a.current {
-  background: var(--primary);
-  color: var(--primary-foreground);
+.nav a[aria-current="page"] {
+  color: var(--foreground);
 }
 
-.theme {
+.theme-toggle {
+  position: relative;
+  width: 2.25rem;
+  height: 1.25rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--muted);
+  cursor: pointer;
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.theme-knob {
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 999px;
+  background: var(--foreground);
+}
+
+.theme-toggle.is-dark .theme-knob {
+  left: calc(100% - 0.875rem - 0.125rem);
+}
+
+.home {
+  display: grid;
+  gap: 5.5rem;
+  padding: 5rem 0 3rem;
+}
+
+.hero {
+  max-width: 40rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.home h1 {
+  margin: 0;
+  font-size: 3.25rem;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.sub {
+  margin: 1.25rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+.command {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding: 0.4rem 0.4rem 0.4rem 1rem;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.command code {
+  font-size: 0.8125rem;
+  color: var(--foreground);
+}
+
+.stage {
+  display: grid;
+  gap: 2.25rem;
+  padding: 2.5rem;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+}
+
+.label {
+  margin: 0 0 0.75rem;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+.stage .tesso-card {
+  max-width: 26rem;
+}
+
+.why h2 {
+  margin: 0 0 1.75rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.5rem;
+}
+
+.why h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.why p {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.foot {
   display: flex;
-  gap: 0.35rem;
-  margin-left: auto;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1.5rem 0 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+.foot a {
+  color: var(--muted-foreground);
+  text-decoration: none;
 }
 
 .content {
   display: grid;
   gap: 1rem;
   max-width: 40rem;
+  padding-top: 2rem;
 }
 
 h1 {
@@ -112,20 +265,6 @@ h1 {
   font-size: 2rem;
   line-height: 1.15;
   letter-spacing: -0.03em;
-}
-
-.kicker {
-  margin: 0;
-  color: var(--muted-foreground);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.lede {
-  margin: 0;
-  font-size: 1.0625rem;
 }
 
 p,
@@ -151,7 +290,8 @@ pre {
   background: var(--muted);
   color: var(--foreground);
   border-radius: calc(var(--radius) - 2px);
-  font: 400 0.8125rem/1.5 ui-monospace, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
   white-space: pre-wrap;
 }
 
@@ -165,12 +305,35 @@ pre {
   width: 100%;
 }
 
-@media (max-width: 640px) {
-  h1 {
-    font-size: 1.6rem;
+@media (max-width: 800px) {
+  .frame {
+    width: min(100% - 2rem, 75rem);
   }
 
-  .theme {
-    margin-left: 0;
+  .home {
+    gap: 3.5rem;
+    padding-top: 3rem;
+  }
+
+  .home h1 {
+    font-size: 2.25rem;
+  }
+
+  .sub {
+    font-size: 1.0625rem;
+  }
+
+  .why-grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  .stage {
+    padding: 1.5rem;
+  }
+
+  .top {
+    flex-wrap: wrap;
+    padding: 0.75rem 0;
   }
 }
