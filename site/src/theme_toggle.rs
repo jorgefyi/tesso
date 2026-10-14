@@ -8,14 +8,22 @@ pub struct ThemeToggle {
 }
 
 impl ThemeToggle {
-    fn set_light(&self) {
-        theme::set_theme("light");
-        self.theme.set("light".to_owned());
+    fn toggle(&self) {
+        let next = if self.theme.get() == "dark" {
+            "light"
+        } else {
+            "dark"
+        };
+        theme::set_theme(next);
+        self.theme.set(next.to_owned());
     }
 
-    fn set_dark(&self) {
-        theme::set_theme("dark");
-        self.theme.set("dark".to_owned());
+    fn label(&self) -> &'static str {
+        if self.theme.get() == "dark" {
+            "Switch to light theme"
+        } else {
+            "Switch to dark theme"
+        }
     }
 }
 

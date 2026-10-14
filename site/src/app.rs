@@ -1,6 +1,8 @@
 use std::rc::Rc;
 
 use fusor::prelude::*;
+use wasm_bindgen::JsCast;
+use wasm_bindgen::closure::Closure;
 
 use crate::button::Button;
 use crate::card::Card;
@@ -13,6 +15,8 @@ struct App {
     open_dialog: Rc<dyn Fn()>,
     close_dialog: Rc<dyn Fn()>,
     noop: Rc<dyn Fn()>,
+    copied: Signal<bool>,
+    copy_cmd: Rc<dyn Fn()>,
 }
 
 impl App {
@@ -29,13 +33,51 @@ impl App {
             Rc::new(move || dialog_open.set(false)) as Rc<dyn Fn()>
         };
         let noop = Rc::new(|| {}) as Rc<dyn Fn()>;
+        let copied = signal(false);
+        let copy_cmd = {
+            let copied = copied.clone();
+            Rc::new(move || {
+                let Some(window) = web_sys::window() else {
+                    return;
+                };
+                let _ = window
+                    .navigator()
+                    .clipboard()
+                    .write_text("npx tesso-ui init");
+                copied.set(true);
+                let copied = copied.clone();
+                let callback = Closure::once_into_js(move || copied.set(false));
+                let _ = window.set_timeout_with_callback_and_timeout_and_arguments_0(
+                    callback.unchecked_ref(),
+                    1600,
+                );
+            }) as Rc<dyn Fn()>
+        };
         Self {
             route,
             dialog_open,
             open_dialog,
             close_dialog,
             noop,
+            copied,
+            copy_cmd,
         }
+    }
+
+    fn copy_init(&self) {
+        (self.copy_cmd)();
+    }
+
+    fn copy_label(&self) -> &'static str {
+        if self.copied.get() { "Copied" } else { "Copy" }
+    }
+
+    fn on_docs(&self) -> bool {
+        self.route.starts_with("/docs/")
+    }
+
+    fn current_docs(&self) -> Option<&'static str> {
+        if self.on_docs() { Some("page") } else { None }
     }
 
     fn hide_home(&self) -> bool {
@@ -77,60 +119,6 @@ impl App {
                 | "/docs/dialog"
                 | "/test"
         )
-    }
-
-    fn nav_home(&self) -> bool {
-        self.route == "/"
-    }
-    fn nav_install(&self) -> bool {
-        self.route == "/docs/install"
-    }
-    fn nav_init(&self) -> bool {
-        self.route == "/docs/init"
-    }
-    fn nav_check(&self) -> bool {
-        self.route == "/docs/check"
-    }
-    fn nav_add(&self) -> bool {
-        self.route == "/docs/add"
-    }
-    fn nav_button(&self) -> bool {
-        self.route == "/docs/button"
-    }
-    fn nav_card(&self) -> bool {
-        self.route == "/docs/card"
-    }
-    fn nav_dialog(&self) -> bool {
-        self.route == "/docs/dialog"
-    }
-
-    fn current_home(&self) -> Option<&'static str> {
-        self.current(self.nav_home())
-    }
-    fn current_install(&self) -> Option<&'static str> {
-        self.current(self.nav_install())
-    }
-    fn current_init(&self) -> Option<&'static str> {
-        self.current(self.nav_init())
-    }
-    fn current_check(&self) -> Option<&'static str> {
-        self.current(self.nav_check())
-    }
-    fn current_add(&self) -> Option<&'static str> {
-        self.current(self.nav_add())
-    }
-    fn current_button(&self) -> Option<&'static str> {
-        self.current(self.nav_button())
-    }
-    fn current_card(&self) -> Option<&'static str> {
-        self.current(self.nav_card())
-    }
-    fn current_dialog(&self) -> Option<&'static str> {
-        self.current(self.nav_dialog())
-    }
-
-    fn current(&self, active: bool) -> Option<&'static str> {
-        if active { Some("page") } else { None }
     }
 
     fn button_snippet(&self) -> &'static str {

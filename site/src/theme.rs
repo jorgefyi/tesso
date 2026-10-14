@@ -1,5 +1,6 @@
 //! Theme switch: a `.dark` class on `<html>`, persisted in localStorage.
-//! web/index.html applies the stored choice, or the OS preference, before first paint.
+//! web/index.html adds `.dark` before first paint only when the stored choice is dark.
+//! With nothing stored, the page stays light.
 //! tokens.css does not read `prefers-color-scheme`; that decision stays in the app.
 
 fn root() -> Option<web_sys::Element> {
