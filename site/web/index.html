@@ -46,15 +46,17 @@
   </head>
   <body>
     <App state="{{ App::new() }}">
-      <div class="frame">
-        <header class="top">
+      <header class="top">
+        <div class="frame top-bar">
           <a class="mark" href="/">Tesso</a>
           <nav class="nav" aria-label="Site">
             <a href="/docs/install" aria-current="{{ state.current_docs() }}">Docs</a>
             <a href="https://github.com/jorgefyi/tesso" target="_blank" rel="noreferrer">GitHub</a>
           </nav>
           <ThemeToggle></ThemeToggle>
-        </header>
+        </div>
+      </header>
+      <div class="frame page">
         <main>
           <section data-page="home" hidden="{{ state.hide_home() }}">
             <div class="home">
@@ -78,15 +80,18 @@
               <div class="why">
                 <h2>Why Tesso</h2>
                 <div class="why-grid">
-                  <div>
+                  <div class="why-card">
+                    <span class="why-icon why-icon-copied" aria-hidden="true"></span>
                     <h3>Copied into your project</h3>
                     <p>Button, Card, and Dialog are files in your app. Change them there.</p>
                   </div>
-                  <div>
+                  <div class="why-card">
+                    <span class="why-icon why-icon-tokens" aria-hidden="true"></span>
                     <h3>A CSS file for tokens</h3>
                     <p>Light and dark values live in public/tokens.css, as raw oklch(). You own that file.</p>
                   </div>
-                  <div>
+                  <div class="why-card">
+                    <span class="why-icon why-icon-fusor" aria-hidden="true"></span>
                     <h3>Made for Fusor</h3>
                     <p>Add a component with tesso add. It lands in your project as source you can edit.</p>
                   </div>
