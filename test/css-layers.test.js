@@ -172,10 +172,13 @@ test("variant and size classes survive Tailwind preflight", () => {
   for (const size of SIZES) assert.match(markup, new RegExp(`tesso-button-${size}`));
   assert.match(css, /\.tesso-button-sm\b/);
   assert.match(css, /\.tesso-button-lg\b/);
+  assert.match(button.css.content, /\.tesso-button \{[^}]*font: inherit;/);
+  assert.doesNotMatch(button.css.content, /system-ui/);
   const built = fs.readFileSync(path.join(repo, "site", "public", "tesso.css"), "utf8");
   for (const variant of VARIANTS) assert.match(built, new RegExp(`\\.tesso-button-${variant}\\b`));
   assert.match(built, /\.tesso-button-sm\b/);
   assert.match(built, /\.tesso-button-lg\b/);
+  assert.match(built, /\.tesso-button \{[^}]*font: inherit;/);
 
   const danger = { tag: "button", classes: new Set(["tesso-button", "tesso-button-danger", "tesso-button-lg"]) };
   assert.equal(winning(css, danger, "padding"), "0.75rem 1.25rem");
@@ -186,6 +189,7 @@ test("variant and size classes survive Tailwind preflight", () => {
   const secondary = { tag: "button", classes: new Set(["tesso-button", "tesso-button-secondary", "tesso-button-md"]) };
   assert.equal(winning(css, secondary, "padding"), "0.5rem 1rem");
   assert.equal(winning(css, secondary, "background-color"), "var(--secondary)");
+  assert.equal(winning(css, secondary, "font-size"), "inherit");
 
   const quiet = { tag: "button", classes: new Set(["tesso-button", "tesso-button-quiet", "tesso-button-sm"]) };
   assert.equal(winning(css, quiet, "padding"), "0.25rem 0.75rem");

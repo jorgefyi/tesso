@@ -18,6 +18,7 @@ Components are fetched from a registry. The docs site is a Fusor app.
 ### Fixed
 
 - Component CSS declares `@layer properties, theme, base, components, utilities` before its rules. Tailwind's preflight was loading afterward and, because `components` had been created first, it wiped padding, button fills, radii, and sizes.
+- Button's base rule uses `font: inherit`, so it takes the page font instead of `system-ui`.
 
 ### Changed
 
