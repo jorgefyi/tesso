@@ -46,7 +46,9 @@ jobs:
           fusor install
           fusor build
 
-  # Current Fusor CLI from main, building the same 0.1.6 example.
+  # Current Fusor CLI from main. Since 0.1.7 the CLI refuses an app whose
+  # fusor-* crates are a different version, so move those crates up to the
+  # CLI before building. The committed apps stay on 0.1.6 for the other job.
   fusor-main:
     runs-on: ubuntu-latest
     steps:
@@ -61,6 +63,13 @@ jobs:
       - run: npm ci
       - name: Install Fusor CLI from main
         run: cargo install --git https://github.com/fusor-rs/fusor fusor-cli
+      - name: Align Fusor crates with the CLI
+        run: |
+          version=$(fusor --version | awk 'NR==1 { print $2 }')
+          for dir in examples/counter-themed site; do
+            sed -i "s/version = \"0.1.6\"/version = \"$version\"/" "$dir/Cargo.toml"
+            cargo update --manifest-path "$dir/Cargo.toml"
+          done
       - name: Build the example
         working-directory: examples/counter-themed
         run: |
