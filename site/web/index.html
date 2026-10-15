@@ -46,6 +46,7 @@
   </head>
   <body>
     <App state="{{ App::new() }}">
+      <div class="shell">
       <header class="top">
         <div class="frame top-bar">
           <a class="mark" href="/">Tesso</a>
@@ -238,6 +239,7 @@ fusor dev</pre>
             <Button variant="primary" size="md" on_press="{{ state.close_dialog.clone() }}">Close</Button>
           </template>
         </Dialog>
+      </div>
       </div>
     </App>
   </body>
