@@ -299,7 +299,7 @@ No multi-brand themes, no Figma sync, no Rust token runtime, and no crates.io Fu
 
 ## Site
 
-[`site/`](site) is a Fusor app that uses Tesso: `public/tokens.css`, Button, Card, and Dialog, and `.dark` on `<html>`. The landing page and the docs for install, init, check, add, and each component are one HTML file. Rust reads `window.location.pathname` and hides the other sections. A full page load, plus the Vercel rewrite, is the router.
+[`site/`](site) is a Fusor app that uses Tesso: `public/tokens.css`, Button, Card, and Dialog, and `.dark` on `<html>`. The landing page and the docs for install, init, check, add, and each component are one HTML file. Rust reads `window.location.pathname` and hides the other sections. A full page load is the router. After `fusor build`, `node split-not-found.mjs` copies `dist/index.html` to `dist/404.html` and removes the not-found section from `index.html`, so that copy is not in the other pages. Tag names in the docs, such as `<html>` and `<dialog>`, are HTML-escaped so they stay text.
 
 `[package.metadata.fusor]` sets `assets = { "/" = "public" }` and `assets-build = ["node", "build-registry.mjs"]`. That hook copies `registry/*.json` to `site/public/r/` and writes `index.json`, so the built site serves `https://tesso.fyi/r/button.json`. The generated `public/r/` directory is not committed.
 
@@ -309,7 +309,7 @@ Component templates do not contain inline SVG. [Fusor #38](https://github.com/fu
 
 `git.deploymentEnabled` is `false` in both [`vercel.json`](vercel.json) and [`site/vercel.json`](site/vercel.json). That turns off Vercel's automatic Git deployments, so a push to main does not deploy to production. Production is a `v*` tag. Pull requests get a preview. Both use `vercel build` and `vercel deploy --prebuilt` from [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
 
-The Vercel project root is `site`. `site/vercel.json` sets `outputDirectory` to `dist` and rewrites every path except `/r/` to `/index.html`, so `/docs/install` serves the app and `/r/button.json` stays the registry file. The root `vercel.json` is the same rule for an import that has not set the root directory yet, with output `site/dist`.
+The Vercel project root is `site`. `site/vercel.json` sets `outputDirectory` to `dist` and rewrites `/docs/install`, `/docs/init`, `/docs/check`, `/docs/add`, `/docs/button`, `/docs/card`, `/docs/dialog`, and `/test` to `/index.html`. A file that exists, including `/r/button.json`, is served as itself. Any other path is `404.html`. The root `vercel.json` is the same rule for an import that has not set the root directory yet, with output `site/dist`.
 
 The deploy job checks `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`. If any one is missing it prints a notice and exits 0, so CI stays green until those secrets exist. CI installs Fusor 0.1.7 with `install.sh` and also builds on Fusor main.
 

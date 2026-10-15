@@ -107,19 +107,6 @@ impl App {
     fn hide_test(&self) -> bool {
         self.route != "/test"
     }
-    fn hide_missing(&self) -> bool {
-        matches!(
-            self.route.as_str(),
-            "/" | "/docs/install"
-                | "/docs/init"
-                | "/docs/check"
-                | "/docs/add"
-                | "/docs/button"
-                | "/docs/card"
-                | "/docs/dialog"
-                | "/test"
-        )
-    }
 
     fn button_snippet(&self) -> &'static str {
         "<Button variant=\"primary\" size=\"md\" on_press=\"{{ state.save.clone() }}\">Save</Button>"
