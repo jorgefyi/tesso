@@ -7,11 +7,7 @@
       (function () {
         try {
           var stored = localStorage.getItem("theme");
-          var dark =
-            stored === "dark" ||
-            (stored !== "light" &&
-              window.matchMedia("(prefers-color-scheme: dark)").matches);
-          if (dark) document.documentElement.classList.add("dark");
+          if (stored === "dark") document.documentElement.classList.add("dark");
         } catch (e) {}
       })();
     </script>
@@ -37,52 +33,74 @@
         document.head.appendChild(style);
       })();
     </script>
+    <link
+      rel="preload"
+      href="/fonts/InterVariable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="stylesheet" href="/tokens.css" />
     <link rel="stylesheet" href="/tesso.css" />
     <title>Tesso</title>
   </head>
   <body>
     <App state="{{ App::new() }}">
-      <div class="frame">
-        <header class="top">
+      <div class="shell">
+      <header class="top">
+        <div class="frame top-bar">
           <a class="mark" href="/">Tesso</a>
-          <nav class="nav" aria-label="Docs">
-            <a href="/" class:current="state.nav_home()" aria-current="{{ state.current_home() }}">Home</a>
-            <a href="/docs/install" class:current="state.nav_install()" aria-current="{{ state.current_install() }}">Install</a>
-            <a href="/docs/init" class:current="state.nav_init()" aria-current="{{ state.current_init() }}">Init</a>
-            <a href="/docs/check" class:current="state.nav_check()" aria-current="{{ state.current_check() }}">Check</a>
-            <a href="/docs/add" class:current="state.nav_add()" aria-current="{{ state.current_add() }}">Add</a>
-            <a href="/docs/button" class:current="state.nav_button()" aria-current="{{ state.current_button() }}">Button</a>
-            <a href="/docs/card" class:current="state.nav_card()" aria-current="{{ state.current_card() }}">Card</a>
-            <a href="/docs/dialog" class:current="state.nav_dialog()" aria-current="{{ state.current_dialog() }}">Dialog</a>
+          <nav class="nav" aria-label="Site">
+            <a href="/docs/install" aria-current="{{ state.current_docs() }}">Docs</a>
+            <a href="https://github.com/jorgefyi/tesso" target="_blank" rel="noreferrer">GitHub</a>
           </nav>
           <ThemeToggle></ThemeToggle>
-        </header>
-        <main class="content">
+        </div>
+      </header>
+      <div class="frame page">
+        <main>
           <section data-page="home" hidden="{{ state.hide_home() }}">
-            <p class="kicker">For Fusor</p>
-            <h1>Components and tokens you own</h1>
-            <p class="lede">
-              Tesso copies accessible components and a plain CSS token file into a Fusor project.
-              You edit that source. The npm package is tesso-ui. The binary is tesso.
-            </p>
-            <div class="row">
-              <a class="tesso-button tesso-button-primary tesso-button-md" href="/docs/install">Install</a>
-              <a class="tesso-button tesso-button-secondary tesso-button-md" href="/docs/add">Add a component</a>
-            </div>
-            <Card title="Button, Card, and Dialog" description="This site is a Fusor app. These three components were added with tesso add.">
-              <div class="row">
-                <Button variant="primary" size="md" on_press="{{ state.open_dialog.clone() }}">Open dialog</Button>
-                <Button variant="secondary" size="md" on_press="{{ state.noop.clone() }}">Secondary</Button>
-                <Button variant="quiet" size="md" on_press="{{ state.noop.clone() }}">Quiet</Button>
-                <Button variant="danger" size="md" on_press="{{ state.noop.clone() }}">Danger</Button>
+            <div class="home">
+              <div class="hero">
+                <h1>A design system starter for Fusor.</h1>
+                <p class="sub">Composable, accessible components and tokens, yours to edit from day one.</p>
+                <div class="hero-actions">
+                  <div class="command">
+                    <code>npx tesso-ui init</code>
+                    <button
+                      type="button"
+                      class="tesso-button tesso-button-primary tesso-button-sm"
+                      on:click="state.copy_init()"
+                    >
+                      {{ state.copy_label() }}
+                    </button>
+                  </div>
+                  <a class="tesso-button tesso-button-secondary tesso-button-sm" href="/docs/install">Read the docs</a>
+                </div>
               </div>
-              <p class="meta">Light values sit on :root. Dark values sit on .dark. Both are raw oklch().</p>
-              <template slot="footer">
-                <p class="meta">public/tokens.css is the file the project owns.</p>
-              </template>
-            </Card>
+              <div class="why">
+                <h2>Why Tesso</h2>
+                <div class="why-grid">
+                  <div class="why-card">
+                    <span class="why-icon why-icon-copied" aria-hidden="true"></span>
+                    <h3>Copied into your project</h3>
+                    <p>Button, Card, and Dialog are files in your app. Change them there.</p>
+                  </div>
+                  <div class="why-card">
+                    <span class="why-icon why-icon-tokens" aria-hidden="true"></span>
+                    <h3>A CSS file for tokens</h3>
+                    <p>Light and dark values live in public/tokens.css, as raw oklch(). You own that file.</p>
+                  </div>
+                  <div class="why-card">
+                    <span class="why-icon why-icon-fusor" aria-hidden="true"></span>
+                    <h3>Made for Fusor</h3>
+                    <p>Add a component with tesso add. It lands in your project as source you can edit.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
+          <div class="content">
 
           <section data-page="install" hidden="{{ state.hide_install() }}">
             <h1>Install</h1>
@@ -205,7 +223,12 @@ fusor dev</pre>
             <p>That path is not a docs page.</p>
             <a class="tesso-button tesso-button-primary tesso-button-md" href="/">Back home</a>
           </section>
+          </div>
         </main>
+        <footer class="foot">
+          <span>Tesso</span>
+          <a href="https://github.com/jorgefyi/tesso" target="_blank" rel="noreferrer">GitHub</a>
+        </footer>
         <Dialog
           open="{{ state.dialog_open.clone() }}"
           title="Dialog"
@@ -216,6 +239,7 @@ fusor dev</pre>
             <Button variant="primary" size="md" on_press="{{ state.close_dialog.clone() }}">Close</Button>
           </template>
         </Dialog>
+      </div>
       </div>
     </App>
   </body>
