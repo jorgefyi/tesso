@@ -102,8 +102,8 @@ code {
 }
 
 .dark .top {
-  background-color: color-mix(in oklch, oklch(100% 0 0) 7%, transparent);
-  border-bottom-color: color-mix(in oklch, oklch(100% 0 0) 18%, transparent);
+  background-color: color-mix(in oklch, var(--foreground) 7%, transparent);
+  border-bottom-color: color-mix(in oklch, var(--foreground) 18%, transparent);
 }
 
 .top-bar {
@@ -169,8 +169,10 @@ code {
   left: calc(100% - 0.875rem - 0.125rem);
 }
 
-.tesso-button {
+button.tesso-button,
+a.tesso-button {
   border-radius: 999px;
+  font-size: inherit;
 }
 
 .home {
@@ -230,6 +232,7 @@ code {
 }
 
 .command code {
+  padding-left: 0.75rem;
   font-size: 0.8125rem;
   line-height: 1;
   color: var(--foreground);
@@ -271,7 +274,7 @@ code {
 }
 
 .dark .why-card {
-  border-color: oklch(58% 0.012 260);
+  border-color: oklch(42% 0.012 260);
 }
 
 .why-icon {
@@ -307,7 +310,7 @@ code {
 
 .why h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 
@@ -368,7 +371,7 @@ pre {
   overflow: auto;
   background: var(--muted);
   color: var(--foreground);
-  border-radius: calc(var(--radius) - 2px);
+  border-radius: var(--radius);
   font-size: 0.8125rem;
   line-height: 1.5;
   white-space: pre-wrap;
