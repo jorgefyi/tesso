@@ -59,41 +59,20 @@
           <section data-page="home" hidden="{{ state.hide_home() }}">
             <div class="home">
               <div class="hero">
-                <h1>Components and a plain CSS token file you own.</h1>
-                <p class="sub">Tesso copies them into a Fusor project. You edit the source.</p>
-                <div class="command">
-                  <code>npx tesso-ui init</code>
-                  <button
-                    type="button"
-                    class="tesso-button tesso-button-primary tesso-button-sm"
-                    on:click="state.copy_init()"
-                  >
-                    {{ state.copy_label() }}
-                  </button>
-                </div>
-              </div>
-              <div class="stage">
-                <div>
-                  <p class="label">Button</p>
-                  <div class="row">
-                    <Button variant="primary" size="md" on_press="{{ state.noop.clone() }}">Primary</Button>
-                    <Button variant="secondary" size="md" on_press="{{ state.noop.clone() }}">Secondary</Button>
-                    <Button variant="quiet" size="md" on_press="{{ state.noop.clone() }}">Quiet</Button>
-                    <Button variant="danger" size="md" on_press="{{ state.noop.clone() }}">Danger</Button>
+                <h1>A starter for your design system.</h1>
+                <p class="sub">Components and a plain CSS token file you own, for Fusor.</p>
+                <div class="hero-actions">
+                  <div class="command">
+                    <code>npx tesso-ui init</code>
+                    <button
+                      type="button"
+                      class="tesso-button tesso-button-primary tesso-button-sm"
+                      on:click="state.copy_init()"
+                    >
+                      {{ state.copy_label() }}
+                    </button>
                   </div>
-                </div>
-                <div>
-                  <p class="label">Card</p>
-                  <Card title="Card" description="Title, description, and a footer.">
-                    <p>The body is the default slot.</p>
-                    <template slot="footer">
-                      <p class="meta">Footer</p>
-                    </template>
-                  </Card>
-                </div>
-                <div>
-                  <p class="label">Dialog</p>
-                  <Button variant="primary" size="md" on_press="{{ state.open_dialog.clone() }}">Open dialog</Button>
+                  <a class="tesso-button tesso-button-secondary tesso-button-sm" href="/docs/install">Docs</a>
                 </div>
               </div>
               <div class="why">
@@ -109,7 +88,7 @@
                   </div>
                   <div>
                     <h3>Made for Fusor</h3>
-                    <p>Add a component with tesso add. The same components are on this page.</p>
+                    <p>Add a component with tesso add. It lands in your project as source you can edit.</p>
                   </div>
                 </div>
               </div>
