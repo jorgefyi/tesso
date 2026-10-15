@@ -85,10 +85,28 @@ code {
 .frame {
   width: min(100% - 3rem, 75rem);
   margin: 0 auto;
-  padding: 0 0 1.5rem;
+}
+
+.page {
+  padding-bottom: 1.5rem;
 }
 
 .top {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: color-mix(in oklch, var(--background) 72%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+}
+
+.dark .top {
+  background-color: color-mix(in oklch, oklch(100% 0 0) 7%, transparent);
+  border-bottom-color: color-mix(in oklch, oklch(100% 0 0) 18%, transparent);
+}
+
+.top-bar {
   display: flex;
   align-items: center;
   gap: 1.25rem;
@@ -151,15 +169,25 @@ code {
   left: calc(100% - 0.875rem - 0.125rem);
 }
 
+.tesso-button {
+  border-radius: 999px;
+}
+
 .home {
   display: grid;
   gap: 5.5rem;
-  padding: 5rem 0 3rem;
+  padding: 0 0 3rem;
 }
 
 .hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   max-width: 40rem;
+  min-height: calc(100svh - 4rem);
   margin: 0 auto;
+  padding: 2rem 0;
   text-align: center;
 }
 
@@ -188,16 +216,16 @@ code {
 }
 
 .command {
-  --command-pad: 0.25rem;
+  --command-pad: 0.5rem;
+  --command-radius: 999px;
   display: flex;
   align-items: center;
-  gap: var(--command-pad);
+  gap: 0.75rem;
   margin: 0;
   padding: var(--command-pad);
-  padding-left: 0.875rem;
   background: var(--muted);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--command-radius);
   line-height: 1;
 }
 
@@ -208,11 +236,11 @@ code {
 }
 
 .command .tesso-button {
-  border-radius: calc(var(--radius) - var(--command-pad));
+  border-radius: calc(var(--command-radius) - var(--command-pad));
 }
 
-.hero-actions > a.tesso-button {
-  border-radius: var(--radius);
+.why {
+  text-align: center;
 }
 
 .why h2 {
@@ -220,16 +248,65 @@ code {
   font-size: 1.25rem;
   font-weight: 500;
   letter-spacing: -0.02em;
+  text-align: center;
 }
 
 .why-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 2.5rem;
+  gap: 1.25rem;
+}
+
+.why-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1.5rem 1.25rem;
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.dark .why-card {
+  border-color: oklch(58% 0.012 260);
+}
+
+.why-icon {
+  display: block;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+  background-color: currentColor;
+  color: var(--foreground);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  mask-mode: alpha;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+
+.why-icon-copied {
+  mask-image: url("/icons/copied.svg");
+  -webkit-mask-image: url("/icons/copied.svg");
+}
+
+.why-icon-tokens {
+  mask-image: url("/icons/tokens.svg");
+  -webkit-mask-image: url("/icons/tokens.svg");
+}
+
+.why-icon-fusor {
+  mask-image: url("/icons/fusor.svg");
+  -webkit-mask-image: url("/icons/fusor.svg");
 }
 
 .why h3 {
-  margin: 0 0 0.4rem;
+  margin: 0;
   font-size: 1rem;
   font-weight: 500;
 }
@@ -314,7 +391,7 @@ pre {
 
   .home {
     gap: 3.5rem;
-    padding-top: 3rem;
+    padding-top: 0;
   }
 
   .home h1 {
@@ -330,7 +407,7 @@ pre {
     gap: 1.75rem;
   }
 
-  .top {
+  .top-bar {
     flex-wrap: wrap;
     padding: 0.75rem 0;
   }
