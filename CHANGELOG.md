@@ -19,6 +19,7 @@ Components are fetched from a registry. The docs site is a Fusor app.
 
 - Component CSS declares `@layer properties, theme, base, components, utilities` before its rules. Tailwind's preflight was loading afterward and, because `components` had been created first, it wiped padding, button fills, radii, and sizes.
 - Button's base rule uses `font: inherit`, so it takes the page font instead of `system-ui`.
+- The Fusor main CI job sets the app's Fusor crates to the CLI version before building. Fusor 0.1.7 will not build an app whose `fusor-build` is 0.1.6.
 
 ### Changed
 
