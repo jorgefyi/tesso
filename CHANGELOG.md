@@ -13,7 +13,7 @@ Components are fetched from a registry. The docs site is a Fusor app.
 - A target file that already exists and differs is skipped. `add` says so and exits 0. `--diff` prints the diff and does not write. `--force` overwrites. `--overwrite` is the same as `--force`.
 - `site/` is a Fusor app that uses `tokens.css`, Button, Card, and Dialog. It has a landing page and docs for install, init, check, add, and each component. An `assets-build` hook copies `registry/` to `/r/*.json` and writes an index for `tesso list`.
 - `vercel.json` sets `git.deploymentEnabled` to false, so a push does not deploy, including a push to main. GitHub Actions deploys production on `v*` tags and a preview on pull requests with `vercel build` and `vercel deploy --prebuilt`. The job prints a notice and stays green when `VERCEL_TOKEN`, `VERCEL_ORG_ID`, or `VERCEL_PROJECT_ID` is missing.
-- CI builds the site on Fusor 0.1.6 and on Fusor main.
+- CI installs Fusor 0.1.7 with `install.sh` and also builds on Fusor main.
 
 ### Fixed
 
@@ -22,6 +22,9 @@ Components are fetched from a registry. The docs site is a Fusor app.
 
 ### Changed
 
+- Button's `variant` and `size` are optional. They default to `primary` and `md` (`#[input(default = ...)]`, Fusor 0.1.7).
+- The minimum Fusor version is 0.1.7, in the registry files and in the example and site apps. Dialog's hand-written inputs derive `Inputs`, which Fusor 0.1.7 requires.
+- CI and the deploy workflow install the Fusor CLI with `install.sh` pinned to 0.1.7. Fusor 0.1.7 fixes the Linux musl Tailwind download.
 - `tesso init` records the devDependency `tesso-ui` as `^0.4.1`.
 
 ## 0.4.0

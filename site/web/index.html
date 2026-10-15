@@ -98,7 +98,7 @@
 
           <section data-page="install" hidden="{{ state.hide_install() }}">
             <h1>Install</h1>
-            <p>Node 20 or newer. The Fusor app stays Node-free until you opt in. Tesso requires Fusor 0.1.6 or newer.</p>
+            <p>Node 20 or newer. The Fusor app stays Node-free until you opt in. Tesso requires Fusor 0.1.7 or newer.</p>
             <pre>npm install --save-dev tesso-ui
 npx tesso-ui init
 npx tesso-ui add button
@@ -149,7 +149,7 @@ fusor dev</pre>
 
           <section data-page="button" hidden="{{ state.hide_button() }}">
             <h1>Button</h1>
-            <p><code>variant</code> is <code>primary</code>, <code>secondary</code>, <code>quiet</code>, or <code>danger</code>. <code>size</code> is <code>sm</code>, <code>md</code>, or <code>lg</code>. <code>on_press</code> is the callback. Focus draws a ring from <code>--ring</code>.</p>
+            <p><code>variant</code> is <code>primary</code> (the default), <code>secondary</code>, <code>quiet</code>, or <code>danger</code>. <code>size</code> is <code>sm</code>, <code>md</code> (the default), or <code>lg</code>. Omit either one and the default is used. <code>on_press</code> is the callback. Focus draws a ring from <code>--ring</code>.</p>
             <p>There's no <code>--destructive-foreground</code>. The danger button uses <code>--primary-foreground</code> for its text.</p>
             <div class="row">
               <Button variant="primary" size="sm" on_press="{{ state.noop.clone() }}">Small</Button>

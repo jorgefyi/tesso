@@ -17,7 +17,7 @@
     "--radius"
   ],
   "tessoUi": "0.4.1",
-  "fusor": "0.1.6",
+  "fusor": "0.1.7",
   "files": [
     {
       "target": "web/components/button.html",
@@ -25,7 +25,7 @@
     },
     {
       "target": "src/button.rs",
-      "content": "//! Button copied by `tesso add button`.\n//!\n//! Fusor component tags do not accept `on:click` (that attribute is only for\n//! native elements, and the name is not a snake_case input). The page passes\n//! an `on_press` callback instead. `variant` and `size` are static strings:\n//! `variant=\"primary\"` and `size=\"md\"`.\n//!\n//! Variants: primary, secondary, quiet, danger.\n//! Sizes: sm, md, lg.\n\nuse std::rc::Rc;\n\nuse fusor::prelude::*;\n\n#[derive(FromInputs)]\npub struct Button {\n    #[input]\n    variant: &'static str,\n    #[input]\n    size: &'static str,\n    #[input]\n    on_press: Rc<dyn Fn()>,\n}\n\nimpl Button {\n    fn press(&self) {\n        (self.on_press)();\n    }\n}\n\nfusor::template!(\"web/components/button.html\");\n"
+      "content": "//! Button copied by `tesso add button`.\n//!\n//! Fusor component tags do not accept `on:click` (that attribute is only for\n//! native elements, and the name is not a snake_case input). The page passes\n//! an `on_press` callback instead. `variant` and `size` are static strings.\n//! Omit them and they default to `primary` and `md`.\n//!\n//! Variants: primary, secondary, quiet, danger.\n//! Sizes: sm, md, lg.\n\nuse std::rc::Rc;\n\nuse fusor::prelude::*;\n\n#[derive(FromInputs)]\npub struct Button {\n    #[input(default = \"primary\")]\n    variant: &'static str,\n    #[input(default = \"md\")]\n    size: &'static str,\n    #[input]\n    on_press: Rc<dyn Fn()>,\n}\n\nimpl Button {\n    fn press(&self) {\n        (self.on_press)();\n    }\n}\n\nfusor::template!(\"web/components/button.html\");\n"
     }
   ],
   "css": {
