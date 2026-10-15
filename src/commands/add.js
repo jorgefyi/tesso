@@ -77,7 +77,8 @@ export async function addCommand(cwd, names, { stdout, stderr, force, diff, regi
   lines.push("");
   lines.push("Wire the pieces that were written:");
   lines.push('  <link rel="stylesheet" href="/tesso.css" />');
-  lines.push('  <Button variant="primary" size="md" on_press="{{ state.save.clone() }}">Save</Button>');
+  lines.push('  <Button on_press="{{ state.save.clone() }}">Save</Button>');
+  lines.push("  variant defaults to primary and size defaults to md.");
   lines.push('  <Card title="Title" description="Supporting text."><template slot="footer">Footer</template></Card>');
   lines.push('  <Dialog open="{{ state.dialog_open.clone() }}" title="Title" description="What this dialog does."><template slot="footer">Actions</template></Dialog>');
   lines.push("");

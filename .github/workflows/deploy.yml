@@ -39,9 +39,11 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
 
-      - name: Install Fusor CLI 0.1.6
+      - name: Install Fusor CLI 0.1.7
         if: steps.gate.outputs.skip != 'true'
-        run: cargo install fusor-cli --version 0.1.6
+        run: |
+          curl -fsSL https://fusor.build/install.sh | sh -s -- v0.1.7
+          echo "$HOME/.fusor/bin" >> "$GITHUB_PATH"
 
       - name: Build the site
         if: steps.gate.outputs.skip != 'true'

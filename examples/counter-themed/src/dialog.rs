@@ -23,6 +23,7 @@ use wasm_bindgen::{JsCast, JsValue};
 
 use crate::dialog_a11y::{self, OpenerChoice, OpenerFacts};
 
+#[derive(fusor::Inputs)]
 pub struct DialogInputs {
     pub open: Signal<bool>,
     pub title: &'static str,

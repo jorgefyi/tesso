@@ -2,8 +2,8 @@
 //!
 //! Fusor component tags do not accept `on:click` (that attribute is only for
 //! native elements, and the name is not a snake_case input). The page passes
-//! an `on_press` callback instead. `variant` and `size` are static strings:
-//! `variant="primary"` and `size="md"`.
+//! an `on_press` callback instead. `variant` and `size` are static strings.
+//! Omit them and they default to `primary` and `md`.
 //!
 //! Variants: primary, secondary, quiet, danger.
 //! Sizes: sm, md, lg.
@@ -14,9 +14,9 @@ use fusor::prelude::*;
 
 #[derive(FromInputs)]
 pub struct Button {
-    #[input]
+    #[input(default = "primary")]
     variant: &'static str,
-    #[input]
+    #[input(default = "md")]
     size: &'static str,
     #[input]
     on_press: Rc<dyn Fn()>,

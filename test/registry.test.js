@@ -20,7 +20,14 @@ test("each component is one JSON file and the old source copies are gone", () =>
   const dialog = validateComponent(load("dialog"));
   assert.deepEqual(dialog.dependencies, ["button"]);
   assert.equal(dialog.tessoUi, "0.4.1");
-  assert.equal(dialog.fusor, "0.1.6");
+  assert.equal(dialog.fusor, "0.1.7");
+  assert.equal(load("button").fusor, "0.1.7");
+  assert.equal(load("card").fusor, "0.1.7");
+  const button = load("button").files.find((file) => file.target.endsWith("button.rs")).content;
+  assert.match(button, /#\[input\(default = "primary"\)\]\s+variant: &'static str,/);
+  assert.match(button, /#\[input\(default = "md"\)\]\s+size: &'static str,/);
+  const dialogRust = load("dialog").files.find((file) => file.target.endsWith("dialog.rs")).content;
+  assert.match(dialogRust, /#\[derive\(fusor::Inputs\)\]\s+pub struct DialogInputs/);
 });
 
 test("component css uses plain variables inside @layer components", () => {
