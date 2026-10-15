@@ -11,8 +11,8 @@ const HELP = `tesso — plain CSS tokens and components for Fusor
 Usage:
   tesso init [--force] [--migrate] [--no-install]
   tesso check
-  tesso add <component...> [--overwrite]
-  tesso list
+  tesso add <component...> [--registry <url-or-folder>] [--diff] [--force]
+  tesso list [--registry <url-or-folder>]
 
 Commands:
   init    Write tesso.config.json and the tokens CSS file when that file
@@ -20,17 +20,20 @@ Commands:
           --migrate renames matching --ft-* variables in project files.
   check   Read the tokens CSS file. Require every token, valid oklch(),
           and WCAG AA contrast for foreground and background pairs.
-  add     Copy component source into this Fusor app
-  list    Show the components in the built-in registry
+  add     Copy components from the registry into this Fusor app.
+          The default registry is https://tesso.fyi/r/. A file that already
+          differs is skipped. --diff prints the diff. --force overwrites.
+  list    Show the components in the registry
 
 Options:
-  --cwd <dir>     App root (default: current directory)
-  --force         init: replace an existing tokens CSS file
-  --migrate       init: rename matching --ft-* variables
-  --no-install    Accepted. init does not install packages
-  --overwrite     add: replace component files that already exist
-  --help          Show this help
-  --version       Print ${PACKAGE_VERSION}
+  --cwd <dir>             App root (default: current directory)
+  --registry <location>   Registry base URL or a local folder of component JSON
+  --force                 init: replace tokens.css. add: overwrite differing files
+  --diff                  add: print diffs and do not write unless --force is set
+  --migrate               init: rename matching --ft-* variables
+  --no-install            Accepted. init does not install packages
+  --help                  Show this help
+  --version               Print ${PACKAGE_VERSION}
 `;
 
 export async function run(argv, io = {}) {
@@ -60,11 +63,21 @@ export async function run(argv, io = {}) {
       return 0;
     }
     if (parsed.command === "list") {
-      listCommand(readOptionalConfig(parsed.cwd, stderr), { stdout });
+      await listCommand(readOptionalConfig(parsed.cwd, stderr), {
+        stdout,
+        cwd: parsed.cwd,
+        registry: parsed.registry,
+      });
       return 0;
     }
     if (parsed.command === "add") {
-      addCommand(parsed.cwd, parsed.args, { stdout, stderr, overwrite: parsed.overwrite });
+      await addCommand(parsed.cwd, parsed.args, {
+        stdout,
+        stderr,
+        force: parsed.force,
+        diff: parsed.diff,
+        registry: parsed.registry,
+      });
       return 0;
     }
     stderr.write(`Unknown command "${parsed.command ?? ""}".\n\n${HELP}`);
@@ -87,9 +100,10 @@ function parseArgs(argv, defaultCwd) {
   let cwd = defaultCwd ?? process.cwd();
   let help = false;
   let version = false;
-  let overwrite = false;
   let migrate = false;
   let force = false;
+  let diff = false;
+  let registry;
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -97,10 +111,17 @@ function parseArgs(argv, defaultCwd) {
     else if (arg === "--version" || arg === "-v") version = true;
     else if (arg === "--no-install") {
       /* init no longer installs packages */
-    } else if (arg === "--overwrite") overwrite = true;
+    } else if (arg === "--overwrite") force = true;
     else if (arg === "--migrate") migrate = true;
     else if (arg === "--force") force = true;
-    else if (arg === "--cwd") {
+    else if (arg === "--diff") diff = true;
+    else if (arg === "--registry") {
+      const value = argv[++i];
+      if (!value) throw new Error("--registry needs a URL or a folder.");
+      registry = value;
+    } else if (arg.startsWith("--registry=")) {
+      registry = arg.slice("--registry=".length);
+    } else if (arg === "--cwd") {
       const value = argv[++i];
       if (!value) throw new Error("--cwd needs a directory.");
       cwd = path.resolve(value);
@@ -116,8 +137,9 @@ function parseArgs(argv, defaultCwd) {
     cwd,
     help,
     version,
-    overwrite,
     migrate,
     force,
+    diff,
+    registry,
   };
 }

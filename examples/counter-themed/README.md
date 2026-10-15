@@ -1,6 +1,6 @@
 # Shift counter
 
-A Fusor 0.1.6 app that shows how Tesso lands in a real project. Dependencies are `fusor-core`, `fusor-components`, and `fusor-build` 0.1.6 from crates.io. `Cargo.toml` sets `assets = { "/" = "public" }` and `tailwind = "web/app.css"`. The counter uses copied Button, Card, and Dialog components. Light values are on `:root`. Dark values are on `.dark`.
+A Fusor 0.1.7 app that shows how Tesso lands in a real project. Dependencies are `fusor-core`, `fusor-components`, and `fusor-build` 0.1.7 from crates.io. `Cargo.toml` sets `assets = { "/" = "public" }` and `tailwind = "web/app.css"`. The counter uses copied Button, Card, and Dialog components. Light values are on `:root`. Dark values are on `.dark`.
 
 `public/tokens.css` is the token file this app owns, and `public/tesso.css` is the copied component CSS. Both are committed. A copy of this folder still has a theme if Node is not installed.
 
@@ -23,7 +23,7 @@ The page components were copied with `tesso add button card dialog`:
 
 `src/app.rs` imports `Button`, `Card`, and `Dialog`. The card body is the default child. A `<template slot="footer">` fills `<Children name="footer">` on the card and on each dialog. Reset opens a dialog. Why, inside that dialog, opens a second one on top. Because that click opens one dialog from another, Escape closes only the top dialog. Cancel, the close button, a click outside the panel, and Escape set that dialog's signal to false. Confirm sets the count to zero and closes. Focus returns to the control that opened the dialog.
 
-Named children and the optional `aria-labelledby` / `aria-describedby` attributes need Fusor 0.1.6 or newer. Button, Card, and Dialog all build on that release.
+Named children and the optional `aria-labelledby` / `aria-describedby` attributes need Fusor 0.1.6 or newer. Button's `variant` and `size` default to `primary` and `md`, which needs Fusor 0.1.7. Button, Card, and Dialog all build on 0.1.7.
 
 ## Commands
 
@@ -37,7 +37,7 @@ npm run preview
 
 Open http://127.0.0.1:44731 and switch Light / Dark. The page reads the same `public/tokens.css` Fusor would copy. The preview is a static stand-in of the three components. Tailwind utilities such as `bg-primary` appear after `fusor build`.
 
-From this folder, after `npm install` here (the `file:../..` dependency) and the Fusor 0.1.6 CLI:
+From this folder, after `npm install` here (the `file:../..` dependency) and the Fusor 0.1.7 CLI:
 
 ```bash
 npx tesso-ui check

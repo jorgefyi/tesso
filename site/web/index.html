@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("theme");
+          var dark =
+            stored === "dark" ||
+            (stored !== "light" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+        } catch (e) {}
+      })();
+    </script>
+    <script>
+      (function () {
+        var path = location.pathname.replace(/\/+$/, "") || "/";
+        if (path === "/index.html") path = "/";
+        var known = {
+          "/": "home",
+          "/docs/install": "install",
+          "/docs/init": "init",
+          "/docs/check": "check",
+          "/docs/add": "add",
+          "/docs/button": "button",
+          "/docs/card": "card",
+          "/docs/dialog": "dialog",
+          "/test": "test",
+        };
+        var page = known[path] || "missing";
+        var style = document.createElement("style");
+        style.textContent =
+          '[data-page]{display:none}[data-page="' + page + '"]{display:block}';
+        document.head.appendChild(style);
+      })();
+    </script>
+    <link rel="stylesheet" href="/tokens.css" />
+    <link rel="stylesheet" href="/tesso.css" />
+    <title>Tesso</title>
+  </head>
+  <body>
+    <App state="{{ App::new() }}">
+      <div class="frame">
+        <header class="top">
+          <a class="mark" href="/">Tesso</a>
+          <nav class="nav" aria-label="Docs">
+            <a href="/" class:current="state.nav_home()" aria-current="{{ state.current_home() }}">Home</a>
+            <a href="/docs/install" class:current="state.nav_install()" aria-current="{{ state.current_install() }}">Install</a>
+            <a href="/docs/init" class:current="state.nav_init()" aria-current="{{ state.current_init() }}">Init</a>
+            <a href="/docs/check" class:current="state.nav_check()" aria-current="{{ state.current_check() }}">Check</a>
+            <a href="/docs/add" class:current="state.nav_add()" aria-current="{{ state.current_add() }}">Add</a>
+            <a href="/docs/button" class:current="state.nav_button()" aria-current="{{ state.current_button() }}">Button</a>
+            <a href="/docs/card" class:current="state.nav_card()" aria-current="{{ state.current_card() }}">Card</a>
+            <a href="/docs/dialog" class:current="state.nav_dialog()" aria-current="{{ state.current_dialog() }}">Dialog</a>
+          </nav>
+          <ThemeToggle></ThemeToggle>
+        </header>
+        <main class="content">
+          <section data-page="home" hidden="{{ state.hide_home() }}">
+            <p class="kicker">For Fusor</p>
+            <h1>Components and tokens you own</h1>
+            <p class="lede">
+              Tesso copies accessible components and a plain CSS token file into a Fusor project.
+              You edit that source. The npm package is tesso-ui. The binary is tesso.
+            </p>
+            <div class="row">
+              <a class="tesso-button tesso-button-primary tesso-button-md" href="/docs/install">Install</a>
+              <a class="tesso-button tesso-button-secondary tesso-button-md" href="/docs/add">Add a component</a>
+            </div>
+            <Card title="Button, Card, and Dialog" description="This site is a Fusor app. These three components were added with tesso add.">
+              <div class="row">
+                <Button variant="primary" size="md" on_press="{{ state.open_dialog.clone() }}">Open dialog</Button>
+                <Button variant="secondary" size="md" on_press="{{ state.noop.clone() }}">Secondary</Button>
+                <Button variant="quiet" size="md" on_press="{{ state.noop.clone() }}">Quiet</Button>
+                <Button variant="danger" size="md" on_press="{{ state.noop.clone() }}">Danger</Button>
+              </div>
+              <p class="meta">Light values sit on :root. Dark values sit on .dark. Both are raw oklch().</p>
+              <template slot="footer">
+                <p class="meta">public/tokens.css is the file the project owns.</p>
+              </template>
+            </Card>
+          </section>
+
+          <section data-page="install" hidden="{{ state.hide_install() }}">
+            <h1>Install</h1>
+            <p>Node 20 or newer. The Fusor app stays Node-free until you opt in. Tesso requires Fusor 0.1.7 or newer.</p>
+            <pre>npm install --save-dev tesso-ui
+npx tesso-ui init
+npx tesso-ui add button
+fusor dev</pre>
+            <p><code>npx tesso-ui</code> and <code>tesso</code> run the same binary. Then link the stylesheets from the init page.</p>
+          </section>
+
+          <section data-page="init" hidden="{{ state.hide_init() }}">
+            <h1>Init</h1>
+            <p><code>tesso init</code> writes <code>tesso.config.json</code> and <code>public/tokens.css</code> once, with the 19 starter tokens. If that CSS file already exists, init leaves it alone. <code>--force</code> replaces it.</p>
+            <p>It records an npm devDependency on tesso-ui, and when <code>assets</code> is missing it sets <code>assets = { "/" = "public" }</code>. When Fusor sets <code>tailwind</code>, init writes an <code>@theme inline</code> bridge so utilities such as <code>bg-primary</code> follow <code>.dark</code>.</p>
+            <p><code>tesso init --migrate</code> only renames <code>--ft-*</code> variables that have a matching token, and lists the names it left alone.</p>
+            <pre>&lt;link rel="stylesheet" href="/tokens.css" /&gt;
+&lt;link rel="stylesheet" href="/tesso.css" /&gt;</pre>
+            <p>Put <code>.dark</code> on <code>&lt;html&gt;</code> in the app. tokens.css does not read <code>prefers-color-scheme</code>.</p>
+          </section>
+
+          <section data-page="check" hidden="{{ state.hide_check() }}">
+            <h1>Check</h1>
+            <p><code>tesso check</code> reads <code>public/tokens.css</code>. It does not write the file. A failure names the token and the theme and exits non-zero.</p>
+            <ul>
+              <li>Every required token is set on <code>:root</code>, and every color on <code>.dark</code>.</li>
+              <li>Colors are <code>oklch()</code> or a <code>var()</code> that resolves to one. <code>--radius</code> is a length or a <code>var()</code>.</li>
+              <li>Foreground and background pairs meet WCAG AA 4.5:1 in both themes, including <code>--primary-foreground</code> on <code>--destructive</code>.</li>
+            </ul>
+            <pre>npx tesso-ui check</pre>
+          </section>
+
+          <section data-page="add" hidden="{{ state.hide_add() }}">
+            <h1>Add</h1>
+            <p>
+              <code>tesso add</code> reads one JSON file per component from a single base URL.
+              The default is <code>https://tesso.fyi/r/</code>, so button is
+              <a href="/r/button.json">/r/button.json</a>.
+              The command prints the registry it used.
+            </p>
+            <p><code>--registry</code> takes that base URL or a local folder. CI, tests, and offline use pass a checkout, for example <code>--registry ../registry</code>. <code>tesso.config.json</code> can set the same <code>registry</code> value. The flag wins.</p>
+            <pre>{{ state.add_snippet() }}</pre>
+            <ul>
+              <li>A missing file is written. An identical file is kept.</li>
+              <li>A file that already exists and differs is skipped. add says so and exits 0.</li>
+              <li><code>--diff</code> prints the diff and does not write. <code>--force</code> overwrites. <code>--overwrite</code> is the same flag.</li>
+              <li>If this CLI is older than the file's minimum tesso-ui version, add writes nothing and names the version it needs.</li>
+              <li>If the registry cannot be reached, add fails and names the URL.</li>
+            </ul>
+            <p><code>tesso list</code> prints the same registry. Components require an empty prefix, because they read variables such as <code>--primary</code>.</p>
+          </section>
+
+          <section data-page="button" hidden="{{ state.hide_button() }}">
+            <h1>Button</h1>
+            <p><code>variant</code> is <code>primary</code> (the default), <code>secondary</code>, <code>quiet</code>, or <code>danger</code>. <code>size</code> is <code>sm</code>, <code>md</code> (the default), or <code>lg</code>. Omit either one and the default is used. <code>on_press</code> is the callback. Focus draws a ring from <code>--ring</code>.</p>
+            <p>There's no <code>--destructive-foreground</code>. The danger button uses <code>--primary-foreground</code> for its text.</p>
+            <div class="row">
+              <Button variant="primary" size="sm" on_press="{{ state.noop.clone() }}">Small</Button>
+              <Button variant="primary" size="md" on_press="{{ state.noop.clone() }}">Medium</Button>
+              <Button variant="primary" size="lg" on_press="{{ state.noop.clone() }}">Large</Button>
+            </div>
+            <pre>{{ state.button_snippet() }}</pre>
+          </section>
+
+          <section data-page="card" hidden="{{ state.hide_card() }}">
+            <h1>Card</h1>
+            <p><code>title</code> and <code>description</code> are static strings. An empty string hides that line. The default slot is the body. <code>slot="footer"</code> fills the footer.</p>
+            <Card title="Shift" description="A short line under the title.">
+              <p>Body copy stays in the default slot.</p>
+              <template slot="footer">
+                <p class="meta">Footer slot</p>
+              </template>
+            </Card>
+            <pre>{{ state.card_snippet() }}</pre>
+          </section>
+
+          <section data-page="dialog" hidden="{{ state.hide_dialog() }}">
+            <h1>Dialog</h1>
+            <p>Dialog renders a native <code>&lt;dialog&gt;</code> and calls <code>showModal()</code> while <code>open</code> is true. Escape, the backdrop, and the close control set <code>open</code> back to false. The page behind is inert, and focus returns to the control that opened it.</p>
+            <p><code>title</code> and <code>description</code> are static strings. An empty one hides that line and omits <code>aria-labelledby</code> or <code>aria-describedby</code>. Adding dialog also adds button, which it depends on.</p>
+            <Button variant="primary" size="md" on_press="{{ state.open_dialog.clone() }}">Open dialog</Button>
+            <pre>{{ state.dialog_snippet() }}</pre>
+          </section>
+
+          <section data-page="test" hidden="{{ state.hide_test() }}">
+            <h1>Test</h1>
+            <div>
+              <Button variant="primary" size="sm" on_press="{{ state.noop.clone() }}">Primary sm</Button>
+              <Button variant="primary" size="md" on_press="{{ state.noop.clone() }}">Primary md</Button>
+              <Button variant="primary" size="lg" on_press="{{ state.noop.clone() }}">Primary lg</Button>
+            </div>
+            <div>
+              <Button variant="secondary" size="sm" on_press="{{ state.noop.clone() }}">Secondary sm</Button>
+              <Button variant="secondary" size="md" on_press="{{ state.noop.clone() }}">Secondary md</Button>
+              <Button variant="secondary" size="lg" on_press="{{ state.noop.clone() }}">Secondary lg</Button>
+            </div>
+            <div>
+              <Button variant="quiet" size="sm" on_press="{{ state.noop.clone() }}">Quiet sm</Button>
+              <Button variant="quiet" size="md" on_press="{{ state.noop.clone() }}">Quiet md</Button>
+              <Button variant="quiet" size="lg" on_press="{{ state.noop.clone() }}">Quiet lg</Button>
+            </div>
+            <div>
+              <Button variant="danger" size="sm" on_press="{{ state.noop.clone() }}">Danger sm</Button>
+              <Button variant="danger" size="md" on_press="{{ state.noop.clone() }}">Danger md</Button>
+              <Button variant="danger" size="lg" on_press="{{ state.noop.clone() }}">Danger lg</Button>
+            </div>
+            <Card title="Card" description="A card on the test page.">
+              <p>Body</p>
+              <template slot="footer">
+                <p>Footer</p>
+              </template>
+            </Card>
+            <div>
+              <Button variant="primary" size="md" on_press="{{ state.open_dialog.clone() }}">Open dialog</Button>
+            </div>
+          </section>
+
+          <section data-page="missing">
+            <h1>Page not found</h1>
+            <p>That path is not a docs page.</p>
+            <a class="tesso-button tesso-button-primary tesso-button-md" href="/">Back home</a>
+          </section>
+        </main>
+        <Dialog
+          open="{{ state.dialog_open.clone() }}"
+          title="Dialog"
+          description="A native dialog. Escape closes it and returns focus."
+        >
+          <p>The rest of the page is inert while this is open.</p>
+          <template slot="footer">
+            <Button variant="primary" size="md" on_press="{{ state.close_dialog.clone() }}">Close</Button>
+          </template>
+        </Dialog>
+      </div>
+    </App>
+  </body>
+</html>

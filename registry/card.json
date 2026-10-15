@@ -1,0 +1,36 @@
+{
+  "name": "card",
+  "title": "Card",
+  "description": "Surface with a title, description, a body slot, and a named footer slot.",
+  "dependencies": [],
+  "cssVariables": [
+    "--card",
+    "--card-foreground",
+    "--muted-foreground",
+    "--border",
+    "--radius"
+  ],
+  "tessoUi": "0.4.1",
+  "fusor": "0.1.7",
+  "files": [
+    {
+      "target": "web/components/card.html",
+      "content": "<template rust:component=\"Card\">\n  <article class=\"tesso-card\">\n    <header class=\"tesso-card-header\">\n      <h2 class=\"tesso-card-title\" hidden=\"{{ state.title.is_empty() }}\">{{ state.title }}</h2>\n      <p class=\"tesso-card-description\" hidden=\"{{ state.description.is_empty() }}\">{{ state.description }}</p>\n    </header>\n    <div class=\"tesso-card-body\">\n      <Children></Children>\n    </div>\n    <footer class=\"tesso-card-footer\">\n      <Children name=\"footer\"></Children>\n    </footer>\n  </article>\n</template>\n"
+    },
+    {
+      "target": "src/card.rs",
+      "content": "//! Card copied by `tesso add card`.\n//!\n//! `title` and `description` are static strings (`title=\"Shift\"`). An empty\n//! string hides that line. The body is the default `<Children>` slot. A\n//! `<template slot=\"footer\">` fills `<Children name=\"footer\">`. Named slots\n//! need Fusor 0.1.7 or newer.\n\nuse fusor::prelude::*;\n\n#[derive(FromInputs)]\npub struct Card {\n    #[input]\n    title: &'static str,\n    #[input]\n    description: &'static str,\n}\n\nfusor::template!(\"web/components/card.html\");\n"
+    }
+  ],
+  "css": {
+    "target": "public/tesso.css",
+    "marker": "card",
+    "content": "@layer properties, theme, base, components, utilities;\n\n@layer components {\n  .tesso-card {\n    background: var(--card);\n    color: var(--card-foreground);\n    border: 1px solid var(--border);\n    border-radius: var(--radius);\n    box-shadow: 0 0.25rem 0.75rem oklch(0% 0 0 / 0.12);\n    padding: 1.5rem;\n  }\n\n  .tesso-card-header {\n    display: flex;\n    flex-direction: column;\n    gap: 0.5rem;\n    margin-bottom: 1rem;\n  }\n\n  .tesso-card-title {\n    margin: 0;\n    color: var(--card-foreground);\n    font-size: 1.25rem;\n    font-weight: 600;\n    line-height: 1.25;\n  }\n\n  .tesso-card-description {\n    margin: 0;\n    color: var(--muted-foreground);\n    font-size: 0.875rem;\n    line-height: 1.5;\n  }\n\n  .tesso-card-body {\n    display: flex;\n    flex-direction: column;\n    gap: 1rem;\n  }\n\n  .tesso-card-footer {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 0.5rem;\n    margin-top: 1rem;\n  }\n\n  .tesso-card-title[hidden],\n  .tesso-card-description[hidden],\n  .tesso-card-footer:empty {\n    display: none;\n  }\n}\n"
+  },
+  "rustModules": [
+    {
+      "module": "card",
+      "use": "use crate::card::Card;"
+    }
+  ]
+}
