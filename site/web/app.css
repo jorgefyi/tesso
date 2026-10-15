@@ -72,11 +72,6 @@ a {
   color: var(--foreground);
 }
 
-/* The button rule sets an explicit system-ui family. Inherit the page face here. */
-.tesso-button {
-  font-family: inherit;
-}
-
 code,
 pre {
   font-family: "JetBrains Mono", ui-monospace, monospace;
