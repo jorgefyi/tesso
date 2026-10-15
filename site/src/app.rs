@@ -65,19 +65,6 @@ impl App {
     fn hide_test(&self) -> bool {
         self.route != "/test"
     }
-    fn hide_missing(&self) -> bool {
-        matches!(
-            self.route.as_str(),
-            "/" | "/docs/install"
-                | "/docs/init"
-                | "/docs/check"
-                | "/docs/add"
-                | "/docs/button"
-                | "/docs/card"
-                | "/docs/dialog"
-                | "/test"
-        )
-    }
 
     fn nav_home(&self) -> bool {
         self.route == "/"

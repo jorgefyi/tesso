@@ -52,6 +52,7 @@ jobs:
           npm install
           fusor install
           fusor build
+          node split-not-found.mjs
 
       - name: Install Vercel CLI
         if: steps.gate.outputs.skip != 'true'

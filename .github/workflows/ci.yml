@@ -47,6 +47,7 @@ jobs:
           npm install
           fusor install
           fusor build
+          node split-not-found.mjs
 
   # Current Fusor CLI from main, building the same 0.1.7 apps.
   fusor-main:
@@ -75,3 +76,4 @@ jobs:
           npm install
           fusor install
           fusor build
+          node split-not-found.mjs
