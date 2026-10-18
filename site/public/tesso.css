@@ -19,12 +19,12 @@
   }
 
   .tesso-button:focus {
-    outline: none;
-  }
-
-  .tesso-button:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
+  }
+
+  .tesso-button:focus:not(:focus-visible) {
+    outline: none;
   }
 
   .tesso-button:disabled {

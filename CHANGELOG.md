@@ -19,6 +19,7 @@ Components are fetched from a registry. The docs site is a Fusor app.
 
 - Component CSS declares `@layer properties, theme, base, components, utilities` before its rules. Tailwind's preflight was loading afterward and, because `components` had been created first, it wiped padding, button fills, radii, and sizes.
 - Button's base rule uses `font: inherit`, so it takes the page font instead of `system-ui`.
+- Button focus no longer uses bare `:focus { outline: none }`. `:focus` draws `2px solid var(--ring)` with `outline-offset: 2px`; `:focus:not(:focus-visible)` clears the ring for pointer focus so keyboard users always keep a visible ring.
 - The not-found section is served only for an unknown path (`404.html`). `index.html` does not include it, and the docs routes rewrite to that file.
 
 ### Changed

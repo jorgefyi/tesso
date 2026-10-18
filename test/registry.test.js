@@ -46,6 +46,16 @@ test("component css uses plain variables inside @layer components", () => {
   }
 });
 
+test("button focus keeps a ring for keyboard and clears it only for pointer", () => {
+  const css = load("button").css.content;
+  assert.match(css, /\.tesso-button:focus \{\s*outline: 2px solid var\(--ring\);\s*outline-offset: 2px;\s*\}/);
+  assert.match(css, /\.tesso-button:focus:not\(:focus-visible\) \{\s*outline: none;\s*\}/);
+  assert.doesNotMatch(css, /\.tesso-button:focus \{\s*outline: none;/);
+  const built = fs.readFileSync(path.join(repo, "site", "public", "tesso.css"), "utf8");
+  assert.match(built, /\.tesso-button:focus:not\(:focus-visible\)/);
+  assert.doesNotMatch(built, /\.tesso-button:focus \{\s*outline: none;/);
+});
+
 test("dialog markup is a native modal wired to the tested decisions", () => {
   const item = load("dialog");
   const html = item.files.find((file) => file.target.endsWith("dialog.html")).content;
