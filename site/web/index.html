@@ -54,6 +54,7 @@
   <body>
     <App state="{{ App::new() }}">
       <div class="shell">
+      <a class="skip-link" href="#main">Skip to content</a>
       <header class="top">
         <div class="frame top-bar">
           <a class="mark" href="/">Tesso</a>
@@ -65,7 +66,7 @@
         </div>
       </header>
       <div class="frame page">
-        <main>
+        <main id="main" tabindex="-1">
           <section data-page="home" hidden="{{ state.hide_home() }}">
             <div class="home">
               <div class="hero min-h-(--hero-height)">
