@@ -69,7 +69,7 @@ body {
   font-feature-settings: "cv11", "cv05";
 }
 
-a {
+a:not(.tesso-button) {
   color: var(--foreground);
 }
 
@@ -217,7 +217,7 @@ a.tesso-button {
 }
 
 .command {
-  --command-pad: --spacing(2);
+  --command-pad: --spacing(1);
   --command-radius: calc(infinity * 1px);
   display: flex;
   align-items: center;
