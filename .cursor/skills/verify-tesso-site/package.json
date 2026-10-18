@@ -1,0 +1,12 @@
+{
+  "name": "verify-tesso-site",
+  "private": true,
+  "type": "module",
+  "description": "Harness for the verify-tesso-site skill: SPA serve + Playwright drive.",
+  "bin": {
+    "control-tesso-site": "./bin/control-tesso-site.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.55.0"
+  }
+}

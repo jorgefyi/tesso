@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if [[ ! -d "$ROOT/node_modules/playwright" ]]; then
+  echo "Installing verify-tesso-site harness deps…" >&2
+  (cd "$ROOT" && npm install --silent)
+fi
+export PATH="${HOME}/.fusor/bin:${PATH:-}"
+exec node "$ROOT/bin/control-tesso-site.mjs" "$@"
