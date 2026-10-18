@@ -273,10 +273,6 @@ a.tesso-button {
   text-align: center;
 }
 
-.dark .why-card {
-  border-color: oklch(42% 0.012 260);
-}
-
 .why-icon {
   display: block;
   width: 1.25rem;
