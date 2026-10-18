@@ -157,14 +157,6 @@ impl App {
         );
     }
 
-    fn markdown_label(&self) -> &'static str {
-        if self.markdown_copied.get() {
-            "Copied"
-        } else {
-            "Copy as Markdown"
-        }
-    }
-
     fn markdown_status(&self) -> &'static str {
         if self.markdown_copied.get() { "Copied" } else { "" }
     }

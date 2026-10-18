@@ -291,14 +291,16 @@ pre code {
   height: --spacing(3.5);
   border-radius: calc(infinity * 1px);
   background: var(--foreground);
-  transition-property: left;
+  /* Travel = toggle width − knob − both insets = --spacing(9 − 3.5 − 0.5 − 0.5). */
+  transform: translateX(0);
+  transition-property: transform;
   transition-duration: var(--duration);
   transition-timing-function: var(--easing);
   pointer-events: none;
 }
 
 .theme-toggle.is-dark .theme-knob {
-  left: calc(100% - --spacing(3.5) - --spacing(0.5));
+  transform: translateX(--spacing(4.5));
 }
 
 button.tesso-button,
@@ -658,6 +660,20 @@ a.docs-nav-link[aria-current="page"] {
   flex-wrap: wrap;
   align-items: center;
   gap: --spacing(3);
+}
+
+.docs-md-copy {
+  position: relative;
+  min-width: --spacing(10);
+  min-height: --spacing(10);
+}
+
+.docs-md-copy::before {
+  content: "";
+  position: absolute;
+  /* Half .docs-tools gap toward the md link; keep full vertical outset. */
+  inset-block: calc(var(--hit-outset) * -1);
+  inset-inline: calc(--spacing(1.5) * -1);
 }
 
 a.docs-md-link {
