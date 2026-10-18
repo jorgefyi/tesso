@@ -173,7 +173,6 @@ code {
 button.tesso-button,
 a.tesso-button {
   border-radius: calc(infinity * 1px);
-  font-size: inherit;
 }
 
 .home {
