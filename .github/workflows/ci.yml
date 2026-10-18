@@ -17,8 +17,9 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  # Fusor 0.1.7 via install.sh. 0.1.7 fixes the musl Tailwind download
-  # on glibc hosts (fusor-rs/fusor#53).
+  # Stated minimum. The example pins fusor-build 0.1.7. CLI 0.1.8 refuses
+  # that pin, so this job installs CLI 0.1.7 itself and builds only the
+  # example. The site pins 0.1.8, so it is not built here.
   fusor-0-1-7:
     runs-on: ubuntu-latest
     steps:
@@ -41,15 +42,11 @@ jobs:
           npm install
           fusor install
           fusor build
-      - name: Build the site on Fusor 0.1.7
-        working-directory: site
-        run: |
-          npm install
-          fusor install
-          fusor build
-          node split-not-found.mjs
 
-  # Current Fusor CLI from main, building the same 0.1.7 apps.
+  # CLI from main, which is the 0.1.8 release. Builds the site (pinned to
+  # fusor-build 0.1.8). Does not build the 0.1.7 example. A fusor-0-1-8
+  # job would repeat this site build. Deploy installs the same release
+  # with install.sh v0.1.8.
   fusor-main:
     runs-on: ubuntu-latest
     steps:
@@ -64,12 +61,6 @@ jobs:
       - run: npm ci
       - name: Install Fusor CLI from main
         run: cargo install --git https://github.com/fusor-rs/fusor fusor-cli
-      - name: Build the example
-        working-directory: examples/counter-themed
-        run: |
-          npm install
-          fusor install
-          fusor build
       - name: Build the site
         working-directory: site
         run: |
