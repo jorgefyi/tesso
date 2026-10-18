@@ -37,10 +37,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - --spacing(1));
+  --radius-md: calc(var(--radius) - --spacing(0.5));
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + --spacing(1));
 }
 
 :root {
@@ -63,8 +63,8 @@ body {
   font-family: InterVariable, sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
   font-feature-settings: "cv11", "cv05";
 }
 
@@ -83,12 +83,12 @@ code {
 }
 
 .frame {
-  width: min(100% - 3rem, 75rem);
+  width: min(100% - --spacing(12), 75rem);
   margin: 0 auto;
 }
 
 .page {
-  padding-bottom: 1.5rem;
+  padding-bottom: --spacing(6);
 }
 
 .top {
@@ -98,7 +98,7 @@ code {
   background-color: color-mix(in oklch, var(--background) 72%, transparent);
   -webkit-backdrop-filter: blur(var(--blur-lg));
   backdrop-filter: blur(var(--blur-lg));
-  border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  border-bottom: theme(spacing.px) solid color-mix(in oklch, var(--foreground) 12%, transparent);
 }
 
 .dark .top {
@@ -109,8 +109,8 @@ code {
 .top-bar {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  min-height: 4rem;
+  gap: --spacing(5);
+  min-height: --spacing(16);
 }
 
 .mark {
@@ -124,7 +124,7 @@ code {
 .nav {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: --spacing(5);
   margin-left: auto;
 }
 
@@ -140,33 +140,33 @@ code {
 
 .theme-toggle {
   position: relative;
-  width: 2.25rem;
-  height: 1.25rem;
+  width: --spacing(9);
+  height: --spacing(5);
   margin: 0;
   padding: 0;
-  border: 1px solid var(--border);
+  border: theme(spacing.px) solid var(--border);
   border-radius: calc(infinity * 1px);
   background: var(--muted);
   cursor: pointer;
 }
 
 .theme-toggle:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline: --spacing(0.5) solid var(--ring);
+  outline-offset: --spacing(0.5);
 }
 
 .theme-knob {
   position: absolute;
-  top: 0.125rem;
-  left: 0.125rem;
-  width: 0.875rem;
-  height: 0.875rem;
+  top: --spacing(0.5);
+  left: --spacing(0.5);
+  width: --spacing(3.5);
+  height: --spacing(3.5);
   border-radius: calc(infinity * 1px);
   background: var(--foreground);
 }
 
 .theme-toggle.is-dark .theme-knob {
-  left: calc(100% - 0.875rem - 0.125rem);
+  left: calc(100% - --spacing(3.5) - --spacing(0.5));
 }
 
 button.tesso-button,
@@ -178,7 +178,7 @@ a.tesso-button {
 .home {
   display: grid;
   gap: 5.5rem;
-  padding: 0 0 3rem;
+  padding: 0 0 --spacing(12);
 }
 
 .hero {
@@ -187,9 +187,9 @@ a.tesso-button {
   align-items: center;
   justify-content: center;
   max-width: 40rem;
-  min-height: calc(100svh - 4rem);
+  min-height: calc(100svh - --spacing(16));
   margin: 0 auto;
-  padding: 2rem 0;
+  padding: --spacing(8) 0;
   text-align: center;
 }
 
@@ -202,10 +202,10 @@ a.tesso-button {
 }
 
 .sub {
-  margin: 1.25rem 0 0;
+  margin: --spacing(5) 0 0;
   color: var(--muted-foreground);
-  font-size: 1.25rem;
-  line-height: 1.5;
+  font-size: var(--text-xl);
+  line-height: var(--leading-normal);
 }
 
 .hero-actions {
@@ -213,27 +213,27 @@ a.tesso-button {
   flex-wrap: wrap;
   align-items: stretch;
   justify-content: center;
-  gap: 0.75rem;
-  margin-top: 2rem;
+  gap: --spacing(3);
+  margin-top: --spacing(8);
 }
 
 .command {
-  --command-pad: 0.5rem;
+  --command-pad: --spacing(2);
   --command-radius: calc(infinity * 1px);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: --spacing(3);
   margin: 0;
   padding: var(--command-pad);
   background: var(--muted);
-  border: 1px solid var(--border);
+  border: theme(spacing.px) solid var(--border);
   border-radius: var(--command-radius);
   line-height: 1;
 }
 
 .command code {
-  padding-left: 0.75rem;
-  font-size: 0.8125rem;
+  padding-left: --spacing(3);
+  font-size: var(--text-sm);
   line-height: 1;
   color: var(--foreground);
 }
@@ -247,8 +247,8 @@ a.tesso-button {
 }
 
 .why h2 {
-  margin: 0 0 1.75rem;
-  font-size: 1.25rem;
+  margin: 0 0 --spacing(7);
+  font-size: var(--text-xl);
   font-weight: 500;
   letter-spacing: -0.02em;
   text-align: center;
@@ -257,7 +257,7 @@ a.tesso-button {
 .why-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.25rem;
+  gap: --spacing(5);
 }
 
 .why-card {
@@ -265,18 +265,18 @@ a.tesso-button {
   flex-direction: column;
   align-items: center;
   gap: 0.65rem;
-  padding: 1.5rem 1.25rem;
+  padding: --spacing(6) --spacing(5);
   background: var(--card);
   color: var(--card-foreground);
-  border: 1px solid var(--border);
+  border: theme(spacing.px) solid var(--border);
   border-radius: var(--radius);
   text-align: center;
 }
 
 .why-icon {
   display: block;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: --spacing(5);
+  height: --spacing(5);
   flex: none;
   background-color: currentColor;
   color: var(--foreground);
@@ -306,7 +306,7 @@ a.tesso-button {
 
 .why h3 {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--text-lg);
   font-weight: 500;
 }
 
@@ -318,12 +318,12 @@ a.tesso-button {
 .foot {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
-  margin-top: 2rem;
-  padding: 1.5rem 0 1rem;
-  border-top: 1px solid var(--border);
+  gap: --spacing(4);
+  margin-top: --spacing(8);
+  padding: --spacing(6) 0 --spacing(4);
+  border-top: theme(spacing.px) solid var(--border);
   color: var(--muted-foreground);
-  font-size: 0.8125rem;
+  font-size: var(--text-sm);
 }
 
 .foot a {
@@ -333,14 +333,14 @@ a.tesso-button {
 
 .content {
   display: grid;
-  gap: 1rem;
+  gap: --spacing(4);
   max-width: 40rem;
-  padding-top: 2rem;
+  padding-top: --spacing(8);
 }
 
 h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: --spacing(8);
   line-height: 1.15;
   letter-spacing: -0.03em;
 }
@@ -357,44 +357,44 @@ ul {
 .row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: --spacing(2);
   align-items: center;
 }
 
 pre {
   margin: 0;
-  padding: 0.75rem 1rem;
+  padding: --spacing(3) --spacing(4);
   overflow: auto;
   background: var(--muted);
   color: var(--foreground);
   border-radius: var(--radius);
-  font-size: 0.8125rem;
-  line-height: 1.5;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
   white-space: pre-wrap;
 }
 
 .meta {
   margin: 0;
   color: var(--muted-foreground);
-  font-size: 0.8125rem;
+  font-size: var(--text-sm);
 }
 
 .content .tesso-card {
   width: 100%;
 }
 
-@media (max-width: 800px) {
+@media (width < theme(--breakpoint-md)) {
   .frame {
-    width: min(100% - 2rem, 75rem);
+    width: min(100% - --spacing(8), 75rem);
   }
 
   .home {
-    gap: 3.5rem;
+    gap: --spacing(14);
     padding-top: 0;
   }
 
   .home h1 {
-    font-size: 2.25rem;
+    font-size: var(--text-4xl);
   }
 
   .sub {
@@ -403,11 +403,11 @@ pre {
 
   .why-grid {
     grid-template-columns: 1fr;
-    gap: 1.75rem;
+    gap: --spacing(7);
   }
 
   .top-bar {
     flex-wrap: wrap;
-    padding: 0.75rem 0;
+    padding: --spacing(3) 0;
   }
 }
