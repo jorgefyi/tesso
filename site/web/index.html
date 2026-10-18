@@ -61,21 +61,24 @@
         <main>
           <section data-page="home" hidden="{{ state.hide_home() }}">
             <div class="home">
-              <div class="hero">
-                <h1>A design system starter for Fusor.</h1>
-                <p class="sub">Composable, accessible components and tokens, yours to edit from day one.</p>
+              <div class="hero min-h-(--hero-height)">
+                <h1>Design system starter for Fusor</h1>
+                <p class="sub">A collection of composable, accessible components and tokens, yours to edit from day one.</p>
                 <div class="hero-actions">
                   <div class="command">
                     <code>npx tesso-ui init</code>
                     <button
                       type="button"
-                      class="tesso-button tesso-button-primary tesso-button-sm"
+                      class="tesso-button tesso-button-quiet tesso-button-sm"
+                      aria-label="Copy install command"
                       on:click="state.copy_init()"
                     >
-                      {{ state.copy_label() }}
+                      <span class="copy-icon copy-icon-copy" aria-hidden="true" hidden="{{ state.hide_copy_icon() }}"></span>
+                      <span class="copy-icon copy-icon-check" aria-hidden="true" hidden="{{ state.hide_check_icon() }}"></span>
                     </button>
+                    <span class="sr-only" aria-live="polite">{{ state.copy_status() }}</span>
                   </div>
-                  <a class="tesso-button tesso-button-secondary tesso-button-sm" href="/docs/install">Read the docs</a>
+                  <a class="tesso-button tesso-button-primary tesso-button-md" href="/docs/install">Read the docs</a>
                 </div>
               </div>
               <div class="why">

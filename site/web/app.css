@@ -45,6 +45,7 @@
 
 :root {
   color-scheme: light;
+  --hero-height: 66svh;
 }
 
 .dark {
@@ -187,7 +188,6 @@ a.tesso-button {
   align-items: center;
   justify-content: center;
   max-width: --spacing(160);
-  min-height: calc(100svh - --spacing(16));
   margin: 0 auto;
   padding: --spacing(8) 0;
   text-align: center;
@@ -240,6 +240,34 @@ a.tesso-button {
 
 .command .tesso-button {
   border-radius: calc(var(--command-radius) - var(--command-pad));
+}
+
+.copy-icon {
+  display: block;
+  width: --spacing(4);
+  height: --spacing(4);
+  background-color: currentColor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  mask-mode: alpha;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+
+.copy-icon[hidden] {
+  display: none;
+}
+
+.copy-icon-copy {
+  mask-image: url("/icons/copied.svg");
+  -webkit-mask-image: url("/icons/copied.svg");
+}
+
+.copy-icon-check {
+  mask-image: url("/icons/check.svg");
+  -webkit-mask-image: url("/icons/check.svg");
 }
 
 .why {

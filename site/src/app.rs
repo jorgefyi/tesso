@@ -68,8 +68,16 @@ impl App {
         (self.copy_cmd)();
     }
 
-    fn copy_label(&self) -> &'static str {
-        if self.copied.get() { "Copied" } else { "Copy" }
+    fn hide_copy_icon(&self) -> bool {
+        self.copied.get()
+    }
+
+    fn hide_check_icon(&self) -> bool {
+        !self.copied.get()
+    }
+
+    fn copy_status(&self) -> &'static str {
+        if self.copied.get() { "Copied" } else { "" }
     }
 
     fn on_docs(&self) -> bool {
