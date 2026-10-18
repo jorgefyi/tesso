@@ -81,6 +81,7 @@ body {
   line-height: var(--leading-normal);
   font-feature-settings: "cv11", "cv05";
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
@@ -228,14 +229,16 @@ pre code {
 .nav a::before {
   content: "";
   position: absolute;
-  inset: calc(var(--hit-outset) * -1);
+  /* Horizontal inset is half .nav gap so neighbors never overlap. */
+  inset-block: calc(var(--hit-outset) * -1);
+  inset-inline: calc(--spacing(2.5) * -1);
 }
 
 .nav a:hover {
   color: var(--foreground);
   text-decoration: underline;
   text-decoration-thickness: from-font;
-  text-underline-offset: 0.12em;
+  text-underline-offset: --spacing(0.5);
 }
 
 .nav a[aria-current="page"] {
@@ -261,7 +264,10 @@ pre code {
 .theme-toggle::before {
   content: "";
   position: absolute;
-  inset: calc(var(--hit-outset) * -1);
+  /* Match half .top-bar gap toward the nav; keep full outset on the outer edge. */
+  inset-block: calc(var(--hit-outset) * -1);
+  inset-inline-start: calc(--spacing(2.5) * -1);
+  inset-inline-end: calc(var(--hit-outset) * -1);
 }
 
 .theme-toggle:hover {
@@ -560,7 +566,7 @@ a.tesso-button:focus-visible {
   color: var(--foreground);
   text-decoration: underline;
   text-decoration-thickness: from-font;
-  text-underline-offset: 0.12em;
+  text-underline-offset: --spacing(0.5);
 }
 
 .docs {
@@ -578,6 +584,18 @@ a.tesso-button:focus-visible {
   padding: --spacing(6) --spacing(4) --spacing(8) 0;
   overflow: auto;
   border-right: theme(spacing.px) solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--foreground) var(--scrollbar-mix), transparent) transparent;
+}
+
+.docs-side::-webkit-scrollbar {
+  width: --spacing(2);
+  height: --spacing(2);
+}
+
+.docs-side::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--foreground) var(--scrollbar-mix), transparent);
+  border-radius: var(--radius-sm);
 }
 
 .dark .docs-side {
@@ -648,7 +666,7 @@ a.docs-md-link {
   font-size: var(--text-sm);
   text-decoration: underline;
   text-decoration-thickness: from-font;
-  text-underline-offset: 0.12em;
+  text-underline-offset: --spacing(0.5);
   transition-property: color;
   transition-duration: var(--duration);
   transition-timing-function: var(--easing);
@@ -657,7 +675,9 @@ a.docs-md-link {
 a.docs-md-link::before {
   content: "";
   position: absolute;
-  inset: calc(var(--hit-outset) * -1);
+  /* Half .docs-tools gap so the hit area does not collide with the copy button. */
+  inset-block: calc(var(--hit-outset) * -1);
+  inset-inline: calc(--spacing(1.5) * -1);
 }
 
 a.docs-md-link:hover {
@@ -682,7 +702,7 @@ a.docs-md-link:hover {
 .docs-article p,
 .docs-article ul {
   max-width: 65ch;
-  line-height: 1.55;
+  line-height: var(--leading-normal);
   text-wrap: pretty;
 }
 
