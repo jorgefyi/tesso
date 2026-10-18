@@ -3,3 +3,6 @@ node_modules/
 target/
 *.log
 .DS_Store
+
+# Local Cursor skills / agent config (never commit)
+.cursor/
