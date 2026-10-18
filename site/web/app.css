@@ -211,7 +211,7 @@ a.tesso-button {
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   gap: --spacing(3);
   margin-top: --spacing(8);
