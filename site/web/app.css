@@ -79,7 +79,7 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklch, var(--foreground) 14%, transparent);
+  background: color-mix(in oklch, var(--foreground) 15%, transparent);
 }
 
 a:not(.tesso-button) {
@@ -103,7 +103,12 @@ pre {
 }
 
 code {
-  font-size: 0.85em;
+  font-size: var(--text-sm);
+}
+
+pre code {
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .frame {
