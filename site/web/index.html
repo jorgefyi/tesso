@@ -63,7 +63,7 @@
             <div class="home">
               <div class="hero min-h-(--hero-height)">
                 <h1>Design system starter for Fusor</h1>
-                <p class="sub">A collection of composable, accessible components and tokens, yours to edit from day one.</p>
+                <p class="sub">A collection of composable, accessible components and tokens, yours to edit from day&nbsp;one.</p>
                 <div class="hero-actions">
                   <div class="command">
                     <code>npx tesso-ui init</code>
@@ -150,7 +150,7 @@ fusor dev</pre>
               <li>A missing file is written. An identical file is kept.</li>
               <li>A file that already exists and differs is skipped. add says so and exits 0.</li>
               <li><code>--diff</code> prints the diff and does not write. <code>--force</code> overwrites. <code>--overwrite</code> is the same flag.</li>
-              <li>If this CLI is older than the file's minimum tesso-ui version, add writes nothing and names the version it needs.</li>
+              <li>If this CLI is older than the file&rsquo;s minimum tesso-ui version, add writes nothing and names the version it needs.</li>
               <li>If the registry cannot be reached, add fails and names the URL.</li>
             </ul>
             <p><code>tesso list</code> prints the same registry. Components require an empty prefix, because they read variables such as <code>--primary</code>.</p>
@@ -159,7 +159,7 @@ fusor dev</pre>
           <section data-page="button" hidden="{{ state.hide_button() }}">
             <h1>Button</h1>
             <p><code>variant</code> is <code>primary</code> (the default), <code>secondary</code>, <code>quiet</code>, or <code>danger</code>. <code>size</code> is <code>sm</code>, <code>md</code> (the default), or <code>lg</code>. Omit either one and the default is used. <code>on_press</code> is the callback. Focus draws a ring from <code>--ring</code>.</p>
-            <p>There's no <code>--destructive-foreground</code>. The danger button uses <code>--primary-foreground</code> for its text.</p>
+            <p>There&rsquo;s no <code>--destructive-foreground</code>. The danger button uses <code>--primary-foreground</code> for its text.</p>
             <div class="row">
               <Button variant="primary" size="sm" on_press="{{ state.noop.clone() }}">Small</Button>
               <Button variant="primary" size="md" on_press="{{ state.noop.clone() }}">Medium</Button>
