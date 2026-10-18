@@ -76,6 +76,7 @@ body {
   color: var(--foreground);
   font-family: InterVariable, sans-serif;
   font-optical-sizing: auto;
+  font-synthesis: none;
   font-weight: 400;
   font-size: var(--text-base);
   line-height: var(--leading-normal);
@@ -382,10 +383,20 @@ a.tesso-button:focus-visible {
   letter-spacing: var(--tracking-tight);
 }
 
-.sub {
-  margin: --spacing(5) 0 0;
-  color: var(--muted-foreground);
+.hero-line {
+  margin: --spacing(4) 0 0;
+  color: var(--foreground);
   font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+
+.sub {
+  margin: --spacing(3) 0 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-lg);
   line-height: var(--leading-normal);
   text-wrap: pretty;
 }
@@ -393,31 +404,37 @@ a.tesso-button:focus-visible {
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: --spacing(3);
+  gap: --spacing(4);
   margin-top: --spacing(8);
 }
 
 .command {
-  --command-pad: --spacing(1);
+  --command-pad: --spacing(0.5);
   --command-radius: calc(infinity * 1px);
   display: flex;
   align-items: center;
-  gap: --spacing(3);
+  gap: --spacing(2);
   margin: 0;
   padding: var(--command-pad);
-  background: var(--muted);
-  border: theme(spacing.px) solid var(--border);
+  background: transparent;
+  border: theme(spacing.px) solid color-mix(in oklch, var(--foreground) 12%, transparent);
   border-radius: var(--command-radius);
   line-height: 1;
+  color: var(--muted-foreground);
+}
+
+.dark .command {
+  border-color: var(--border);
 }
 
 .command code {
-  padding-left: --spacing(3);
-  font-size: var(--text-sm);
+  padding-left: --spacing(2.5);
+  font-size: var(--text-xs);
   line-height: 1;
-  color: var(--foreground);
+  color: var(--muted-foreground);
 }
 
 .command .tesso-button {
@@ -772,7 +789,7 @@ a.docs-md-link:hover {
 
 h1 {
   margin: 0;
-  font-size: --spacing(8);
+  font-size: var(--text-2xl);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
 }
@@ -876,8 +893,12 @@ pre::-webkit-scrollbar-thumb {
     font-size: var(--text-4xl);
   }
 
-  .sub {
+  .hero-line {
     font-size: var(--text-lg);
+  }
+
+  .sub {
+    font-size: var(--text-base);
   }
 
   .why-grid {
