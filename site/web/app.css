@@ -46,6 +46,12 @@
 :root {
   color-scheme: light;
   --hero-height: 66svh;
+  --duration: 150ms;
+  --easing: ease-out;
+  --hit-outset: --spacing(3);
+  --press-scale: 0.96;
+  --hover-mix: 88%;
+  --scrollbar-mix: 20%;
   --z-sticky: 40;
   --header-offset: --spacing(16);
 }
@@ -141,12 +147,12 @@ code {
   letter-spacing: var(--tracking-tight);
   text-decoration: none;
   transition-property: color, opacity;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--duration);
+  transition-timing-function: var(--easing);
 }
 
 .mark:hover {
-  opacity: 0.72;
+  opacity: 0.7;
 }
 
 .mark:focus-visible,
@@ -170,14 +176,14 @@ code {
   font-weight: 400;
   text-decoration: none;
   transition-property: color;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--duration);
+  transition-timing-function: var(--easing);
 }
 
 .nav a::before {
   content: "";
   position: absolute;
-  inset: -12px -8px;
+  inset: calc(var(--hit-outset) * -1);
 }
 
 .nav a:hover {
@@ -200,14 +206,14 @@ code {
   background: var(--muted);
   cursor: pointer;
   transition-property: background-color, border-color, transform;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--duration);
+  transition-timing-function: var(--easing);
 }
 
 .theme-toggle::before {
   content: "";
   position: absolute;
-  inset: -12px -10px;
+  inset: calc(var(--hit-outset) * -1);
 }
 
 .theme-toggle:hover {
@@ -215,7 +221,7 @@ code {
 }
 
 .theme-toggle:active {
-  transform: scale(0.96);
+  transform: scale(var(--press-scale));
 }
 
 .theme-toggle:focus-visible {
@@ -232,8 +238,8 @@ code {
   border-radius: calc(infinity * 1px);
   background: var(--foreground);
   transition-property: left;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--duration);
+  transition-timing-function: var(--easing);
   pointer-events: none;
 }
 
@@ -245,38 +251,38 @@ button.tesso-button,
 a.tesso-button {
   border-radius: calc(infinity * 1px);
   transition-property: color, background-color, border-color, box-shadow, transform, opacity;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--duration);
+  transition-timing-function: var(--easing);
 }
 
 button.tesso-button:hover:not(:disabled),
 a.tesso-button:hover {
-  background: color-mix(in oklch, var(--background) 88%, var(--foreground));
+  background: color-mix(in oklch, var(--background) var(--hover-mix), var(--foreground));
 }
 
 button.tesso-button-primary:hover:not(:disabled),
 a.tesso-button-primary:hover {
-  background: color-mix(in oklch, var(--primary) 88%, var(--foreground));
+  background: color-mix(in oklch, var(--primary) var(--hover-mix), var(--foreground));
 }
 
 button.tesso-button-secondary:hover:not(:disabled),
 a.tesso-button-secondary:hover {
-  background: color-mix(in oklch, var(--secondary) 88%, var(--foreground));
+  background: color-mix(in oklch, var(--secondary) var(--hover-mix), var(--foreground));
 }
 
 button.tesso-button-quiet:hover:not(:disabled),
 a.tesso-button-quiet:hover {
-  background: color-mix(in oklch, var(--muted) 88%, var(--foreground));
+  background: color-mix(in oklch, var(--muted) var(--hover-mix), var(--foreground));
 }
 
 button.tesso-button-danger:hover:not(:disabled),
 a.tesso-button-danger:hover {
-  background: color-mix(in oklch, var(--destructive) 88%, var(--foreground));
+  background: color-mix(in oklch, var(--destructive) var(--hover-mix), var(--foreground));
 }
 
 button.tesso-button:active:not(:disabled),
 a.tesso-button:active {
-  transform: scale(0.96);
+  transform: scale(var(--press-scale));
 }
 
 button.tesso-button:focus-visible,
@@ -291,7 +297,7 @@ a.tesso-button:focus-visible {
 .command .tesso-button::before {
   content: "";
   position: absolute;
-  inset: -8px;
+  inset: calc(var(--hit-outset) * -1);
 }
 
 .home {
@@ -485,8 +491,8 @@ a.tesso-button:focus-visible {
   text-decoration: none;
   font-weight: 400;
   transition-property: color;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--duration);
+  transition-timing-function: var(--easing);
 }
 
 .foot a:hover {
@@ -534,17 +540,17 @@ pre {
   line-height: var(--leading-normal);
   white-space: pre-wrap;
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklch, var(--foreground) 20%, transparent) transparent;
+  scrollbar-color: color-mix(in oklch, var(--foreground) var(--scrollbar-mix), transparent) transparent;
 }
 
 pre::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: --spacing(2);
+  height: --spacing(2);
 }
 
 pre::-webkit-scrollbar-thumb {
-  background: color-mix(in oklch, var(--foreground) 20%, transparent);
-  border-radius: 4px;
+  background: color-mix(in oklch, var(--foreground) var(--scrollbar-mix), transparent);
+  border-radius: var(--radius-sm);
 }
 
 .meta {
@@ -560,11 +566,11 @@ pre::-webkit-scrollbar-thumb {
 .tesso-dialog-close::before {
   content: "";
   position: absolute;
-  inset: -10px;
+  inset: calc(var(--hit-outset) * -1);
 }
 
 .tesso-dialog-panel {
-  max-height: calc(100dvh - 2rem);
+  max-height: calc(100dvh - --spacing(8));
 }
 
 .tesso-dialog-description {
