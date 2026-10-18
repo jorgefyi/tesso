@@ -96,8 +96,8 @@ code {
   top: 0;
   z-index: 40;
   background-color: color-mix(in oklch, var(--background) 72%, transparent);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(var(--blur-lg));
+  backdrop-filter: blur(var(--blur-lg));
   border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
 }
 
@@ -145,7 +145,7 @@ code {
   margin: 0;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: calc(infinity * 1px);
   background: var(--muted);
   cursor: pointer;
 }
@@ -161,7 +161,7 @@ code {
   left: 0.125rem;
   width: 0.875rem;
   height: 0.875rem;
-  border-radius: 999px;
+  border-radius: calc(infinity * 1px);
   background: var(--foreground);
 }
 
@@ -171,7 +171,7 @@ code {
 
 button.tesso-button,
 a.tesso-button {
-  border-radius: 999px;
+  border-radius: calc(infinity * 1px);
   font-size: inherit;
 }
 
@@ -219,7 +219,7 @@ a.tesso-button {
 
 .command {
   --command-pad: 0.5rem;
-  --command-radius: 999px;
+  --command-radius: calc(infinity * 1px);
   display: flex;
   align-items: center;
   gap: 0.75rem;
