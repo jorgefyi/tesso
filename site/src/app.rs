@@ -3,6 +3,7 @@ use std::rc::Rc;
 use fusor::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
+use web_sys::Element;
 
 use crate::button::Button;
 use crate::card::Card;
@@ -17,12 +18,14 @@ struct App {
     noop: Rc<dyn Fn()>,
     copied: Signal<bool>,
     copy_cmd: Rc<dyn Fn()>,
+    markdown_copied: Signal<bool>,
 }
 
 impl App {
     fn new() -> Self {
         let route = current_path();
         set_document_title(title_for(&route));
+        install_snippet_copy();
         let dialog_open = signal(false);
         let open_dialog = {
             let dialog_open = dialog_open.clone();
@@ -61,6 +64,7 @@ impl App {
             noop,
             copied,
             copy_cmd,
+            markdown_copied: signal(false),
         }
     }
 
@@ -84,8 +88,85 @@ impl App {
         self.route.starts_with("/docs/")
     }
 
+    fn hide_docs(&self) -> bool {
+        !self.on_docs()
+    }
+
     fn current_docs(&self) -> Option<&'static str> {
         if self.on_docs() { Some("page") } else { None }
+    }
+
+    fn nav_current(&self, path: &str) -> Option<&'static str> {
+        if self.route == path { Some("page") } else { None }
+    }
+
+    fn nav_install(&self) -> Option<&'static str> {
+        self.nav_current("/docs/install")
+    }
+    fn nav_init(&self) -> Option<&'static str> {
+        self.nav_current("/docs/init")
+    }
+    fn nav_check(&self) -> Option<&'static str> {
+        self.nav_current("/docs/check")
+    }
+    fn nav_add(&self) -> Option<&'static str> {
+        self.nav_current("/docs/add")
+    }
+    fn nav_button(&self) -> Option<&'static str> {
+        self.nav_current("/docs/button")
+    }
+    fn nav_card(&self) -> Option<&'static str> {
+        self.nav_current("/docs/card")
+    }
+    fn nav_dialog(&self) -> Option<&'static str> {
+        self.nav_current("/docs/dialog")
+    }
+
+    fn docs_md_href(&self) -> String {
+        format!("{}.md", self.route)
+    }
+
+    fn docs_markdown(&self) -> &'static str {
+        match self.route.as_str() {
+            "/docs/install" => include_str!("../public/docs/install.md"),
+            "/docs/init" => include_str!("../public/docs/init.md"),
+            "/docs/check" => include_str!("../public/docs/check.md"),
+            "/docs/add" => include_str!("../public/docs/add.md"),
+            "/docs/button" => include_str!("../public/docs/button.md"),
+            "/docs/card" => include_str!("../public/docs/card.md"),
+            "/docs/dialog" => include_str!("../public/docs/dialog.md"),
+            _ => "",
+        }
+    }
+
+    fn copy_markdown(&self) {
+        let Some(window) = web_sys::window() else {
+            return;
+        };
+        let text = self.docs_markdown();
+        if text.is_empty() {
+            return;
+        }
+        let _ = window.navigator().clipboard().write_text(text);
+        self.markdown_copied.set(true);
+        let markdown_copied = self.markdown_copied.clone();
+        let callback = Closure::once_into_js(move || markdown_copied.set(false));
+        let _ = window.set_timeout_with_callback_and_timeout_and_arguments_0(
+            callback.unchecked_ref(),
+            1600,
+        );
+    }
+
+    fn markdown_label(&self) -> &'static str {
+        if self.markdown_copied.get() {
+            "Copied"
+        } else {
+            "Copy as Markdown"
+        }
+    }
+
+    fn markdown_status(&self) -> &'static str {
+        if self.markdown_copied.get() { "Copied" } else { "" }
     }
 
     fn hide_home(&self) -> bool {
@@ -128,6 +209,53 @@ impl App {
     fn add_snippet(&self) -> &'static str {
         "npx tesso-ui add button card dialog\nnpx tesso-ui add button --diff\nnpx tesso-ui add button --force\nnpx tesso-ui add button --registry ../registry"
     }
+}
+
+fn install_snippet_copy() {
+    let Some(document) = web_sys::window().and_then(|window| window.document()) else {
+        return;
+    };
+    let closure = Closure::<dyn FnMut(web_sys::Event)>::new(move |event: web_sys::Event| {
+        let Some(target) = event.target().and_then(|t| t.dyn_into::<Element>().ok()) else {
+            return;
+        };
+        let Ok(Some(btn)) = target.closest("[data-snippet-copy]") else {
+            return;
+        };
+        let Ok(Some(wrap)) = btn.closest(".code-wrap") else {
+            return;
+        };
+        let Ok(Some(pre)) = wrap.query_selector("pre") else {
+            return;
+        };
+        let text = pre.text_content().unwrap_or_default();
+        let Some(window) = web_sys::window() else {
+            return;
+        };
+        let _ = window.navigator().clipboard().write_text(&text);
+        if let Ok(Some(idle)) = btn.query_selector("[data-copy-idle]") {
+            let _ = idle.set_attribute("hidden", "");
+        }
+        if let Ok(Some(done)) = btn.query_selector("[data-copy-done]") {
+            let _ = done.remove_attribute("hidden");
+        }
+        let btn = btn.clone();
+        let callback = Closure::once_into_js(move || {
+            if let Ok(Some(idle)) = btn.query_selector("[data-copy-idle]") {
+                let _ = idle.remove_attribute("hidden");
+            }
+            if let Ok(Some(done)) = btn.query_selector("[data-copy-done]") {
+                let _ = done.set_attribute("hidden", "");
+            }
+        });
+        let _ = window.set_timeout_with_callback_and_timeout_and_arguments_0(
+            callback.unchecked_ref(),
+            1600,
+        );
+    });
+    let _ = document
+        .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref());
+    closure.forget();
 }
 
 fn current_path() -> String {
