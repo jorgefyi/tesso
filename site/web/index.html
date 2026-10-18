@@ -131,11 +131,11 @@
               <div class="docs-tools">
                 <button
                   type="button"
-                  class="tesso-button tesso-button-quiet tesso-button-sm"
+                  class="docs-md-copy tesso-button tesso-button-quiet tesso-button-sm"
                   aria-label="Copy page as Markdown"
                   on:click="state.copy_markdown()"
                 >
-                  {{ state.markdown_label() }}
+                  Copy as Markdown
                 </button>
                 <a class="docs-md-link" href="{{ state.docs_md_href() }}">View as Markdown</a>
                 <span class="sr-only" aria-live="polite">{{ state.markdown_status() }}</span>
