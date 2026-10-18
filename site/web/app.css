@@ -83,7 +83,7 @@ code {
 }
 
 .frame {
-  width: min(100% - --spacing(12), 75rem);
+  width: min(100% - --spacing(12), --spacing(300));
   margin: 0 auto;
 }
 
@@ -116,8 +116,8 @@ code {
 .mark {
   color: var(--foreground);
   font-weight: 500;
-  font-size: 0.9375rem;
-  letter-spacing: -0.03em;
+  font-size: var(--text-base);
+  letter-spacing: var(--tracking-tight);
   text-decoration: none;
 }
 
@@ -130,7 +130,7 @@ code {
 
 .nav a {
   color: var(--muted-foreground);
-  font-size: 0.9375rem;
+  font-size: var(--text-base);
   text-decoration: none;
 }
 
@@ -177,7 +177,7 @@ a.tesso-button {
 
 .home {
   display: grid;
-  gap: 5.5rem;
+  gap: --spacing(22);
   padding: 0 0 --spacing(12);
 }
 
@@ -186,7 +186,7 @@ a.tesso-button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-width: 40rem;
+  max-width: --spacing(160);
   min-height: calc(100svh - --spacing(16));
   margin: 0 auto;
   padding: --spacing(8) 0;
@@ -195,10 +195,10 @@ a.tesso-button {
 
 .home h1 {
   margin: 0;
-  font-size: 3.25rem;
+  font-size: var(--text-5xl);
   font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -0.035em;
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
 }
 
 .sub {
@@ -250,7 +250,7 @@ a.tesso-button {
   margin: 0 0 --spacing(7);
   font-size: var(--text-xl);
   font-weight: 500;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--tracking-tight);
   text-align: center;
 }
 
@@ -264,7 +264,7 @@ a.tesso-button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.65rem;
+  gap: --spacing(3);
   padding: --spacing(6) --spacing(5);
   background: var(--card);
   color: var(--card-foreground);
@@ -334,15 +334,15 @@ a.tesso-button {
 .content {
   display: grid;
   gap: --spacing(4);
-  max-width: 40rem;
+  max-width: --spacing(160);
   padding-top: --spacing(8);
 }
 
 h1 {
   margin: 0;
   font-size: --spacing(8);
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
 }
 
 p,
@@ -351,7 +351,7 @@ ul {
 }
 
 ul {
-  padding-left: 1.15rem;
+  padding-left: --spacing(5);
 }
 
 .row {
@@ -385,7 +385,7 @@ pre {
 
 @media (width < theme(--breakpoint-md)) {
   .frame {
-    width: min(100% - --spacing(8), 75rem);
+    width: min(100% - --spacing(8), --spacing(300));
   }
 
   .home {
@@ -398,7 +398,7 @@ pre {
   }
 
   .sub {
-    font-size: 1.0625rem;
+    font-size: var(--text-lg);
   }
 
   .why-grid {
