@@ -17,9 +17,10 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  # Released Fusor CLI from crates.io. The v0.1.6 install.sh binary
-  # downloads a musl Tailwind that does not run on ubuntu-latest.
-  fusor-0-1-6:
+  # Stated minimum. The example pins fusor-build 0.1.7. CLI 0.1.8 refuses
+  # that pin, so this job installs CLI 0.1.7 itself and builds only the
+  # example. The site pins 0.1.8, so it is not built here.
+  fusor-0-1-7:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,16 +32,21 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
       - run: npm ci
-      - name: Install Fusor CLI 0.1.6
-        run: cargo install fusor-cli --version 0.1.6
-      - name: Build the example on Fusor 0.1.6
+      - name: Install Fusor CLI 0.1.7
+        run: |
+          curl -fsSL https://fusor.build/install.sh | sh -s -- v0.1.7
+          echo "$HOME/.fusor/bin" >> "$GITHUB_PATH"
+      - name: Build the example on Fusor 0.1.7
         working-directory: examples/counter-themed
         run: |
           npm install
           fusor install
           fusor build
 
-  # Current Fusor CLI from main, building the same 0.1.6 example.
+  # CLI from main, which is the 0.1.8 release. Builds the site (pinned to
+  # fusor-build 0.1.8). Does not build the 0.1.7 example. A fusor-0-1-8
+  # job would repeat this site build. Deploy installs the same release
+  # with install.sh v0.1.8.
   fusor-main:
     runs-on: ubuntu-latest
     steps:
@@ -55,9 +61,10 @@ jobs:
       - run: npm ci
       - name: Install Fusor CLI from main
         run: cargo install --git https://github.com/fusor-rs/fusor fusor-cli
-      - name: Build the example
-        working-directory: examples/counter-themed
+      - name: Build the site
+        working-directory: site
         run: |
           npm install
           fusor install
           fusor build
+          node split-not-found.mjs

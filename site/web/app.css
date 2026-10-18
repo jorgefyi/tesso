@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+/* tesso:theme */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font: 400 0.9375rem/1.5 system-ui, sans-serif;
+}
+
+a {
+  color: var(--foreground);
+}
+
+code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85em;
+}
+
+.frame {
+  width: min(100% - 2rem, 64rem);
+  margin: 0 auto;
+  padding: 1.5rem 0 4rem;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.mark {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.nav a {
+  padding: 0.2rem 0.55rem;
+  border-radius: calc(var(--radius) - 4px);
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+
+.nav a.current {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.theme {
+  display: flex;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.content {
+  display: grid;
+  gap: 1rem;
+  max-width: 40rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.kicker {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lede {
+  margin: 0;
+  font-size: 1.0625rem;
+}
+
+p,
+ul {
+  margin: 0;
+}
+
+ul {
+  padding-left: 1.15rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+pre {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  overflow: auto;
+  background: var(--muted);
+  color: var(--foreground);
+  border-radius: calc(var(--radius) - 2px);
+  font: 400 0.8125rem/1.5 ui-monospace, monospace;
+  white-space: pre-wrap;
+}
+
+.meta {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+.content .tesso-card {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  .theme {
+    margin-left: 0;
+  }
+}

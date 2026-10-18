@@ -1,0 +1,98 @@
+name: Deploy
+
+on:
+  push:
+    tags:
+      - "v*"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skip when Vercel secrets are missing
+        id: gate
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "::notice title=Vercel deploy skipped::Set the repository secrets VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID. Until they exist, this job does nothing and stays green."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.skip != 'true'
+        with:
+          node-version: 20
+
+      - uses: dtolnay/rust-toolchain@1.95.0
+        if: steps.gate.outputs.skip != 'true'
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install Fusor CLI 0.1.8
+        if: steps.gate.outputs.skip != 'true'
+        run: |
+          curl -fsSL https://fusor.build/install.sh | sh -s -- v0.1.8
+          echo "$HOME/.fusor/bin" >> "$GITHUB_PATH"
+
+      - name: Build the site
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: site
+        run: |
+          npm install
+          fusor install
+          fusor build
+          node split-not-found.mjs
+
+      - name: Install Vercel CLI
+        if: steps.gate.outputs.skip != 'true'
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel project settings
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: site
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+      - name: Package the prebuilt site
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: site
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+      - name: Deploy to Vercel
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: site
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+          fi

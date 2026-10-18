@@ -1,4 +1,6 @@
 /* tesso:button */
+@layer properties, theme, base, components, utilities;
+
 @layer components {
   .tesso-button {
     appearance: none;
@@ -12,17 +14,17 @@
     border-radius: calc(var(--radius) - 2px);
     background: var(--background);
     color: var(--foreground);
-    font: 500 0.875rem/1.25 system-ui, sans-serif;
+    font: inherit;
     cursor: pointer;
   }
 
   .tesso-button:focus {
-    outline: none;
-  }
-
-  .tesso-button:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
+  }
+
+  .tesso-button:focus:not(:focus-visible) {
+    outline: none;
   }
 
   .tesso-button:disabled {
@@ -70,6 +72,8 @@
 /* /tesso:button */
 
 /* tesso:card */
+@layer properties, theme, base, components, utilities;
+
 @layer components {
   .tesso-card {
     background: var(--card);
@@ -124,6 +128,8 @@
 /* /tesso:card */
 
 /* tesso:dialog */
+@layer properties, theme, base, components, utilities;
+
 @layer components {
   /* Do not set `display` here. The user agent hides `dialog:not([open])`, and an
      author `display` would override that and leave a closed dialog on the page. */

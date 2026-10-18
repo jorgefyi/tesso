@@ -46,9 +46,9 @@ export function validateConfig(json) {
     );
   }
   if (json.registry != null) {
-    if (typeof json.registry !== "string" || !/^https?:\/\//i.test(json.registry)) {
+    if (typeof json.registry !== "string" || json.registry.length === 0) {
       throw new Error(
-        'Config "registry" must be an http(s) URL. Omit it to use the registry shipped with tesso-ui.',
+        'Config "registry" must be an http(s) URL or a path to a folder of component JSON. Omit it to use https://tesso.fyi/r/.',
       );
     }
   }

@@ -1,0 +1,12 @@
+{
+  "name": "tesso-site",
+  "private": true,
+  "description": "Tesso site. A Fusor app that uses Tesso and serves the component registry at /r.",
+  "scripts": {
+    "registry": "node build-registry.mjs",
+    "split-not-found": "node split-not-found.mjs"
+  },
+  "devDependencies": {
+    "tesso-ui": "file:../.."
+  }
+}
