@@ -607,7 +607,8 @@ a.tesso-button:focus-visible {
 }
 
 .docs-article ul {
-  list-style: disc;
+  list-style-type: disc;
+  list-style-position: outside;
   padding-left: --spacing(5);
 }
 
