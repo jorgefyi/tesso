@@ -8,8 +8,6 @@
   },
   "rewrites": [
     { "source": "/docs/:page(install|init|check|add|button|card|dialog)", "destination": "/index.html" },
-    { "source": "/docs/:page(install|init|check|add|button|card|dialog)/", "destination": "/index.html" },
-    { "source": "/test", "destination": "/index.html" },
-    { "source": "/test/", "destination": "/index.html" }
+    { "source": "/docs/:page(install|init|check|add|button|card|dialog)/", "destination": "/index.html" }
   ]
 }

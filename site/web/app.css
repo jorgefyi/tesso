@@ -69,9 +69,14 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--background);
   color: var(--foreground);
   font-family: InterVariable, sans-serif;
@@ -83,6 +88,33 @@ body {
   font-feature-settings: "cv11", "cv05";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+button,
+[role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.boot-error {
+  margin: 0;
+  padding: --spacing(3) --spacing(4);
+  background: color-mix(in oklch, var(--destructive) 12%, var(--background));
+  color: var(--foreground);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.dark .tesso-card,
+.dark .tesso-dialog-panel {
+  box-shadow: 0 0 0 theme(spacing.px)
+    color-mix(in oklch, var(--foreground) 8%, transparent);
 }
 
 ::selection {
@@ -195,8 +227,10 @@ pre code {
   inset: calc(var(--hit-outset) * -1);
 }
 
-.mark:hover {
-  opacity: 0.7;
+@media (hover: hover) and (pointer: fine) {
+  .mark:hover {
+    opacity: 0.7;
+  }
 }
 
 .mark:focus-visible,
@@ -235,11 +269,13 @@ pre code {
   inset-inline: calc(--spacing(2.5) * -1);
 }
 
-.nav a:hover {
-  color: var(--foreground);
-  text-decoration: underline;
-  text-decoration-thickness: from-font;
-  text-underline-offset: --spacing(0.5);
+@media (hover: hover) and (pointer: fine) {
+  .nav a:hover {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-offset: --spacing(0.5);
+  }
 }
 
 .nav a[aria-current="page"] {
@@ -271,8 +307,10 @@ pre code {
   inset-inline-end: calc(var(--hit-outset) * -1);
 }
 
-.theme-toggle:hover {
-  background: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle:hover {
+    background: var(--accent);
+  }
 }
 
 .theme-toggle:active {
@@ -312,29 +350,31 @@ a.tesso-button {
   transition-timing-function: var(--easing);
 }
 
-button.tesso-button:hover:not(:disabled),
-a.tesso-button:hover {
-  background: color-mix(in oklch, var(--background) var(--hover-mix), var(--foreground));
-}
+@media (hover: hover) and (pointer: fine) {
+  button.tesso-button:hover:not(:disabled),
+  a.tesso-button:hover {
+    background: color-mix(in oklch, var(--background) var(--hover-mix), var(--foreground));
+  }
 
-button.tesso-button-primary:hover:not(:disabled),
-a.tesso-button-primary:hover {
-  background: color-mix(in oklch, var(--primary) var(--hover-mix), var(--foreground));
-}
+  button.tesso-button-primary:hover:not(:disabled),
+  a.tesso-button-primary:hover {
+    background: color-mix(in oklch, var(--primary) var(--hover-mix), var(--foreground));
+  }
 
-button.tesso-button-secondary:hover:not(:disabled),
-a.tesso-button-secondary:hover {
-  background: color-mix(in oklch, var(--secondary) var(--hover-mix), var(--foreground));
-}
+  button.tesso-button-secondary:hover:not(:disabled),
+  a.tesso-button-secondary:hover {
+    background: color-mix(in oklch, var(--secondary) var(--hover-mix), var(--foreground));
+  }
 
-button.tesso-button-quiet:hover:not(:disabled),
-a.tesso-button-quiet:hover {
-  background: color-mix(in oklch, var(--muted) var(--hover-mix), var(--foreground));
-}
+  button.tesso-button-quiet:hover:not(:disabled),
+  a.tesso-button-quiet:hover {
+    background: color-mix(in oklch, var(--muted) var(--hover-mix), var(--foreground));
+  }
 
-button.tesso-button-danger:hover:not(:disabled),
-a.tesso-button-danger:hover {
-  background: color-mix(in oklch, var(--destructive) var(--hover-mix), var(--foreground));
+  button.tesso-button-danger:hover:not(:disabled),
+  a.tesso-button-danger:hover {
+    background: color-mix(in oklch, var(--destructive) var(--hover-mix), var(--foreground));
+  }
 }
 
 button.tesso-button:active:not(:disabled),
@@ -581,11 +621,13 @@ a.tesso-button:focus-visible {
   inset: calc(var(--hit-outset) * -1);
 }
 
-.foot a:hover {
-  color: var(--foreground);
-  text-decoration: underline;
-  text-decoration-thickness: from-font;
-  text-underline-offset: --spacing(0.5);
+@media (hover: hover) and (pointer: fine) {
+  .foot a:hover {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-offset: --spacing(0.5);
+  }
 }
 
 .docs {
@@ -655,9 +697,11 @@ a.docs-nav-link {
   transition-timing-function: var(--easing);
 }
 
-a.docs-nav-link:hover {
-  color: var(--foreground);
-  background: var(--muted);
+@media (hover: hover) and (pointer: fine) {
+  a.docs-nav-link:hover {
+    color: var(--foreground);
+    background: var(--muted);
+  }
 }
 
 a.docs-nav-link[aria-current="page"] {
@@ -713,8 +757,10 @@ a.docs-md-link::before {
   inset-inline: calc(--spacing(1.5) * -1);
 }
 
-a.docs-md-link:hover {
-  color: var(--foreground);
+@media (hover: hover) and (pointer: fine) {
+  a.docs-md-link:hover {
+    color: var(--foreground);
+  }
 }
 
 .docs-article.content {
