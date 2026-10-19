@@ -29,6 +29,14 @@ pub fn set_theme(theme: &str) {
     if let Some(storage) = web_sys::window().and_then(|w| w.local_storage().ok().flatten()) {
         let _ = storage.set_item("theme", theme);
     }
+    if let Some(document) = web_sys::window().and_then(|w| w.document()) {
+        if let Ok(Some(meta)) = document.query_selector("meta[name=\"theme-color\"]") {
+            let _ = meta.set_attribute(
+                "content",
+                if theme == "dark" { "#000000" } else { "#fafcff" },
+            );
+        }
+    }
     let Some(window) = web_sys::window() else {
         let _ = classes.remove_1("theme-switching");
         return;
