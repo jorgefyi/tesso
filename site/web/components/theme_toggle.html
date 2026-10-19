@@ -1,22 +1,11 @@
 <template rust:component="ThemeToggle">
-  <div class="theme" role="group" aria-label="Theme">
-    <button
-      type="button"
-      class="tesso-button tesso-button-sm"
-      class:tesso-button-primary='state.theme.get() == "light"'
-      class:tesso-button-quiet='state.theme.get() != "light"'
-      on:click="state.set_light()"
-    >
-      Light
-    </button>
-    <button
-      type="button"
-      class="tesso-button tesso-button-sm"
-      class:tesso-button-primary='state.theme.get() == "dark"'
-      class:tesso-button-quiet='state.theme.get() != "dark"'
-      on:click="state.set_dark()"
-    >
-      Dark
-    </button>
-  </div>
+  <button
+    type="button"
+    class="theme-toggle"
+    class:is-dark='state.theme.get() == "dark"'
+    aria-label="{{ state.label() }}"
+    on:click="state.toggle()"
+  >
+    <span class="theme-knob"></span>
+  </button>
 </template>
