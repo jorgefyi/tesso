@@ -2,13 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fafcff" />
+    <meta
+      name="description"
+      content="A collection of composable, accessible components and tokens, yours to edit from day one."
+    />
     <script>
       (function () {
         try {
           var stored = localStorage.getItem("theme");
           if (stored === "dark") document.documentElement.classList.add("dark");
         } catch (e) {}
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+          meta.setAttribute(
+            "content",
+            document.documentElement.classList.contains("dark")
+              ? "#000000"
+              : "#fafcff"
+          );
+        }
       })();
     </script>
     <script>
@@ -24,12 +42,26 @@
           "/docs/button": "button",
           "/docs/card": "card",
           "/docs/dialog": "dialog",
-          "/test": "test",
+        };
+        var titles = {
+          "/": "Tesso",
+          "/docs/install": "Install — Tesso",
+          "/docs/init": "Init — Tesso",
+          "/docs/check": "Check — Tesso",
+          "/docs/add": "Add — Tesso",
+          "/docs/button": "Button — Tesso",
+          "/docs/card": "Card — Tesso",
+          "/docs/dialog": "Dialog — Tesso",
         };
         var page = known[path] || "missing";
+        var onDocs = path.indexOf("/docs/") === 0 && known[path];
+        document.title = titles[path] || "Not found — Tesso";
         var style = document.createElement("style");
         style.textContent =
-          '[data-page]{display:none}[data-page="' + page + '"]{display:block}';
+          '[data-page]{display:none}[data-page="' +
+          page +
+          '"]{display:block}' +
+          (onDocs ? "" : ".docs{display:none}");
         document.head.appendChild(style);
       })();
     </script>
@@ -55,6 +87,9 @@
     <App state="{{ App::new() }}">
       <div class="shell">
       <a class="skip-link" href="#main">Skip to content</a>
+      <p id="boot-error" class="boot-error" hidden role="alert">
+        This page failed to load. Refresh and try again.
+      </p>
       <header class="top">
         <div class="frame top-bar">
           <a class="mark" href="/">Tesso</a>
@@ -70,9 +105,11 @@
           <section data-page="home" hidden="{{ state.hide_home() }}">
             <div class="home">
               <div class="hero min-h-(--hero-height)">
-                <h1>Design system starter for Fusor</h1>
+                <h1>Tesso</h1>
+                <p class="hero-line">Design system starter for Fusor</p>
                 <p class="sub">A collection of composable, accessible components and tokens, yours to edit from day&nbsp;one.</p>
                 <div class="hero-actions">
+                  <a class="tesso-button tesso-button-primary tesso-button-md" href="/docs/install">Read the docs</a>
                   <div class="command">
                     <code>npx tesso-ui init</code>
                     <button
@@ -86,7 +123,6 @@
                     </button>
                     <span class="sr-only" aria-live="polite">{{ state.copy_status() }}</span>
                   </div>
-                  <a class="tesso-button tesso-button-primary tesso-button-md" href="/docs/install">Read the docs</a>
                 </div>
               </div>
               <div class="why">
@@ -131,14 +167,15 @@
               <div class="docs-tools">
                 <button
                   type="button"
-                  class="tesso-button tesso-button-quiet tesso-button-sm"
+                  class="docs-md-copy tesso-button tesso-button-quiet tesso-button-sm"
                   aria-label="Copy page as Markdown"
                   on:click="state.copy_markdown()"
                 >
-                  {{ state.markdown_label() }}
+                  Copy as Markdown
                 </button>
                 <a class="docs-md-link" href="{{ state.docs_md_href() }}">View as Markdown</a>
                 <span class="sr-only" aria-live="polite">{{ state.markdown_status() }}</span>
+                <span class="sr-only" id="snippet-copy-status" aria-live="polite"></span>
               </div>
               <div class="docs-article content">
 
@@ -338,5 +375,11 @@ fusor dev</pre>
       </div>
       </div>
     </App>
+    <script>
+      document.addEventListener("fusor:error", function () {
+        var el = document.getElementById("boot-error");
+        if (el) el.hidden = false;
+      });
+    </script>
   </body>
 </html>

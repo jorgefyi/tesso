@@ -69,18 +69,52 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--background);
   color: var(--foreground);
   font-family: InterVariable, sans-serif;
   font-optical-sizing: auto;
+  font-synthesis: none;
   font-weight: 400;
   font-size: var(--text-base);
   line-height: var(--leading-normal);
   font-feature-settings: "cv11", "cv05";
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+button,
+[role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.boot-error {
+  margin: 0;
+  padding: --spacing(3) --spacing(4);
+  background: color-mix(in oklch, var(--destructive) 12%, var(--background));
+  color: var(--foreground);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.dark .tesso-card,
+.dark .tesso-dialog-panel {
+  box-shadow: 0 0 0 theme(spacing.px)
+    color-mix(in oklch, var(--foreground) 8%, transparent);
 }
 
 ::selection {
@@ -193,8 +227,10 @@ pre code {
   inset: calc(var(--hit-outset) * -1);
 }
 
-.mark:hover {
-  opacity: 0.7;
+@media (hover: hover) and (pointer: fine) {
+  .mark:hover {
+    opacity: 0.7;
+  }
 }
 
 .mark:focus-visible,
@@ -228,14 +264,18 @@ pre code {
 .nav a::before {
   content: "";
   position: absolute;
-  inset: calc(var(--hit-outset) * -1);
+  /* Horizontal inset is half .nav gap so neighbors never overlap. */
+  inset-block: calc(var(--hit-outset) * -1);
+  inset-inline: calc(--spacing(2.5) * -1);
 }
 
-.nav a:hover {
-  color: var(--foreground);
-  text-decoration: underline;
-  text-decoration-thickness: from-font;
-  text-underline-offset: 0.12em;
+@media (hover: hover) and (pointer: fine) {
+  .nav a:hover {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-offset: --spacing(0.5);
+  }
 }
 
 .nav a[aria-current="page"] {
@@ -261,11 +301,16 @@ pre code {
 .theme-toggle::before {
   content: "";
   position: absolute;
-  inset: calc(var(--hit-outset) * -1);
+  /* Match half .top-bar gap toward the nav; keep full outset on the outer edge. */
+  inset-block: calc(var(--hit-outset) * -1);
+  inset-inline-start: calc(--spacing(2.5) * -1);
+  inset-inline-end: calc(var(--hit-outset) * -1);
 }
 
-.theme-toggle:hover {
-  background: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle:hover {
+    background: var(--accent);
+  }
 }
 
 .theme-toggle:active {
@@ -285,14 +330,16 @@ pre code {
   height: --spacing(3.5);
   border-radius: calc(infinity * 1px);
   background: var(--foreground);
-  transition-property: left;
+  /* Travel = toggle width − knob − both insets = --spacing(9 − 3.5 − 0.5 − 0.5). */
+  transform: translateX(0);
+  transition-property: transform;
   transition-duration: var(--duration);
   transition-timing-function: var(--easing);
   pointer-events: none;
 }
 
 .theme-toggle.is-dark .theme-knob {
-  left: calc(100% - --spacing(3.5) - --spacing(0.5));
+  transform: translateX(--spacing(4.5));
 }
 
 button.tesso-button,
@@ -303,29 +350,31 @@ a.tesso-button {
   transition-timing-function: var(--easing);
 }
 
-button.tesso-button:hover:not(:disabled),
-a.tesso-button:hover {
-  background: color-mix(in oklch, var(--background) var(--hover-mix), var(--foreground));
-}
+@media (hover: hover) and (pointer: fine) {
+  button.tesso-button:hover:not(:disabled),
+  a.tesso-button:hover {
+    background: color-mix(in oklch, var(--background) var(--hover-mix), var(--foreground));
+  }
 
-button.tesso-button-primary:hover:not(:disabled),
-a.tesso-button-primary:hover {
-  background: color-mix(in oklch, var(--primary) var(--hover-mix), var(--foreground));
-}
+  button.tesso-button-primary:hover:not(:disabled),
+  a.tesso-button-primary:hover {
+    background: color-mix(in oklch, var(--primary) var(--hover-mix), var(--foreground));
+  }
 
-button.tesso-button-secondary:hover:not(:disabled),
-a.tesso-button-secondary:hover {
-  background: color-mix(in oklch, var(--secondary) var(--hover-mix), var(--foreground));
-}
+  button.tesso-button-secondary:hover:not(:disabled),
+  a.tesso-button-secondary:hover {
+    background: color-mix(in oklch, var(--secondary) var(--hover-mix), var(--foreground));
+  }
 
-button.tesso-button-quiet:hover:not(:disabled),
-a.tesso-button-quiet:hover {
-  background: color-mix(in oklch, var(--muted) var(--hover-mix), var(--foreground));
-}
+  button.tesso-button-quiet:hover:not(:disabled),
+  a.tesso-button-quiet:hover {
+    background: color-mix(in oklch, var(--muted) var(--hover-mix), var(--foreground));
+  }
 
-button.tesso-button-danger:hover:not(:disabled),
-a.tesso-button-danger:hover {
-  background: color-mix(in oklch, var(--destructive) var(--hover-mix), var(--foreground));
+  button.tesso-button-danger:hover:not(:disabled),
+  a.tesso-button-danger:hover {
+    background: color-mix(in oklch, var(--destructive) var(--hover-mix), var(--foreground));
+  }
 }
 
 button.tesso-button:active:not(:disabled),
@@ -374,10 +423,20 @@ a.tesso-button:focus-visible {
   letter-spacing: var(--tracking-tight);
 }
 
-.sub {
-  margin: --spacing(5) 0 0;
-  color: var(--muted-foreground);
+.hero-line {
+  margin: --spacing(4) 0 0;
+  color: var(--foreground);
   font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+
+.sub {
+  margin: --spacing(3) 0 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-lg);
   line-height: var(--leading-normal);
   text-wrap: pretty;
 }
@@ -385,31 +444,37 @@ a.tesso-button:focus-visible {
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: --spacing(3);
+  gap: --spacing(4);
   margin-top: --spacing(8);
 }
 
 .command {
-  --command-pad: --spacing(1);
+  --command-pad: --spacing(0.5);
   --command-radius: calc(infinity * 1px);
   display: flex;
   align-items: center;
-  gap: --spacing(3);
+  gap: --spacing(2);
   margin: 0;
   padding: var(--command-pad);
-  background: var(--muted);
-  border: theme(spacing.px) solid var(--border);
+  background: transparent;
+  border: theme(spacing.px) solid color-mix(in oklch, var(--foreground) 12%, transparent);
   border-radius: var(--command-radius);
   line-height: 1;
+  color: var(--muted-foreground);
+}
+
+.dark .command {
+  border-color: var(--border);
 }
 
 .command code {
-  padding-left: --spacing(3);
-  font-size: var(--text-sm);
+  padding-left: --spacing(2.5);
+  font-size: var(--text-xs);
   line-height: 1;
-  color: var(--foreground);
+  color: var(--muted-foreground);
 }
 
 .command .tesso-button {
@@ -556,11 +621,13 @@ a.tesso-button:focus-visible {
   inset: calc(var(--hit-outset) * -1);
 }
 
-.foot a:hover {
-  color: var(--foreground);
-  text-decoration: underline;
-  text-decoration-thickness: from-font;
-  text-underline-offset: 0.12em;
+@media (hover: hover) and (pointer: fine) {
+  .foot a:hover {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-offset: --spacing(0.5);
+  }
 }
 
 .docs {
@@ -578,6 +645,18 @@ a.tesso-button:focus-visible {
   padding: --spacing(6) --spacing(4) --spacing(8) 0;
   overflow: auto;
   border-right: theme(spacing.px) solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--foreground) var(--scrollbar-mix), transparent) transparent;
+}
+
+.docs-side::-webkit-scrollbar {
+  width: --spacing(2);
+  height: --spacing(2);
+}
+
+.docs-side::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--foreground) var(--scrollbar-mix), transparent);
+  border-radius: var(--radius-sm);
 }
 
 .dark .docs-side {
@@ -618,9 +697,11 @@ a.docs-nav-link {
   transition-timing-function: var(--easing);
 }
 
-a.docs-nav-link:hover {
-  color: var(--foreground);
-  background: var(--muted);
+@media (hover: hover) and (pointer: fine) {
+  a.docs-nav-link:hover {
+    color: var(--foreground);
+    background: var(--muted);
+  }
 }
 
 a.docs-nav-link[aria-current="page"] {
@@ -642,13 +723,27 @@ a.docs-nav-link[aria-current="page"] {
   gap: --spacing(3);
 }
 
+.docs-md-copy {
+  position: relative;
+  min-width: --spacing(10);
+  min-height: --spacing(10);
+}
+
+.docs-md-copy::before {
+  content: "";
+  position: absolute;
+  /* Half .docs-tools gap toward the md link; keep full vertical outset. */
+  inset-block: calc(var(--hit-outset) * -1);
+  inset-inline: calc(--spacing(1.5) * -1);
+}
+
 a.docs-md-link {
   position: relative;
   color: var(--muted-foreground);
   font-size: var(--text-sm);
   text-decoration: underline;
   text-decoration-thickness: from-font;
-  text-underline-offset: 0.12em;
+  text-underline-offset: --spacing(0.5);
   transition-property: color;
   transition-duration: var(--duration);
   transition-timing-function: var(--easing);
@@ -657,11 +752,15 @@ a.docs-md-link {
 a.docs-md-link::before {
   content: "";
   position: absolute;
-  inset: calc(var(--hit-outset) * -1);
+  /* Half .docs-tools gap so the hit area does not collide with the copy button. */
+  inset-block: calc(var(--hit-outset) * -1);
+  inset-inline: calc(--spacing(1.5) * -1);
 }
 
-a.docs-md-link:hover {
-  color: var(--foreground);
+@media (hover: hover) and (pointer: fine) {
+  a.docs-md-link:hover {
+    color: var(--foreground);
+  }
 }
 
 .docs-article.content {
@@ -682,7 +781,7 @@ a.docs-md-link:hover {
 .docs-article p,
 .docs-article ul {
   max-width: 65ch;
-  line-height: 1.55;
+  line-height: var(--leading-normal);
   text-wrap: pretty;
 }
 
@@ -736,7 +835,7 @@ a.docs-md-link:hover {
 
 h1 {
   margin: 0;
-  font-size: --spacing(8);
+  font-size: var(--text-2xl);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
 }
@@ -840,8 +939,12 @@ pre::-webkit-scrollbar-thumb {
     font-size: var(--text-4xl);
   }
 
-  .sub {
+  .hero-line {
     font-size: var(--text-lg);
+  }
+
+  .sub {
+    font-size: var(--text-base);
   }
 
   .why-grid {
