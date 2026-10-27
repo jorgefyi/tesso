@@ -17,9 +17,9 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  # Stated minimum. The example pins fusor-build 0.1.7. CLI 0.1.8 refuses
+  # Stated minimum. The example pins fusor-build 0.1.7. CLI 0.1.9 refuses
   # that pin, so this job installs CLI 0.1.7 itself and builds only the
-  # example. The site pins 0.1.8, so it is not built here.
+  # example. The site pins 0.1.9, so it is not built here.
   fusor-0-1-7:
     runs-on: ubuntu-latest
     steps:
@@ -43,10 +43,10 @@ jobs:
           fusor install
           fusor build
 
-  # CLI from main, which is the 0.1.8 release. Builds the site (pinned to
-  # fusor-build 0.1.8). Does not build the 0.1.7 example. A fusor-0-1-8
+  # CLI from main, which is the 0.1.9 release. Builds the site (pinned to
+  # fusor-build 0.1.9). Does not build the 0.1.7 example. A fusor-0-1-9
   # job would repeat this site build. Deploy installs the same release
-  # with install.sh v0.1.8.
+  # with install.sh v0.1.9.
   fusor-main:
     runs-on: ubuntu-latest
     steps:
