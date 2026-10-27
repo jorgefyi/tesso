@@ -157,14 +157,6 @@ impl App {
         );
     }
 
-    fn markdown_label(&self) -> &'static str {
-        if self.markdown_copied.get() {
-            "Copied"
-        } else {
-            "Copy as Markdown"
-        }
-    }
-
     fn markdown_status(&self) -> &'static str {
         if self.markdown_copied.get() { "Copied" } else { "" }
     }
@@ -194,7 +186,8 @@ impl App {
         self.route != "/docs/dialog"
     }
     fn hide_test(&self) -> bool {
-        self.route != "/test"
+        // Scaffolding route gated out of public surfaces (prep-for-prod H10).
+        true
     }
 
     fn button_snippet(&self) -> &'static str {
@@ -239,6 +232,11 @@ fn install_snippet_copy() {
         if let Ok(Some(done)) = btn.query_selector("[data-copy-done]") {
             let _ = done.remove_attribute("hidden");
         }
+        if let Some(doc) = web_sys::window().and_then(|w| w.document()) {
+            if let Ok(Some(live)) = doc.query_selector("#snippet-copy-status") {
+                live.set_text_content(Some("Copied"));
+            }
+        }
         let btn = btn.clone();
         let callback = Closure::once_into_js(move || {
             if let Ok(Some(idle)) = btn.query_selector("[data-copy-idle]") {
@@ -246,6 +244,11 @@ fn install_snippet_copy() {
             }
             if let Ok(Some(done)) = btn.query_selector("[data-copy-done]") {
                 let _ = done.set_attribute("hidden", "");
+            }
+            if let Some(doc) = web_sys::window().and_then(|w| w.document()) {
+                if let Ok(Some(live)) = doc.query_selector("#snippet-copy-status") {
+                    live.set_text_content(Some(""));
+                }
             }
         });
         let _ = window.set_timeout_with_callback_and_timeout_and_arguments_0(
