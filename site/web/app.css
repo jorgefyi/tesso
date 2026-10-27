@@ -52,6 +52,7 @@
   --press-scale: 0.96;
   --hover-mix: 88%;
   --scrollbar-mix: 20%;
+  --soft-border: color-mix(in oklch, var(--foreground) 12%, transparent);
   --z-sticky: 40;
   --header-offset: --spacing(16);
 }
@@ -596,7 +597,7 @@ a.tesso-button:focus-visible {
   padding: --spacing(6) 0 calc(--spacing(4) + env(safe-area-inset-bottom));
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
-  border-top: theme(spacing.px) solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  border-top: theme(spacing.px) solid var(--soft-border);
   color: var(--muted-foreground);
   font-size: var(--text-sm);
 }
@@ -644,7 +645,7 @@ a.tesso-button:focus-visible {
   height: calc(100dvh - var(--header-offset));
   padding: --spacing(6) --spacing(4) --spacing(8) 0;
   overflow: auto;
-  border-right: theme(spacing.px) solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  border-right: theme(spacing.px) solid var(--soft-border);
   scrollbar-width: thin;
   scrollbar-color: color-mix(in oklch, var(--foreground) var(--scrollbar-mix), transparent) transparent;
 }
@@ -770,7 +771,7 @@ a.docs-md-link::before {
 
 .docs-article section[data-page] {
   display: grid;
-  gap: 1lh;
+  gap: --spacing(6);
 }
 
 .docs-article h1,
