@@ -2,47 +2,63 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { loadRegistry, validateRegistry } from "../src/registry.js";
+import { validateComponent } from "../src/registry.js";
 import { TOKEN_IDS } from "../src/tokens-css.js";
 
 const repo = path.resolve(import.meta.dirname, "..");
+const registry = path.join(repo, "registry");
 
-test("the bundled registry is valid and its files exist", () => {
-  const registry = loadRegistry();
-  assert.equal(registry.registryUrl, null);
-  assert.equal(registry.name, "tesso");
-  assert.deepEqual(validateRegistry(registry, path.join(repo, "registry")), []);
-  const names = registry.items.map((item) => item.name);
-  assert.deepEqual(names, ["button", "card", "dialog"]);
-  const dialog = registry.items.find((item) => item.name === "dialog");
+function load(name) {
+  return JSON.parse(fs.readFileSync(path.join(registry, `${name}.json`), "utf8"));
+}
+
+test("each component is one JSON file and the old source copies are gone", () => {
+  assert.equal(fs.existsSync(path.join(registry, "components")), false);
+  assert.equal(fs.existsSync(path.join(registry, "registry.json")), false);
+  const names = fs.readdirSync(registry).filter((name) => name.endsWith(".json")).sort();
+  assert.deepEqual(names, ["button.json", "card.json", "dialog.json"]);
+  const dialog = validateComponent(load("dialog"));
   assert.deepEqual(dialog.dependencies, ["button"]);
+  assert.equal(dialog.tessoUi, "0.4.1");
+  assert.equal(dialog.fusor, "0.1.7");
+  assert.equal(load("button").fusor, "0.1.7");
+  assert.equal(load("card").fusor, "0.1.7");
+  const button = load("button").files.find((file) => file.target.endsWith("button.rs")).content;
+  assert.match(button, /#\[input\(default = "primary"\)\]\s+variant: &'static str,/);
+  assert.match(button, /#\[input\(default = "md"\)\]\s+size: &'static str,/);
+  const dialogRust = load("dialog").files.find((file) => file.target.endsWith("dialog.rs")).content;
+  assert.match(dialogRust, /#\[derive\(fusor::Inputs\)\]\s+pub struct DialogInputs/);
 });
 
 test("component css uses plain variables inside @layer components", () => {
-  const registry = loadRegistry();
   const reserved = /var\(--(?:tesso-|ft-|color-|font-|shadow-|radius-|spacing|text-|leading-)/;
-  for (const item of registry.items) {
-    const css = fs.readFileSync(path.join(repo, "registry/components", item.css.source), "utf8");
+  for (const name of ["button", "card", "dialog"]) {
+    const item = validateComponent(load(name));
+    const css = item.css.content;
     assert.match(css, /@layer components/);
     assert.doesNotMatch(css, /--ft-/);
-    assert.doesNotMatch(css, reserved, item.name);
+    assert.doesNotMatch(css, reserved, name);
     const variables = css.match(/var\(--[^)]+\)/g) ?? [];
-    assert.ok(variables.length > 0, item.name);
-  }
-});
-
-test("registry tokens exist in the starter set", () => {
-  const registry = loadRegistry();
-  const ids = new Set(TOKEN_IDS);
-  for (const item of registry.items) {
-    for (const token of item.tokens) {
-      assert.equal(ids.has(token), true, `${item.name} token ${token}`);
+    assert.ok(variables.length > 0, name);
+    for (const variable of item.cssVariables) {
+      assert.equal(TOKEN_IDS.includes(variable.slice(2)), true, `${name} ${variable}`);
     }
   }
 });
 
+test("button focus keeps a ring for keyboard and clears it only for pointer", () => {
+  const css = load("button").css.content;
+  assert.match(css, /\.tesso-button:focus \{\s*outline: 2px solid var\(--ring\);\s*outline-offset: 2px;\s*\}/);
+  assert.match(css, /\.tesso-button:focus:not\(:focus-visible\) \{\s*outline: none;\s*\}/);
+  assert.doesNotMatch(css, /\.tesso-button:focus \{\s*outline: none;/);
+  const built = fs.readFileSync(path.join(repo, "site", "public", "tesso.css"), "utf8");
+  assert.match(built, /\.tesso-button:focus:not\(:focus-visible\)/);
+  assert.doesNotMatch(built, /\.tesso-button:focus \{\s*outline: none;/);
+});
+
 test("dialog markup is a native modal wired to the tested decisions", () => {
-  const html = fs.readFileSync(path.join(repo, "registry/components/dialog/dialog.html"), "utf8");
+  const item = load("dialog");
+  const html = item.files.find((file) => file.target.endsWith("dialog.html")).content;
   assert.match(html, /<dialog/);
   assert.match(html, /role="dialog"/);
   assert.match(html, /aria-modal="true"/);
@@ -52,11 +68,10 @@ test("dialog markup is a native modal wired to the tested decisions", () => {
   assert.match(html, /on:click="state\.on_backdrop_click\(&event\)"/);
   assert.match(html, /on:cancel="state\.on_cancel\(&event\)"/);
   assert.match(html, /on:close="state\.on_native_close\(\)"/);
-  const css = fs.readFileSync(path.join(repo, "registry/components/dialog/dialog.css"), "utf8");
-  assert.match(css, /\.tesso-dialog::backdrop/);
-  assert.match(css, /var\(--foreground\)/);
-  assert.doesNotMatch(css, /\.tesso-dialog\s*\{[^}]*display\s*:/);
-  const rust = fs.readFileSync(path.join(repo, "registry/components/dialog/dialog.rs"), "utf8");
+  assert.match(item.css.content, /\.tesso-dialog::backdrop/);
+  assert.match(item.css.content, /var\(--foreground\)/);
+  assert.doesNotMatch(item.css.content, /\.tesso-dialog\s*\{[^}]*display\s*:/);
+  const rust = item.files.find((file) => file.target.endsWith("dialog.rs")).content;
   assert.match(rust, /\.show_modal\(\)/);
   assert.match(rust, /dialog_a11y::choose_opener/);
   assert.match(rust, /dialog_a11y::should_restore_focus/);
@@ -65,4 +80,5 @@ test("dialog markup is a native modal wired to the tested decisions", () => {
   assert.match(rust, /\.escape\(\)/);
   assert.doesNotMatch(rust, /reopen_dialog|EscapeGate/);
   assert.doesNotMatch(rust, /keydown/);
+  assert.doesNotMatch(html, /<svg/i);
 });

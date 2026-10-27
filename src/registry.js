@@ -1,148 +1,241 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { rootCustomProperties } from "./css-tokens.js";
+import { DEFAULT_REGISTRY, PACKAGE_VERSION } from "./constants.js";
 
-const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-
-export function registryRoot() {
-  return path.join(packageRoot, "registry");
-}
-
-export function bundledRegistryPath() {
-  return path.join(registryRoot(), "registry.json");
-}
+const NAME = /^[a-z][a-z0-9-]*$/;
+const VERSION = /^\d+\.\d+\.\d+$/;
 
 /**
- * The built-in registry is a JSON document with a null `registryUrl`.
- * A future release can fetch that same document from `tesso.config.json`'s
- * `registry` URL. The URL is rejected here until that fetch exists.
+ * Where `add` and `list` read component JSON.
+ * A flag wins, then `tesso.config.json`'s `registry`, then https://tesso.fyi/r/.
  */
-export function loadRegistry(config = {}) {
-  if (config.registry) {
-    throw new Error(
-      `Remote registry ${config.registry} is not implemented yet. ` +
-        "The built-in registry is the same JSON document, with registryUrl set when it is hosted. " +
-        'Remove "registry" from tesso.config.json to use the components shipped with tesso-ui.',
-    );
+export function resolveRegistry(value, cwd) {
+  const raw = value == null || value === "" ? DEFAULT_REGISTRY : String(value);
+  if (/^https?:\/\//i.test(raw)) {
+    const href = raw.endsWith("/") ? raw : `${raw}/`;
+    return { kind: "url", href, label: href };
   }
-  return readRegistryFile(bundledRegistryPath());
+  const dir = path.resolve(cwd, raw);
+  return { kind: "dir", dir, href: dir, label: dir };
 }
 
-export function readRegistryFile(file) {
-  const json = JSON.parse(fs.readFileSync(file, "utf8"));
-  const errors = validateRegistry(json, path.dirname(file));
-  if (errors.length) {
-    throw new Error(`Registry ${file} is invalid:\n${errors.map((error) => `  ${error}`).join("\n")}`);
-  }
-  return json;
-}
-
-export function validateRegistry(json, root) {
-  const errors = [];
-  if (!json || typeof json !== "object" || Array.isArray(json)) {
-    return ["registry must be a JSON object"];
-  }
-  if (typeof json.name !== "string" || json.name.length === 0) errors.push("name must be a non-empty string");
-  if (!("registryUrl" in json)) errors.push("registryUrl must be present (null while the registry is bundled)");
-  else if (json.registryUrl !== null && typeof json.registryUrl !== "string") {
-    errors.push("registryUrl must be null or a string");
-  }
-  if (!Array.isArray(json.items) || json.items.length === 0) {
-    errors.push("items must be a non-empty array");
-    return errors;
-  }
-  const names = new Set();
-  for (const item of json.items) {
-    if (!item || typeof item.name !== "string" || !/^[a-z][a-z0-9-]*$/.test(item.name)) {
-      errors.push("each item needs a kebab-case name");
-      continue;
-    }
-    if (names.has(item.name)) errors.push(`duplicate item ${item.name}`);
-    names.add(item.name);
-    if (typeof item.title !== "string" || item.title.length === 0) errors.push(`${item.name} is missing title`);
-    if (typeof item.description !== "string" || item.description.length === 0) {
-      errors.push(`${item.name} is missing description`);
-    }
-    if (!Array.isArray(item.dependencies)) errors.push(`${item.name} dependencies must be an array`);
-    if (!Array.isArray(item.tokens) || item.tokens.length === 0) {
-      errors.push(`${item.name} tokens must be a non-empty array`);
-    } else if (item.tokens.some((token) => typeof token !== "string" || token.length === 0)) {
-      errors.push(`${item.name} tokens must be token ids`);
-    }
-    if (!Array.isArray(item.files) || item.files.length === 0) errors.push(`${item.name} files must be a non-empty array`);
-    else {
-      for (const file of item.files) {
-        if (!file || typeof file.source !== "string" || typeof file.target !== "string") {
-          errors.push(`${item.name} has a file without source and target`);
-          continue;
-        }
-        if (!isSafeRelative(file.source) || !isSafeRelative(file.target)) {
-          errors.push(`${item.name} file path must stay inside the project: ${file.source} -> ${file.target}`);
-          continue;
-        }
-        if (root && !fs.existsSync(path.join(root, "components", file.source))) {
-          errors.push(`${item.name} is missing components/${file.source}`);
-        }
-      }
-    }
-    if (!item.css || typeof item.css.source !== "string" || typeof item.css.marker !== "string") {
-      errors.push(`${item.name} css needs source and marker`);
-    } else if (!isSafeRelative(item.css.source)) {
-      errors.push(`${item.name} css source must stay inside the registry`);
-    } else if (root && !fs.existsSync(path.join(root, "components", item.css.source))) {
-      errors.push(`${item.name} is missing components/${item.css.source}`);
-    }
-    if (!Array.isArray(item.rustModules) || item.rustModules.length === 0) {
-      errors.push(`${item.name} rustModules must list the modules add should declare`);
-    }
-    if (item.cargo != null) {
-      const features = item.cargo.webSysFeatures;
-      if (!Array.isArray(features) || features.some((feature) => typeof feature !== "string")) {
-        errors.push(`${item.name} cargo.webSysFeatures must be an array of strings`);
-      }
-    }
-  }
-  for (const item of json.items) {
-    if (!item || !Array.isArray(item.dependencies)) continue;
-    for (const dependency of item.dependencies) {
-      if (!names.has(dependency)) errors.push(`${item.name} depends on unknown component ${dependency}`);
-      if (dependency === item.name) errors.push(`${item.name} depends on itself`);
-    }
-  }
-  return errors;
-}
-
-export function resolveItems(registry, requested) {
-  const byName = new Map(registry.items.map((item) => [item.name, item]));
-  const unknown = requested.filter((name) => !byName.has(name));
-  if (unknown.length) {
-    const known = registry.items.map((item) => item.name).join(", ");
-    throw new Error(`Unknown component ${unknown.join(", ")}. Known components: ${known}. Run \`tesso list\`.`);
-  }
+export async function loadComponents(registry, names) {
   const ordered = [];
-  const seen = new Set();
-  const visit = (name) => {
-    if (seen.has(name)) return;
-    seen.add(name);
-    const item = byName.get(name);
-    for (const dependency of item.dependencies) visit(dependency);
+  const stack = new Set();
+  const visit = async (name) => {
+    if (ordered.some((item) => item.name === name)) return;
+    if (stack.has(name)) throw new Error(`Component ${name} depends on itself.`);
+    if (typeof name !== "string" || !NAME.test(name)) {
+      throw new Error(`Unknown component ${name}.`);
+    }
+    stack.add(name);
+    const item = validateComponent(await readComponent(registry, name));
+    for (const dependency of item.dependencies) await visit(dependency);
+    stack.delete(name);
     ordered.push(item);
   };
-  for (const name of requested) visit(name);
+  for (const name of names) await visit(name);
   return ordered;
 }
 
-export function readComponentText(relativeSource) {
-  return fs.readFileSync(path.join(registryRoot(), "components", relativeSource), "utf8");
+export async function listComponents(registry) {
+  if (registry.kind === "dir") return listLocal(registry);
+  return listRemote(registry);
 }
 
-export function projectTokenIds(cwd, config) {
-  const file = path.resolve(cwd, config.outFile);
-  if (!fs.existsSync(file)) return [];
-  const names = rootCustomProperties(fs.readFileSync(file, "utf8"));
-  const prefix = config.prefix ? `${config.prefix}-` : "";
-  return names.map((name) => (prefix && name.startsWith(prefix) ? name.slice(prefix.length) : name));
+/** Refuse when this CLI is older than a component's minimum tesso-ui version. */
+export function assertCliVersion(items) {
+  const problems = [];
+  for (const item of items) {
+    if (compareVersions(PACKAGE_VERSION, item.tessoUi) < 0) {
+      problems.push(
+        `${item.name} requires tesso-ui ${item.tessoUi} or newer. This CLI is ${PACKAGE_VERSION}.`,
+      );
+    }
+  }
+  if (problems.length) throw new Error(problems.join("\n"));
+}
+
+/** Refuse when Cargo.toml pins an older fusor-core than the component asks for. */
+export function assertFusorVersion(cargoSource, items) {
+  if (!cargoSource) return;
+  const found = readFusorCoreVersion(cargoSource);
+  if (!found) return;
+  const problems = [];
+  for (const item of items) {
+    if (compareVersions(found, item.fusor) < 0) {
+      problems.push(
+        `${item.name} requires Fusor ${item.fusor} or newer. This app depends on fusor-core ${found}.`,
+      );
+    }
+  }
+  if (problems.length) throw new Error(problems.join("\n"));
+}
+
+export function compareVersions(left, right) {
+  const a = String(left).replace(/^v/, "").split(".").map((part) => Number(part));
+  const b = String(right).replace(/^v/, "").split(".").map((part) => Number(part));
+  for (let i = 0; i < 3; i += 1) {
+    const diff = (a[i] || 0) - (b[i] || 0);
+    if (diff !== 0) return diff < 0 ? -1 : 1;
+  }
+  return 0;
+}
+
+export function tokenIds(item) {
+  return item.cssVariables.map((name) => name.replace(/^--/, ""));
+}
+
+async function readComponent(registry, name) {
+  if (registry.kind === "dir") {
+    if (!fs.existsSync(registry.dir) || !fs.statSync(registry.dir).isDirectory()) {
+      throw new Error(`Registry folder ${registry.label} was not found.`);
+    }
+    const file = path.join(registry.dir, `${name}.json`);
+    if (!fs.existsSync(file)) {
+      throw new Error(`Unknown component ${name}. ${name}.json was not found in ${registry.label}.`);
+    }
+    return parseJson(fs.readFileSync(file, "utf8"), file);
+  }
+  const url = new URL(`${name}.json`, registry.href).href;
+  const text = await fetchText(url, `Unknown component ${name}. ${url} was not found.`);
+  return parseJson(text, url);
+}
+
+async function listLocal(registry) {
+  if (!fs.existsSync(registry.dir) || !fs.statSync(registry.dir).isDirectory()) {
+    throw new Error(`Registry folder ${registry.label} was not found.`);
+  }
+  const names = fs
+    .readdirSync(registry.dir)
+    .filter((name) => name.endsWith(".json") && name !== "index.json")
+    .sort();
+  if (names.length === 0) throw new Error(`Registry folder ${registry.label} has no component JSON files.`);
+  const items = [];
+  for (const name of names) {
+    const file = path.join(registry.dir, name);
+    items.push(summarize(validateComponent(parseJson(fs.readFileSync(file, "utf8"), file))));
+  }
+  return items;
+}
+
+async function listRemote(registry) {
+  const url = new URL("index.json", registry.href).href;
+  const text = await fetchText(url, `Registry index ${url} was not found.`);
+  const json = parseJson(text, url);
+  const components = json.components ?? json.items;
+  if (!Array.isArray(components) || components.length === 0) {
+    throw new Error(`Registry index ${url} has no components.`);
+  }
+  return components.map((item, index) => {
+    if (!item || typeof item.name !== "string") {
+      throw new Error(`Registry index ${url} item ${index} is missing a name.`);
+    }
+    return {
+      name: item.name,
+      title: item.title ?? item.name,
+      description: item.description ?? "",
+      dependencies: Array.isArray(item.dependencies) ? item.dependencies : [],
+    };
+  });
+}
+
+async function fetchText(url, missingMessage) {
+  let response;
+  try {
+    response = await fetch(url, { signal: AbortSignal.timeout(15000), redirect: "follow" });
+  } catch (error) {
+    const reason = error?.cause?.message || error.message;
+    throw new Error(`Could not reach the registry at ${url}. ${reason}`);
+  }
+  if (response.status === 404) throw new Error(missingMessage);
+  if (!response.ok) {
+    throw new Error(`Could not reach the registry at ${url}. The server responded ${response.status}.`);
+  }
+  return response.text();
+}
+
+function parseJson(text, label) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`${label} is not valid JSON (${error.message}).`);
+  }
+}
+
+export function validateComponent(json) {
+  const errors = [];
+  if (!json || typeof json !== "object" || Array.isArray(json)) {
+    throw new Error("A component file must be a JSON object.");
+  }
+  const name = typeof json.name === "string" ? json.name : "component";
+  if (!NAME.test(json.name ?? "")) errors.push(`${name} needs a kebab-case name`);
+  if (typeof json.title !== "string" || json.title.length === 0) errors.push(`${name} is missing title`);
+  if (typeof json.description !== "string" || json.description.length === 0) {
+    errors.push(`${name} is missing description`);
+  }
+  if (!Array.isArray(json.dependencies)) errors.push(`${name} dependencies must be an array`);
+  else if (json.dependencies.some((dependency) => typeof dependency !== "string" || !NAME.test(dependency))) {
+    errors.push(`${name} dependencies must be component names`);
+  }
+  if (!Array.isArray(json.cssVariables) || json.cssVariables.length === 0) {
+    errors.push(`${name} cssVariables must list the custom properties it uses`);
+  } else if (json.cssVariables.some((variable) => typeof variable !== "string" || !/^--[a-z0-9-]+$/.test(variable))) {
+    errors.push(`${name} cssVariables must look like --primary`);
+  }
+  if (!VERSION.test(json.tessoUi ?? "")) errors.push(`${name} tessoUi must be a version like 0.4.1`);
+  if (!VERSION.test(json.fusor ?? "")) errors.push(`${name} fusor must be a version like 0.1.6`);
+  if (!Array.isArray(json.files) || json.files.length === 0) errors.push(`${name} files must be a non-empty array`);
+  else {
+    for (const file of json.files) {
+      if (!file || typeof file.target !== "string" || typeof file.content !== "string") {
+        errors.push(`${name} files need a target path and content`);
+        continue;
+      }
+      if (!isSafeRelative(file.target)) errors.push(`${name} target must stay inside the project: ${file.target}`);
+    }
+  }
+  if (json.css != null) {
+    if (typeof json.css.target !== "string" || typeof json.css.marker !== "string" || typeof json.css.content !== "string") {
+      errors.push(`${name} css needs target, marker, and content`);
+    } else if (!isSafeRelative(json.css.target) || !/^[a-z0-9-]+$/.test(json.css.marker)) {
+      errors.push(`${name} css target or marker is invalid`);
+    }
+  }
+  if (json.rustModules != null) {
+    if (!Array.isArray(json.rustModules)) errors.push(`${name} rustModules must be an array`);
+    else {
+      for (const rustModule of json.rustModules) {
+        if (!rustModule || typeof rustModule.module !== "string" || !/^[a-z_][a-z0-9_]*$/.test(rustModule.module)) {
+          errors.push(`${name} rustModules entries need a module name`);
+        }
+      }
+    }
+  }
+  if (json.cargo != null) {
+    const features = json.cargo.webSysFeatures;
+    if (!Array.isArray(features) || features.some((feature) => typeof feature !== "string")) {
+      errors.push(`${name} cargo.webSysFeatures must be an array of strings`);
+    }
+  }
+  if (errors.length) throw new Error(errors.join("\n"));
+  return json;
+}
+
+function summarize(item) {
+  return {
+    name: item.name,
+    title: item.title,
+    description: item.description,
+    dependencies: item.dependencies,
+  };
+}
+
+function readFusorCoreVersion(source) {
+  const block = /fusor-core\s*=\s*\{[^}]*version\s*=\s*"([^"]+)"/.exec(source);
+  if (block) return block[1];
+  const plain = /fusor-core\s*=\s*"([^"]+)"/.exec(source);
+  return plain ? plain[1] : null;
 }
 
 function isSafeRelative(value) {

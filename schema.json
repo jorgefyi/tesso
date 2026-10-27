@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/jorgefyi/tesso/raw/main/schema.json",
   "title": "tesso config",
-  "description": "Configuration for the tesso CLI. Tokens live in the CSS file named by outFile. The starter set is 19 plain names (--background, --foreground, --card, --card-foreground, --popover, --popover-foreground, --primary, --primary-foreground, --secondary, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --destructive, --border, --input, --ring, --radius) as raw oklch on :root and .dark. Requires Fusor 0.1.6 or newer.",
+  "description": "Configuration for the tesso CLI. Tokens live in the CSS file named by outFile. The starter set is 19 plain names (--background, --foreground, --card, --card-foreground, --popover, --popover-foreground, --primary, --primary-foreground, --secondary, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --destructive, --border, --input, --ring, --radius) as raw oklch on :root and .dark. Requires Fusor 0.1.7 or newer.",
   "type": "object",
   "additionalProperties": false,
   "required": ["outFile", "prefix"],
@@ -24,8 +24,8 @@
     },
     "registry": {
       "type": "string",
-      "description": "Reserved. An http(s) URL returning the same JSON document as the built-in registry. Omit it until remote registries exist.",
-      "pattern": "^https?://.+"
+      "description": "Registry base URL or a local folder of component JSON. Omit it to use https://tesso.fyi/r/.",
+      "minLength": 1
     }
   }
 }

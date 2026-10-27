@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "fusor-build"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99519f75b73cc2d6a1574b707f80b3bc5ed6b807f284d89a45aa85db61ea0f57"
+checksum = "00c8381bfe27fde50cf4d3a9e55df46f738d823f40a73728c3eb2e8818a5f138"
 dependencies = [
  "fusor-core",
  "fusor-islands",
@@ -99,18 +99,19 @@ dependencies = [
 
 [[package]]
 name = "fusor-components"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec3325be3d0d05926e3ce55566c60b01f5c1502a45c874477495427a15657442"
+checksum = "3a842763fe06a789186cd3ae951c599a9c7cabb2c097801d7592d3757bf2493e"
 dependencies = [
  "fusor-core",
+ "web-sys",
 ]
 
 [[package]]
 name = "fusor-core"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d500c268c1fabf7e6da901e236069fb2207c2a25a0b790952ce04e03e9c637cb"
+checksum = "8206b853d7e410db0710e676bfba7fdd53eea56f76ef3d96ae0b9ef2471c8134"
 dependencies = [
  "fusor-macros",
  "js-sys",
@@ -120,9 +121,9 @@ dependencies = [
 
 [[package]]
 name = "fusor-islands"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "afbc141450efc4b1ca699a6dcc34c35982ff70070e304cd602b50b055816fedf"
+checksum = "0cb1fc9db40a9df2ed5571df9789262857a8cb9e3e6c5a2880b85f920fdf16e2"
 dependencies = [
  "serde",
  "serde_json",
@@ -130,9 +131,9 @@ dependencies = [
 
 [[package]]
 name = "fusor-macros"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5e6fd675fdc90ea4f76dbed332e23f9d1bf12a945de1f9774fb6f65c412d64c"
+checksum = "c1192b8b01bcf5cd19fb066feb864866ba78aed6edc2e21a2356528bea474d01"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -141,9 +142,9 @@ dependencies = [
 
 [[package]]
 name = "fusor-router"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf73fba582cdc1fb5fb9f7e9509c9738020e165a8656bc1076af246f808adf13"
+checksum = "7c92dee1fc2c5072dba64aba6988230a036c79c622d598c9f468501168f9c492"
 dependencies = [
  "form_urlencoded",
  "fusor-core",

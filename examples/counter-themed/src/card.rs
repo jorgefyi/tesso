@@ -3,7 +3,7 @@
 //! `title` and `description` are static strings (`title="Shift"`). An empty
 //! string hides that line. The body is the default `<Children>` slot. A
 //! `<template slot="footer">` fills `<Children name="footer">`. Named slots
-//! need Fusor 0.1.6 or newer.
+//! need Fusor 0.1.7 or newer.
 
 use fusor::prelude::*;
 

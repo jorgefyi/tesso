@@ -36,7 +36,7 @@ test("init writes tokens.css once, config, and Cargo assets", async () => {
   assert.match(cargo, /assets = \{ "\/" = "public" \}/);
   assert.doesNotMatch(cargo, /assets-build/);
   const pkg = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
-  assert.equal(pkg.devDependencies["tesso-ui"], "^0.4.0");
+  assert.equal(pkg.devDependencies["tesso-ui"], "^0.4.1");
   assert.equal(pkg.devDependencies["@terrazzo/cli"], undefined);
 
   const edited = fs.readFileSync(cssPath, "utf8").replace("oklch(99% 0.005 260)", "oklch(98% 0.005 260)");

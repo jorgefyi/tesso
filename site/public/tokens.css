@@ -1,0 +1,44 @@
+/* Design tokens. Edit these values; tesso check reads this file. */
+
+:root {
+  --accent: oklch(91% 0.01 260);
+  --accent-foreground: oklch(18% 0.02 260);
+  --background: oklch(99% 0.005 260);
+  --border: oklch(86% 0.012 260);
+  --card: oklch(97% 0.006 260);
+  --card-foreground: oklch(18% 0.02 260);
+  --destructive: oklch(55% 0.19 25);
+  --foreground: oklch(18% 0.02 260);
+  --input: oklch(86% 0.012 260);
+  --muted: oklch(94% 0.008 260);
+  --muted-foreground: oklch(44% 0.018 260);
+  --popover: oklch(97% 0.006 260);
+  --popover-foreground: oklch(18% 0.02 260);
+  --primary: oklch(55% 0.18 264);
+  --primary-foreground: oklch(99% 0.005 260);
+  --radius: 0.625rem;
+  --ring: oklch(70% 0.16 264);
+  --secondary: oklch(94% 0.008 260);
+  --secondary-foreground: oklch(18% 0.02 260);
+}
+
+.dark {
+  --accent: oklch(44% 0.018 260);
+  --accent-foreground: oklch(99% 0.005 260);
+  --background: oklch(18% 0.02 260);
+  --border: oklch(36% 0.018 260);
+  --card: oklch(27% 0.02 260);
+  --card-foreground: oklch(99% 0.005 260);
+  --destructive: oklch(68% 0.17 25);
+  --foreground: oklch(99% 0.005 260);
+  --input: oklch(52% 0.016 260);
+  --muted: oklch(36% 0.018 260);
+  --muted-foreground: oklch(86% 0.012 260);
+  --popover: oklch(27% 0.02 260);
+  --popover-foreground: oklch(99% 0.005 260);
+  --primary: oklch(70% 0.16 264);
+  --primary-foreground: oklch(18% 0.02 260);
+  --ring: oklch(92% 0.04 264);
+  --secondary: oklch(36% 0.018 260);
+  --secondary-foreground: oklch(99% 0.005 260);
+}

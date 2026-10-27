@@ -1,0 +1,218 @@
+/* tesso:button */
+@layer properties, theme, base, components, utilities;
+
+@layer components {
+  .tesso-button {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .tesso-button:focus {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  .tesso-button:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  .tesso-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .tesso-button-primary {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: transparent;
+  }
+
+  .tesso-button-secondary {
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+    border-color: var(--border);
+  }
+
+  .tesso-button-quiet {
+    background: var(--muted);
+    color: var(--foreground);
+    border-color: transparent;
+  }
+
+  /* There's no --destructive-foreground; the danger button uses --primary-foreground for its text. */
+  .tesso-button-danger {
+    background: var(--destructive);
+    color: var(--primary-foreground);
+    border-color: transparent;
+  }
+
+  .tesso-button-sm {
+    min-height: 2rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .tesso-button-lg {
+    min-height: 3rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+  }
+}
+/* /tesso:button */
+
+/* tesso:card */
+@layer properties, theme, base, components, utilities;
+
+@layer components {
+  .tesso-card {
+    background: var(--card);
+    color: var(--card-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 0.25rem 0.75rem oklch(0% 0 0 / 0.12);
+    padding: 1.5rem;
+  }
+
+  .tesso-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .tesso-card-title {
+    margin: 0;
+    color: var(--card-foreground);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .tesso-card-description {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .tesso-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tesso-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .tesso-card-title[hidden],
+  .tesso-card-description[hidden],
+  .tesso-card-footer:empty {
+    display: none;
+  }
+}
+/* /tesso:card */
+
+/* tesso:dialog */
+@layer properties, theme, base, components, utilities;
+
+@layer components {
+  /* Do not set `display` here. The user agent hides `dialog:not([open])`, and an
+     author `display` would override that and leave a closed dialog on the page. */
+  .tesso-dialog {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+  }
+
+  .tesso-dialog[open] {
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 1rem;
+  }
+
+  .tesso-dialog::backdrop {
+    background: color-mix(in oklch, var(--foreground) 40%, transparent);
+  }
+
+  .tesso-dialog-panel {
+    position: relative;
+    width: min(100%, 30rem);
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+    padding: 1.5rem;
+    background: var(--popover);
+    color: var(--popover-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 0.75rem 2rem oklch(0% 0 0 / 0.18);
+  }
+
+  .tesso-dialog-title {
+    margin: 0;
+    padding-right: 3rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .tesso-dialog-description {
+    margin: 0.5rem 0 0;
+    color: var(--muted-foreground);
+    font: 400 0.875rem/1.5 system-ui, sans-serif;
+  }
+
+  .tesso-dialog-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .tesso-dialog-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .tesso-dialog-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .tesso-dialog-title[hidden],
+  .tesso-dialog-description[hidden],
+  .tesso-dialog-body:empty,
+  .tesso-dialog-footer:empty {
+    display: none;
+  }
+
+  html.tesso-dialog-open,
+  html.tesso-dialog-open body {
+    overflow: hidden;
+  }
+}
+/* /tesso:dialog */
