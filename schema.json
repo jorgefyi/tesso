@@ -19,8 +19,8 @@
     },
     "prefix": {
       "type": "string",
-      "description": "Optional CSS variable prefix without leading dashes. Empty emits plain names such as --background. A custom prefix emits --brand-background.",
-      "pattern": "^$|^[A-Za-z][A-Za-z0-9-]*$"
+      "description": "Must be \"\". Components and the Tailwind bridge use plain names such as --primary.",
+      "pattern": "^$"
     },
     "registry": {
       "type": "string",

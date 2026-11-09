@@ -24,11 +24,6 @@ function projectTokenIds(cwd, config) {
 export async function addCommand(cwd, names, { stdout, stderr, force, diff, registry }) {
   if (names.length === 0) throw new Error("Name at least one component. Run `tesso list` to see them.");
   const config = readConfig(cwd, { warn: (message) => stderr?.write(`${message}\n`) });
-  if (config.prefix !== "") {
-    throw new Error(
-      `Components use plain variables such as --primary, but tesso.config.json prefix is "${config.prefix}". Set prefix to "" before adding components.`,
-    );
-  }
   const source = resolveRegistry(registry ?? config.registry, cwd);
   const items = await loadComponents(source, names);
   assertCliVersion(items);
