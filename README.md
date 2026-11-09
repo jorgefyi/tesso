@@ -87,7 +87,7 @@ A file that is missing is written. A file that already matches is kept. A file t
 
 If this CLI is older than the file's minimum `tesso-ui` version, `add` writes nothing and names the version it needs. If `Cargo.toml` depends on an older `fusor-core` than the file's minimum Fusor version, it refuses the same way. If the registry cannot be reached, `add` fails and names the URL.
 
-Components require `"prefix": ""`. They read plain variables such as `--primary`. `tesso add` refuses a non-empty prefix. Their CSS is wrapped in `@layer components`, so a utility class on the same element overrides the component rule without `!important`. Each component's CSS first declares `@layer properties, theme, base, components, utilities`. `tesso.css` is linked before Tailwind, and that statement keeps preflight from landing in a later layer and wiping padding, fills, and sizes.
+`prefix` must be `""`. Components and the Tailwind bridge use plain names such as `--primary`. Component CSS is wrapped in `@layer components`, so a utility class on the same element overrides the component rule without `!important`. Each component's CSS first declares `@layer properties, theme, base, components, utilities`. `tesso.css` is linked before Tailwind, and that statement keeps preflight from landing in a later layer and wiping padding, fills, and sizes.
 
 Card and Dialog use a named `footer` child (`<Children name="footer">`, filled with `<template slot="footer">`). Named children shipped in Fusor 0.1.6. Spacing, type, and shadows in the component CSS are literals. The rules read only the tokens in the starter set.
 
@@ -215,7 +215,7 @@ body {
 }
 ```
 
-`prefix` is empty by default, so the custom property is `--background`. There is no `--tesso-` prefix. A prefix `brand` emits `--brand-background` when `init` writes the file. Light is `:root`. Dark is `.dark`.
+`prefix` must be `""`. Components and the Tailwind bridge use plain names such as `--primary`. There is no `--tesso-` prefix. Light is `:root`. Dark is `.dark`.
 
 `outFile` is the CSS file the project owns. `init` writes it when it is missing. `check` reads it.
 
@@ -311,7 +311,7 @@ Component templates do not contain inline SVG. [Fusor #38](https://github.com/fu
 
 The Vercel project root is `site`. `site/vercel.json` sets `outputDirectory` to `dist` and rewrites `/docs/install`, `/docs/init`, `/docs/check`, `/docs/add`, `/docs/button`, `/docs/card`, `/docs/dialog`, and `/test` to `/index.html`. A file that exists, including `/r/button.json`, is served as itself. Any other path is `404.html`. The root `vercel.json` is the same rule for an import that has not set the root directory yet, with output `site/dist`.
 
-The deploy job checks `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`. If any one is missing it prints a notice and exits 0, so CI stays green until those secrets exist. The site pins Fusor 0.1.9. Deploy installs that CLI with `curl -fsSL https://fusor.build/install.sh | sh -s -- v0.1.9`. CI builds the example on Fusor 0.1.7 and the site on Fusor main.
+The deploy job checks `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`. If any one is missing it prints a notice and exits 0, so CI stays green until those secrets exist. The site pins Fusor 0.1.9. Deploy and the site CI job install that CLI with `curl -fsSL https://fusor.build/install.sh | sh -s -- v0.1.9`. CI builds the example on Fusor 0.1.7 and the site on Fusor 0.1.9.
 
 To connect the project:
 
@@ -344,7 +344,7 @@ Tesso requires Fusor 0.1.7 or newer. Fusor is still pre-1.0.
 - [fusor-rs/fusor#29](https://github.com/fusor-rs/fusor/issues/29) — still open. `fusor build` doesn't download its tools. On a fresh machine it exits until you run `fusor install`.
 - [fusor-rs/fusor#52](https://github.com/fusor-rs/fusor/issues/52) — default values for `#[input]` shipped in Fusor 0.1.7 ([#56](https://github.com/fusor-rs/fusor/pull/56)). Button's `variant` and `size` default to `primary` and `md`. `Option<&str>` only omits the HTML attribute; that shipped in Fusor 0.1.6. Dialog uses it for `aria-labelledby` and `aria-describedby`.
 - [fusor-rs/fusor#38](https://github.com/fusor-rs/fusor/issues/38) — inline SVG in a component template can fail the build. Button, Card, and Dialog do not use inline SVG, and neither does the site.
-- [fusor-rs/fusor#53](https://github.com/fusor-rs/fusor/issues/53) — the Fusor 0.1.6 install script's Tailwind download does not run on glibc hosts such as GitHub's Ubuntu runners. Fusor 0.1.7 fixes that ([#57](https://github.com/fusor-rs/fusor/pull/57)). The 0.1.7 check installs the CLI with `curl -fsSL https://fusor.build/install.sh | sh -s -- v0.1.7`, because CLI 0.1.9 refuses a 0.1.7 `fusor-build` pin. The site and the deploy job use `sh -s -- v0.1.9`.
+- [fusor-rs/fusor#53](https://github.com/fusor-rs/fusor/issues/53) — the Fusor 0.1.6 install script's Tailwind download does not run on glibc hosts such as GitHub's Ubuntu runners. Fusor 0.1.7 fixes that ([#57](https://github.com/fusor-rs/fusor/pull/57)). The 0.1.7 check installs the CLI with `curl -fsSL https://fusor.build/install.sh | sh -s -- v0.1.7`, because a newer CLI refuses a 0.1.7 `fusor-build` pin. The site and the deploy job use `sh -s -- v0.1.9`.
 - Fusor 0.1.7 wants `assets = { "/" = "public" }` and accepts `tailwind = "web/app.css"`.
 - An author `display` rule on `dialog` overrides the user-agent rule `dialog:not([open]) { display: none }`. Dialog sets `display` only on `.tesso-dialog[open]`.
 - A literal component attribute is `&str`, not `String`.

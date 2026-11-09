@@ -2,8 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { CONFIG_FILENAME } from "./constants.js";
 
-const PREFIX_NAME = /^$|^[A-Za-z][A-Za-z0-9-]*$/;
-
 export { CONFIG_FILENAME };
 
 export function configPath(cwd) {
@@ -40,9 +38,9 @@ export function validateConfig(json) {
   if (typeof json.outFile !== "string" || json.outFile.length === 0) {
     throw new Error('Config "outFile" must be a non-empty string.');
   }
-  if (typeof json.prefix !== "string" || !PREFIX_NAME.test(json.prefix)) {
+  if (json.prefix !== "") {
     throw new Error(
-      'Config "prefix" must be empty, or start with a letter and contain only letters, numbers, or "-". An empty prefix emits plain names such as --background.',
+      'Config "prefix" must be "". Components and the Tailwind bridge use plain names such as --primary.',
     );
   }
   if (json.registry != null) {
