@@ -16,7 +16,11 @@
       (function () {
         try {
           var stored = localStorage.getItem("theme");
-          if (stored === "dark") document.documentElement.classList.add("dark");
+          var dark =
+            stored === "dark" ||
+            (stored !== "light" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
         } catch (e) {}
         var meta = document.querySelector('meta[name="theme-color"]');
         if (meta) {
