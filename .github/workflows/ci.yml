@@ -17,7 +17,7 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  # Stated minimum. The example pins fusor-build 0.1.7. CLI 0.1.9 refuses
+  # Stated minimum. The example pins fusor-build 0.1.7. A newer CLI refuses
   # that pin, so this job installs CLI 0.1.7 itself and builds only the
   # example. The site pins 0.1.9, so it is not built here.
   fusor-0-1-7:
@@ -43,10 +43,10 @@ jobs:
           fusor install
           fusor build
 
-  # CLI from main, which is the 0.1.9 release. Builds the site (pinned to
-  # fusor-build 0.1.9). Does not build the 0.1.7 example. A fusor-0-1-9
-  # job would repeat this site build. Deploy installs the same release
-  # with install.sh v0.1.9.
+  # Site pin. Builds the site on fusor-build 0.1.9 with the matching CLI.
+  # Job id stays fusor-main for existing required checks. Fusor git main is
+  # already 0.1.10 and unpublished on crates.io, so this installs CLI 0.1.9
+  # instead of cargo install --git. Deploy uses the same install.sh pin.
   fusor-main:
     runs-on: ubuntu-latest
     steps:
@@ -59,8 +59,10 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
       - run: npm ci
-      - name: Install Fusor CLI from main
-        run: cargo install --git https://github.com/fusor-rs/fusor fusor-cli
+      - name: Install Fusor CLI 0.1.9
+        run: |
+          curl -fsSL https://fusor.build/install.sh | sh -s -- v0.1.9
+          echo "$HOME/.fusor/bin" >> "$GITHUB_PATH"
       - name: Build the site
         working-directory: site
         run: |
