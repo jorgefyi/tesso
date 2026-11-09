@@ -124,6 +124,23 @@ test("committed example css matches the starter and passes check", async () => {
   assert.equal(await run(["check", "--cwd", cwd], check), 0, check.error());
 });
 
+test("init refuses a brand prefix when Tailwind is set", async () => {
+  const cwd = fs.mkdtempSync(path.join(repo, ".tmp", "prefix-"));
+  fs.mkdirSync(path.join(cwd, "web"), { recursive: true });
+  fs.writeFileSync(
+    path.join(cwd, "Cargo.toml"),
+    '[package]\nname = "demo"\nedition = "2021"\n\n[package.metadata.fusor]\nentry = "web/index.html"\ntailwind = "web/app.css"\n',
+  );
+  fs.writeFileSync(path.join(cwd, "web/app.css"), '@import "tailwindcss";\n');
+  fs.writeFileSync(
+    path.join(cwd, "tesso.config.json"),
+    `${JSON.stringify({ outFile: "public/tokens.css", prefix: "brand" }, null, 2)}\n`,
+  );
+  const io = capture();
+  assert.equal(await run(["init", "--no-install", "--cwd", cwd], io), 1);
+  assert.match(io.error(), /prefix/);
+});
+
 test("init writes the Tailwind bridge when Fusor sets tailwind", async () => {
   const cwd = fs.mkdtempSync(path.join(repo, ".tmp", "tw-"));
   fs.mkdirSync(path.join(cwd, "web"), { recursive: true });
