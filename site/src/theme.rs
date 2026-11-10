@@ -32,7 +32,7 @@ pub fn set_theme(theme: &str) {
         if let Ok(Some(meta)) = document.query_selector("meta[name=\"theme-color\"]") {
             let _ = meta.set_attribute(
                 "content",
-                if theme == "dark" { "#000000" } else { "#fafcff" },
+                if theme == "dark" { "oklch(18% 0.02 260)" } else { "oklch(99% 0.005 260)" },
             );
         }
     }
